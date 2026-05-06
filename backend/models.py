@@ -8,6 +8,7 @@ class FileInfo(BaseModel):
     size: int
     pages: int
     path: str
+    session_id: Optional[str] = None   # carpeta temporal de origen
     error: Optional[str] = None
 
 
@@ -26,3 +27,7 @@ class ProcessRequest(BaseModel):
 
 class FolderRequest(BaseModel):
     path: str
+
+
+class CountRequest(BaseModel):
+    file_ids: List[str]

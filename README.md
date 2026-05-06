@@ -1,8 +1,19 @@
 # 📁 Expediente Digital
 
-Aplicación local para construir expedientes digitales: une múltiples PDFs,
-los ordena automáticamente y folea todas las páginas con un número en
-la esquina superior derecha.
+Expediente Digital es una aplicación local para generar expedientes a partir
+de múltiples PDFs. La aplicación permite subir y ordenar documentos, fusionarlos
+por lotes y añadir numeración de página (folio) sin rasterizar el contenido.
+
+---
+
+## Características
+
+- Interfaz web ligera con carga por arrastrar y soltar.
+- Admite selección de archivos individuales o carpetas completas.
+- Reordenado manual de archivos por arrastre.
+- Configuración de posición de folio, tamaño de fuente y márgenes.
+- Proceso de generación con barra de progreso y descarga directa.
+- Registro de actividad en `logs/expediente.log`.
 
 ---
 
@@ -19,11 +30,11 @@ expediente/
 │   ├── index.html
 │   ├── styles.css
 │   └── app.js
-├── expedientes_generados/   ← PDFs finales (se crea sola)
-├── temp/                    ← archivos temporales (se crea sola)
-├── logs/                    ← expediente.log (se crea solo)
+├── expedientes_generados/   ← PDFs generados
+├── temp/                    ← archivos temporales
+├── logs/                    ← registros de ejecución
 ├── requirements.txt
-└── run.py                ← lanzador
+└── run.py                   ← lanzador local
 ```
 
 ---
@@ -38,16 +49,11 @@ expediente/
 ### Pasos
 
 ```bash
-# 1. Clona o copia el proyecto
 cd expediente
-
-# 2. (Opcional pero recomendado) Crea un entorno virtual
 python3 -m venv .venv
-source .venv/bin/activate          # Linux/Mac/WSL
-# .venv\Scripts\activate           # Windows CMD
-# .venv\Scripts\Activate.ps1       # Windows PowerShell
-
-# 3. Instala dependencias
+source .venv/bin/activate        # Linux/Mac/WSL
+# .venv\Scripts\activate      # Windows CMD
+# .venv\Scripts\Activate.ps1  # Windows PowerShell
 pip install -r requirements.txt
 ```
 
@@ -59,17 +65,18 @@ pip install -r requirements.txt
 python3 run.py
 ```
 
-Abre automáticamente `http://127.0.0.1:8000` en el navegador.
+Esto levanta el servidor en `http://127.0.0.1:8000` y abre la aplicación en el
+navegador por defecto.
 
 ### Opciones del lanzador
 
 ```bash
-python3 run.py --port 8080        # cambiar puerto
-python3 run.py --no-browser       # no abrir navegador
-python3 run.py --host 0.0.0.0     # escuchar en toda la red local
+python3 run.py --port 8080
+python3 run.py --no-browser
+python3 run.py --host 0.0.0.0
 ```
 
-### Arranque manual sin run.py
+### Arranque manual sin `run.py`
 
 ```bash
 python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
@@ -79,64 +86,40 @@ python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 
 ## Uso
 
-1. **Arrastrar PDFs** al área central o usar los botones de selección.
-2. **Seleccionar carpeta** desde el explorador (botón) o escribir la ruta
-   completa en el campo de texto y pulsar "Cargar".
-3. **Reordenar** las filas arrastrándolas si es necesario.
-4. **Configurar** posición del folio, tamaño de letra y márgenes.
-5. Pulsar **"Generar expediente"** y esperar la barra de progreso.
-6. Descargar el PDF con **"Descargar"** o encontrarlo en `expedientes_generados/`.
-
----
-
-## Empaquetar como .exe (PyInstaller)
-
-```bash
-pip install pyinstaller
-
-pyinstaller \
-  --onefile \
-  --name "ExpedienteDigital" \
-  --add-data "frontend:frontend" \
-  --add-data "backend:backend" \
-  run.py
-```
-
-El ejecutable queda en `dist/ExpedienteDigital` (Linux) o
-`dist/ExpedienteDigital.exe` (Windows).
-
-> **Nota Windows:** usa `;` como separador en `--add-data`:
-> `--add-data "frontend;frontend" --add-data "backend;backend"`
-
-Para crear un instalador NSIS o InnoSetup, apunta el instalador al
-archivo `dist/ExpedienteDigital.exe`.
+1. Arrastra PDFs al área de carga o selecciona archivos desde el explorador.
+2. Carga una carpeta completa escribiendo su ruta o usando el selector de
+   carpetas.
+3. Reordena los documentos arrastrando las filas en la lista.
+4. Ajusta la posición del folio, tamaño de fuente y márgenes.
+5. Presiona **Generar expediente** y sigue el progreso.
+6. Descarga el resultado o encuentra el PDF en `expedientes_generados/`.
 
 ---
 
 ## API endpoints
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET`  | `/` | Sirve la interfaz web |
-| `POST` | `/api/upload` | Sube un PDF (multipart) |
-| `POST` | `/api/load-folder` | Carga todos los PDFs de una ruta local |
-| `POST` | `/api/process` | Inicia la fusión + foliado |
-| `GET`  | `/api/task/{id}` | Estado del proceso (polling) |
-| `GET`  | `/api/download/{filename}` | Descarga el expediente generado |
-| `DELETE` | `/api/files/{id}` | Elimina un archivo subido |
-| `POST` | `/api/cleanup` | Limpia todos los archivos temporales |
-| `GET`  | `/api/health` | Verificación de estado |
+| Método    | Ruta | Descripción |
+|-----------|------|-------------|
+| `GET`     | `/` | Sirve la interfaz web |
+| `POST`    | `/api/upload` | Sube un PDF (multipart) |
+| `POST`    | `/api/load-folder` | Carga PDFs desde una ruta local |
+| `POST`    | `/api/process` | Inicia la fusión y foliado |
+| `GET`     | `/api/task/{id}` | Consulta el estado del proceso |
+| `GET`     | `/api/download/{filename}` | Descarga el expediente generado |
+| `DELETE`  | `/api/files/{id}` | Elimina un archivo subido |
+| `POST`    | `/api/cleanup` | Limpia archivos temporales |
+| `GET`     | `/api/health` | Verifica que el servicio está activo |
 
 ---
 
 ## Notas técnicas
 
-- **Sin rasterización**: PyMuPDF añade el número de página como texto
-  vectorial sobre el contenido original. La calidad del PDF no cambia.
-- **Archivos grandes**: el motor opera página a página mediante lazy loading.
-  Funciona con expedientes de 1 000+ páginas y archivos de 200 MB+.
-- **PDFs corruptos**: si un archivo falla, se reporta en la interfaz y el
-  resto del expediente se genera igualmente.
-- **PDFs encriptados**: se intenta desencriptar con contraseña vacía;
-  si falla, el archivo se omite y se lista como error.
-- **Logs**: toda la actividad queda registrada en `logs/expediente.log`.
+- PyMuPDF agrega numeración de página como texto vectorial, sin degradar
+  la calidad del PDF.
+- El procesamiento se realiza por página para manejar archivos grandes de
+  forma eficiente.
+- Si un archivo falla, se reporta en la interfaz y el resto del expediente
+  continúa generándose.
+- Para PDFs encriptados, el servicio prueba contraseña vacía y omite el
+  archivo si no puede leerlo.
+- Los registros se almacenan en `logs/expediente.log`.

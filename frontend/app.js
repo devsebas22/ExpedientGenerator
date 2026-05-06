@@ -7,9 +7,10 @@ const API = "";          // same origin
 const POLL_MS = 700;     // progress poll interval
 
 /* ── State ──────────────────────────────────────────────────────────────── */
-// [{id, name, size, pages, error}]  — ordered as the user sees them
-let files = [];
-let pollTimer = null;
+// [{id, name, size, pages, session_id, error}]  — ordered as the user sees them
+let files          = [];
+let pollTimer      = null;
+let currentSession = null;   // session_id activo para uploads
 
 /* ── DOM refs ────────────────────────────────────────────────────────────── */
 const dropZone       = document.getElementById("drop-zone");
@@ -31,6 +32,77 @@ const resultMeta     = document.getElementById("result-meta");
 const btnDownload    = document.getElementById("btn-download");
 const failedWarn     = document.getElementById("failed-warn");
 const failedList     = document.getElementById("failed-list");
+// Counter panel
+const counterCard    = document.getElementById("counter-card");
+const counterNumEl   = document.getElementById("counter-num");
+const counterChips   = document.getElementById("counter-chips");
+const counterWarn    = document.getElementById("counter-warn");
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Counter helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+function estimateTime(pages, fileCount) {
+  if (pages === 0) return null;
+  // ~150 pages/s for stamp pass + ~0.5 s/file for I/O overhead
+  const secs = Math.max(2, Math.ceil(pages / 150) + Math.ceil(fileCount * 0.5));
+  return secs < 60 ? `~${secs}s` : `~${Math.ceil(secs / 60)} min`;
+}
+
+function sizeCategory(pages) {
+  if (pages === 0)   return null;
+  if (pages < 100)   return { cls: "ok",  label: "📋 Pequeño"   };
+  if (pages < 500)   return { cls: "",    label: "📂 Mediano"   };
+  if (pages < 1000)  return { cls: "big", label: "📦 Grande"    };
+  if (pages < 2000)  return { cls: "big", label: "📦 Muy grande" };
+  return               { cls: "huge", label: "🗄️ Masivo"     };
+}
+
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+function animateCounter(el, from, to, ms = 400) {
+  const start = performance.now();
+  el.classList.add("bump");
+  const step = (now) => {
+    const p = Math.min((now - start) / ms, 1);
+    el.textContent = Math.round(from + (to - from) * easeOut(p)).toLocaleString("es");
+    if (p < 1) requestAnimationFrame(step);
+    else        el.classList.remove("bump");
+  };
+  requestAnimationFrame(step);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Gestión de sesiones temporales
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Devuelve el session_id activo, creando uno nuevo en el backend si hace falta.
+ * Si el backend reportó que la sesión expiró durante un upload previo, la
+ * respuesta del upload incluirá el nuevo session_id y _syncSession lo actualizará.
+ */
+async function ensureSession() {
+  if (currentSession) return currentSession;
+  const res = await fetch(`${API}/api/session`, { method: "POST" });
+  if (!res.ok) throw new Error("No se pudo crear sesión temporal en el servidor");
+  const { session_id } = await res.json();
+  currentSession = session_id;
+  return session_id;
+}
+
+/**
+ * Sincroniza el session_id local con el que devuelve el backend.
+ * Si el backend creó una sesión nueva (porque la anterior expiró), la adoptamos.
+ */
+function _syncSession(fileInfo) {
+  if (fileInfo.session_id && fileInfo.session_id !== currentSession) {
+    currentSession = fileInfo.session_id;
+  }
+}
+
+/** Descarta la sesión local. La limpieza en disco ya ocurrió en el backend. */
+function resetSession() {
+  currentSession = null;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Natural sort
@@ -76,30 +148,38 @@ function renderList() {
 
   files.forEach((f, i) => {
     const li = document.createElement("li");
-    li.className = "file-item";
-    li.draggable = true;
-    li.dataset.id = f.id;
+    const isUploading = !!f.uploading;
 
-    const pagesHtml = f.pages > 0
-      ? `<span class="pages-badge">${f.pages} págs.</span>`
-      : `<span class="err">⚠ Error leyendo páginas</span>`;
+    li.className   = isUploading ? "file-item uploading-item" : "file-item";
+    li.draggable   = !isUploading;
+    li.dataset.id  = f.id;
+
+    const pagesHtml = isUploading
+      ? `<span class="pages-loading"><span class="spinner-sm"></span> subiendo…</span>`
+      : f.pages > 0
+        ? `<span class="pages-badge">${f.pages} págs.</span>`
+        : `<span class="err">⚠ Error leyendo</span>`;
+
+    const removeBtn = isUploading
+      ? `<span style="width:26px"></span>`
+      : `<button class="btn-remove" title="Eliminar" data-id="${f.id}">✕</button>`;
 
     li.innerHTML = `
-      <span class="handle">⠿</span>
+      <span class="handle" style="${isUploading ? "opacity:.3" : ""}">⠿</span>
       <span class="file-num">${i + 1}</span>
       <span class="file-icon">📄</span>
       <div class="file-info">
         <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
         <div class="file-meta">${pagesHtml}${esc(fmtSize(f.size))}</div>
       </div>
-      <button class="btn-remove" title="Eliminar" data-id="${f.id}">✕</button>
+      ${removeBtn}
     `;
 
     fileList.append(li);
   });
 
   initDragSort();
-  updateBadges();
+  updateSummary();
 }
 
 function esc(s) {
@@ -110,21 +190,85 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
-function updateBadges() {
-  const total = files.reduce((s, f) => s + (f.pages > 0 ? f.pages : 0), 0);
+function updateSummary() {
+  const uploading = files.filter((f) => f.uploading);
+  const ready     = files.filter((f) => !f.uploading);
+  const errored   = ready.filter((f) => f.pages <= 0);
+  const total     = ready.reduce((s, f) => s + (f.pages > 0 ? f.pages : 0), 0);
+
+  // ── Small header badges ──────────────────────────────────────────────────
   badgeFiles.textContent = `${files.length} archivo${files.length !== 1 ? "s" : ""}`;
-  badgePages.textContent = `${total} página${total !== 1 ? "s" : ""}`;
+  if (uploading.length > 0) {
+    badgePages.innerHTML =
+      `<span class="spinner-sm"></span> ${uploading.length} subiendo…`;
+  } else {
+    badgePages.textContent = `${total.toLocaleString("es")} página${total !== 1 ? "s" : ""}`;
+  }
 
-  btnGenerate.disabled = files.length === 0;
+  // ── Generate button ──────────────────────────────────────────────────────
+  btnGenerate.disabled = ready.length === 0;
 
+  // ── Action summary text ──────────────────────────────────────────────────
   if (files.length === 0) {
     actionSummary.innerHTML = "Carga al menos un PDF para continuar.";
+  } else if (uploading.length > 0) {
+    actionSummary.innerHTML =
+      `Subiendo <strong>${uploading.length}</strong> archivo(s)… espera para continuar.`;
   } else {
-    actionSummary.innerHTML = `
-      <strong>${files.length}</strong> archivo${files.length !== 1 ? "s" : ""} •
-      <strong>${total}</strong> página${total !== 1 ? "s" : ""} en total.
-      Puedes reordenar arrastrando las filas.
-    `;
+    const t = estimateTime(total, ready.length);
+    actionSummary.innerHTML =
+      `<strong>${ready.length}</strong> archivo${ready.length !== 1 ? "s" : ""} · ` +
+      `<strong>${total.toLocaleString("es")}</strong> páginas en total` +
+      (t ? ` · tiempo estimado: <strong>${t}</strong>` : "") +
+      ` · puedes reordenar arrastrando las filas.`;
+  }
+
+  // ── Counter card ─────────────────────────────────────────────────────────
+  if (files.length === 0) {
+    counterCard.style.display = "none";
+    return;
+  }
+  counterCard.style.display = "";
+
+  // Animated number
+  const prev = parseInt(counterNumEl.textContent.replace(/\D/g, "")) || 0;
+  if (prev !== total) animateCounter(counterNumEl, prev, total);
+
+  // Chips
+  const time = estimateTime(total, ready.length);
+  const cat  = sizeCategory(total);
+  const chipsHtml = [
+    `<span class="chip">📁 ${ready.length} archivo${ready.length !== 1 ? "s" : ""}</span>`,
+    uploading.length
+      ? `<span class="chip"><span class="spinner-sm"></span> ${uploading.length} subiendo</span>`
+      : "",
+    time
+      ? `<span class="chip time">⏱ ${time}</span>`
+      : "",
+    errored.length
+      ? `<span class="chip err">⚠ ${errored.length} con error</span>`
+      : "",
+    cat
+      ? `<span class="chip ${cat.cls}">${cat.label}</span>`
+      : "",
+  ].filter(Boolean).join("");
+  counterChips.innerHTML = chipsHtml;
+
+  // Warning strip
+  if (total > 2000) {
+    counterWarn.style.display = "";
+    counterWarn.className = "counter-warn-strip danger";
+    counterWarn.innerHTML =
+      `🔴 <span>Expediente masivo: <strong>${total.toLocaleString("es")} páginas</strong>. ` +
+      `El procesamiento puede tardar varios minutos.</span>`;
+  } else if (total > 1000) {
+    counterWarn.style.display = "";
+    counterWarn.className = "counter-warn-strip warn";
+    counterWarn.innerHTML =
+      `⚠️ <span>Este expediente supera <strong>1.000 páginas</strong>. ` +
+      `El procesamiento puede tardar algunos segundos adicionales.</span>`;
+  } else {
+    counterWarn.style.display = "none";
   }
 }
 
@@ -198,55 +342,77 @@ function initDragSort() {
    Upload helpers
    ═════════════════════════════════════════════════════════════════════════ */
 async function uploadFile(file) {
+  // Garantizar sesión activa antes de subir
+  const sid = await ensureSession();
+
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${API}/api/upload`, { method: "POST", body: form });
+  const res = await fetch(
+    `${API}/api/upload?session_id=${encodeURIComponent(sid)}`,
+    { method: "POST", body: form }
+  );
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || res.statusText);
   }
-  return res.json();
+  const data = await res.json();
+  _syncSession(data);   // adoptar sesión si el backend creó una nueva
+  return data;
 }
 
 async function handleFileObjects(fileArray) {
   if (!fileArray.length) return;
 
-  // Filter only PDFs
   const pdfs = fileArray.filter((f) => f.name.toLowerCase().endsWith(".pdf"));
   const skipped = fileArray.length - pdfs.length;
   if (skipped > 0) toast(`${skipped} archivo(s) ignorados (no son PDF)`, "warn");
   if (!pdfs.length) return;
 
-  // Deduplicate by name (don't re-upload already loaded files)
   const existing = new Set(files.map((f) => f.name));
   const toUpload = pdfs.filter((f) => !existing.has(f.name));
   const dups = pdfs.length - toUpload.length;
-  if (dups > 0) toast(`${dups} archivo(s) ya estaban cargados, omitidos`, "warn");
+  if (dups > 0) toast(`${dups} ya cargados, omitidos`, "warn");
   if (!toUpload.length) return;
 
-  toast(`Subiendo ${toUpload.length} archivo(s)…`, "info", 2000);
-  let ok = 0;
-  let fail = 0;
+  // 1. Add uploading placeholders immediately so the list updates right away
+  const placeholders = toUpload.map((file) => ({
+    id:       `_up_${Math.random().toString(36).slice(2)}`,
+    name:     file.name,
+    size:     file.size,
+    pages:    0,
+    error:    null,
+    uploading: true,
+    _ref:     file,           // keep reference to the original File object
+  }));
+  files.push(...placeholders);
+  files = naturalSort(files);
+  renderList();               // shows spinners in the list immediately
 
-  // Upload concurrently (max 4 at a time)
-  const chunks = chunkArray(toUpload, 4);
+  // 2. Upload in chunks of 4
+  let ok = 0;
+  const chunks = chunkArray(placeholders, 4);
+
   for (const chunk of chunks) {
-    const results = await Promise.allSettled(chunk.map(uploadFile));
-    results.forEach((r, i) => {
+    const results = await Promise.allSettled(chunk.map((p) => uploadFile(p._ref)));
+
+    results.forEach((r, ci) => {
+      const ph  = chunk[ci];
+      const idx = files.findIndex((f) => f.id === ph.id);
+      if (idx === -1) return;
+
       if (r.status === "fulfilled") {
-        files.push(r.value);
+        files[idx] = r.value;   // replace placeholder with real server data
         ok++;
       } else {
-        console.error(chunk[i].name, r.reason);
-        toast(`Error subiendo "${chunk[i].name}": ${r.reason.message}`, "error", 5000);
-        fail++;
+        files.splice(idx, 1);   // remove failed placeholder
+        toast(`Error subiendo "${ph.name}": ${r.reason.message}`, "error", 5000);
       }
     });
-  }
 
-  // Auto natural-sort after upload
-  files = naturalSort(files);
-  renderList();
+    // Re-render after each chunk so page counts appear progressively
+    files = naturalSort(files);
+    renderList();
+  }
 
   if (ok > 0) toast(`${ok} archivo(s) cargado(s) correctamente`, "success");
 }
@@ -311,8 +477,13 @@ async function loadFolderByPath() {
       toast(err.detail || "Error cargando carpeta", "error");
       return;
     }
-    const loaded = await res.json();
-    // Deduplicate
+    // El backend devuelve {session_id, files}
+    const { session_id: folderSession, files: loaded } = await res.json();
+
+    // Adoptar la sesión creada por la carga de carpeta
+    if (folderSession) currentSession = folderSession;
+
+    // Deduplicar
     const existing = new Set(files.map((f) => f.name));
     let added = 0;
     loaded.forEach((f) => {
@@ -344,6 +515,7 @@ document.getElementById("btn-clear").addEventListener("click", () => {
   if (!confirm("¿Eliminar todos los archivos cargados?")) return;
   fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
   files = [];
+  resetSession();
   renderList();
   resetResult();
 });
@@ -414,11 +586,13 @@ async function pollTask(taskId) {
       stopPolling();
       setProcessing(false);
       showProgress(false);
+      resetSession();     // el backend ya limpió temp/; descartamos la referencia
       showResult(task);
     } else if (task.status === "error") {
       stopPolling();
       setProcessing(false);
       showProgress(false);
+      resetSession();     // el backend también limpia en caso de error
       toast(`Error: ${task.error || task.message}`, "error", 8000);
     }
   } catch (_) { /* network hiccup – keep polling */ }
@@ -478,12 +652,68 @@ function resetResult() {
 document.getElementById("btn-new").addEventListener("click", () => {
   fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
   files = [];
+  resetSession();
   renderList();
   resetResult();
   showProgress(false);
   document.getElementById("cfg-output-name").value = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   /api/count-pages  — server-side verification
+   ═════════════════════════════════════════════════════════════════════════ */
+async function callCountPages() {
+  const readyIds = files.filter((f) => !f.uploading && f.id && !f.id.startsWith("_")).map((f) => f.id);
+  if (!readyIds.length) {
+    toast("No hay archivos listos para verificar", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("btn-recount");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-sm"></span> Verificando…`;
+
+  try {
+    const res = await fetch(`${API}/api/count-pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_ids: readyIds }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+
+    // Sync any server-corrected page counts back into local state
+    let corrected = 0;
+    data.files.forEach((sf) => {
+      const local = files.find((f) => f.id === sf.id);
+      if (local && sf.pages > 0 && sf.pages !== local.pages) {
+        local.pages = sf.pages;
+        corrected++;
+      }
+    });
+
+    if (corrected > 0) {
+      renderList();
+      toast(`Conteo actualizado: ${corrected} archivo(s) corregido(s)`, "info");
+    }
+    toast(
+      `✅ Verificado: ${data.total_pages.toLocaleString("es")} páginas en ${readyIds.length} archivo(s)`,
+      "success",
+      4500
+    );
+  } catch (e) {
+    toast(`Error al verificar: ${e.message}`, "error", 5000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "🔄 Verificar";
+  }
+}
+
+document.getElementById("btn-recount").addEventListener("click", callCountPages);
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 renderList();

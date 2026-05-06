@@ -71,3 +71,321 @@
 2026-05-05 23:52:17,867 [INFO] backend.pdf_processor: Fusionado '0c01eacc-5007-40b0-b49c-3ef8aacda1ae.pdf'  1 págs.
 2026-05-05 23:52:17,868 [INFO] backend.pdf_processor: Fusionado '645ff3c2-0c49-498d-9c1a-dd16be7c759a.pdf'  2 págs.
 2026-05-05 23:52:20,578 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_05_2352.pdf'  936 págs.  0 fallos.
+2026-05-06 00:44:12,291 [INFO] backend.main: Subido 'test_1.pdf' → 1 págs.
+2026-05-06 00:44:12,314 [INFO] backend.main: Subido 'test_2.pdf' → 2 págs.
+2026-05-06 00:44:12,335 [INFO] backend.main: Subido 'test_3.pdf' → 3 págs.
+2026-05-06 00:49:28,604 [INFO] backend.main: Subido 'test_1.pdf' → 1 págs.
+2026-05-06 00:49:28,628 [INFO] backend.main: Subido 'test_2.pdf' → 2 págs.
+2026-05-06 00:49:28,651 [INFO] backend.main: Subido 'test_3.pdf' → 3 págs.
+2026-05-06 00:50:57,826 [INFO] backend.main: Subido '113.pdf' → 1 págs.
+2026-05-06 00:50:57,830 [INFO] backend.main: Subido '111.pdf' → 2 págs.
+2026-05-06 00:50:57,832 [INFO] backend.main: Subido '110.pdf' → 3 págs.
+2026-05-06 00:50:57,833 [INFO] backend.main: Subido '112.pdf' → 5 págs.
+2026-05-06 00:50:57,908 [INFO] backend.main: Subido '108.pdf' → 1 págs.
+2026-05-06 00:50:57,913 [INFO] backend.main: Subido '106.pdf' → 3 págs.
+2026-05-06 00:50:57,913 [INFO] backend.main: Subido '107.pdf' → 5 págs.
+2026-05-06 00:50:57,936 [INFO] backend.main: Subido '109.pdf' → 9 págs.
+2026-05-06 00:50:57,958 [INFO] backend.main: Subido '104.pdf' → 2 págs.
+2026-05-06 00:50:57,993 [INFO] backend.main: Subido '105.pdf' → 2 págs.
+2026-05-06 00:50:57,994 [INFO] backend.main: Subido '103.pdf' → 1 págs.
+2026-05-06 00:50:57,995 [INFO] backend.main: Subido '102.pdf' → 2 págs.
+2026-05-06 00:50:58,014 [INFO] backend.main: Subido '98.pdf' → 2 págs.
+2026-05-06 00:50:58,036 [INFO] backend.main: Subido '101.pdf' → 7 págs.
+2026-05-06 00:50:58,048 [INFO] backend.main: Subido '99.pdf' → 1 págs.
+2026-05-06 00:50:58,082 [INFO] backend.main: Subido '100.pdf' → 17 págs.
+2026-05-06 00:50:58,143 [INFO] backend.main: Subido '97.pdf' → 1 págs.
+2026-05-06 00:50:58,143 [INFO] backend.main: Subido '94.pdf' → 2 págs.
+2026-05-06 00:50:58,144 [INFO] backend.main: Subido '95.pdf' → 2 págs.
+2026-05-06 00:50:58,145 [INFO] backend.main: Subido '96.pdf' → 1 págs.
+2026-05-06 00:50:58,157 [INFO] backend.main: Subido '93.pdf' → 2 págs.
+2026-05-06 00:50:58,159 [INFO] backend.main: Subido '91.pdf' → 2 págs.
+2026-05-06 00:50:58,160 [INFO] backend.main: Subido '90.pdf' → 3 págs.
+2026-05-06 00:50:58,196 [INFO] backend.main: Subido '92.pdf' → 2 págs.
+2026-05-06 00:50:58,215 [INFO] backend.main: Subido '88.pdf' → 3 págs.
+2026-05-06 00:50:58,248 [INFO] backend.main: Subido '87.pdf' → 2 págs.
+2026-05-06 00:50:58,249 [INFO] backend.main: Subido '89.pdf' → 2 págs.
+2026-05-06 00:50:58,252 [INFO] backend.main: Subido '86.pdf' → 2 págs.
+2026-05-06 00:50:58,264 [INFO] backend.main: Subido '85.pdf' → 2 págs.
+2026-05-06 00:50:58,265 [INFO] backend.main: Subido '84.pdf' → 2 págs.
+2026-05-06 00:50:58,266 [INFO] backend.main: Subido '82.pdf' → 2 págs.
+2026-05-06 00:50:58,267 [INFO] backend.main: Subido '83.pdf' → 2 págs.
+2026-05-06 00:50:58,298 [INFO] backend.main: Subido '81.pdf' → 4 págs.
+2026-05-06 00:50:58,323 [INFO] backend.main: Subido '80.pdf' → 1 págs.
+2026-05-06 00:50:58,328 [INFO] backend.main: Subido '79.pdf' → 3 págs.
+2026-05-06 00:50:58,399 [INFO] backend.main: Subido '78.pdf' → 24 págs.
+2026-05-06 00:50:58,416 [INFO] backend.main: Subido '75.pdf' → 1 págs.
+2026-05-06 00:50:58,448 [INFO] backend.main: Subido '77.pdf' → 11 págs.
+2026-05-06 00:50:58,451 [INFO] backend.main: Subido '74.pdf' → 11 págs.
+2026-05-06 00:50:58,460 [INFO] backend.main: Subido '76.pdf' → 3 págs.
+2026-05-06 00:50:58,512 [INFO] backend.main: Subido '72.pdf' → 2 págs.
+2026-05-06 00:50:58,513 [INFO] backend.main: Subido '73.pdf' → 1 págs.
+2026-05-06 00:50:58,516 [INFO] backend.main: Subido '70.pdf' → 2 págs.
+2026-05-06 00:50:58,518 [INFO] backend.main: Subido '71.pdf' → 2 págs.
+2026-05-06 00:50:58,532 [INFO] backend.main: Subido '66.pdf' → 2 págs.
+2026-05-06 00:50:58,538 [INFO] backend.main: Subido '68.pdf' → 3 págs.
+2026-05-06 00:50:58,568 [INFO] backend.main: Subido '69.pdf' → 2 págs.
+2026-05-06 00:50:58,571 [INFO] backend.main: Subido '67.pdf' → 2 págs.
+2026-05-06 00:50:58,590 [INFO] backend.main: Subido '65.pdf' → 3 págs.
+2026-05-06 00:50:58,625 [INFO] backend.main: Subido '62.pdf' → 1 págs.
+2026-05-06 00:50:58,626 [INFO] backend.main: Subido '63.pdf' → 1 págs.
+2026-05-06 00:50:58,627 [INFO] backend.main: Subido '64.pdf' → 1 págs.
+2026-05-06 00:50:58,682 [INFO] backend.main: Subido '58.pdf' → 3 págs.
+2026-05-06 00:50:58,683 [INFO] backend.main: Subido '60.pdf' → 2 págs.
+2026-05-06 00:50:58,684 [INFO] backend.main: Subido '61.pdf' → 1 págs.
+2026-05-06 00:50:58,686 [INFO] backend.main: Subido '59.pdf' → 12 págs.
+2026-05-06 00:50:58,704 [INFO] backend.main: Subido '56.pdf' → 1 págs.
+2026-05-06 00:50:58,740 [INFO] backend.main: Subido '57.pdf' → 1 págs.
+2026-05-06 00:50:58,741 [INFO] backend.main: Subido '54.pdf' → 1 págs.
+2026-05-06 00:50:58,747 [INFO] backend.main: Subido '55.pdf' → 22 págs.
+2026-05-06 00:50:58,764 [INFO] backend.main: Subido '50.pdf' → 2 págs.
+2026-05-06 00:50:58,805 [INFO] backend.main: Subido '53.pdf' → 1 págs.
+2026-05-06 00:50:58,806 [INFO] backend.main: Subido '51.pdf' → 1 págs.
+2026-05-06 00:50:58,807 [INFO] backend.main: Subido '52.pdf' → 2 págs.
+2026-05-06 00:50:58,818 [INFO] backend.main: Subido '47.pdf' → 1 págs.
+2026-05-06 00:50:58,819 [INFO] backend.main: Subido '46.pdf' → 1 págs.
+2026-05-06 00:50:58,856 [INFO] backend.main: Subido '49.pdf' → 1 págs.
+2026-05-06 00:50:58,859 [INFO] backend.main: Subido '48.pdf' → 1 págs.
+2026-05-06 00:50:58,870 [INFO] backend.main: Subido '42.pdf' → 2 págs.
+2026-05-06 00:50:58,871 [INFO] backend.main: Subido '44.pdf' → 1 págs.
+2026-05-06 00:50:58,912 [INFO] backend.main: Subido '45.pdf' → 1 págs.
+2026-05-06 00:50:58,913 [INFO] backend.main: Subido '43.pdf' → 1 págs.
+2026-05-06 00:50:58,929 [INFO] backend.main: Subido '38.pdf' → 1 págs.
+2026-05-06 00:50:58,934 [INFO] backend.main: Subido '40.pdf' → 4 págs.
+2026-05-06 00:50:58,968 [INFO] backend.main: Subido '39.pdf' → 2 págs.
+2026-05-06 00:50:58,969 [INFO] backend.main: Subido '41.pdf' → 3 págs.
+2026-05-06 00:50:58,981 [INFO] backend.main: Subido '37.pdf' → 1 págs.
+2026-05-06 00:50:58,983 [INFO] backend.main: Subido '36.pdf' → 2 págs.
+2026-05-06 00:50:58,984 [INFO] backend.main: Subido '35.pdf' → 1 págs.
+2026-05-06 00:50:59,023 [INFO] backend.main: Subido '34.pdf' → 3 págs.
+2026-05-06 00:50:59,032 [INFO] backend.main: Subido '33.pdf' → 3 págs.
+2026-05-06 00:50:59,033 [INFO] backend.main: Subido '32.pdf' → 3 págs.
+2026-05-06 00:50:59,076 [INFO] backend.main: Subido '30.pdf' → 3 págs.
+2026-05-06 00:50:59,077 [INFO] backend.main: Subido '31.pdf' → 3 págs.
+2026-05-06 00:50:59,087 [INFO] backend.main: Subido '26.pdf' → 3 págs.
+2026-05-06 00:50:59,088 [INFO] backend.main: Subido '28.pdf' → 3 págs.
+2026-05-06 00:50:59,089 [INFO] backend.main: Subido '27.pdf' → 3 págs.
+2026-05-06 00:50:59,090 [INFO] backend.main: Subido '29.pdf' → 3 págs.
+2026-05-06 00:50:59,101 [INFO] backend.main: Subido '24.pdf' → 3 págs.
+2026-05-06 00:50:59,102 [INFO] backend.main: Subido '23.pdf' → 3 págs.
+2026-05-06 00:50:59,103 [INFO] backend.main: Subido '22.pdf' → 2 págs.
+2026-05-06 00:50:59,139 [INFO] backend.main: Subido '25.pdf' → 3 págs.
+2026-05-06 00:50:59,150 [INFO] backend.main: Subido '21.pdf' → 2 págs.
+2026-05-06 00:50:59,151 [INFO] backend.main: Subido '20.pdf' → 2 págs.
+2026-05-06 00:50:59,152 [INFO] backend.main: Subido '18.pdf' → 2 págs.
+2026-05-06 00:50:59,192 [INFO] backend.main: Subido '19.pdf' → 2 págs.
+2026-05-06 00:50:59,245 [INFO] backend.main: Subido '17.pdf' → 2 págs.
+2026-05-06 00:50:59,247 [INFO] backend.main: Subido '16.pdf' → 2 págs.
+2026-05-06 00:50:59,248 [INFO] backend.main: Subido '14.pdf' → 2 págs.
+2026-05-06 00:50:59,248 [INFO] backend.main: Subido '15.pdf' → 2 págs.
+2026-05-06 00:50:59,259 [INFO] backend.main: Subido '11.pdf' → 1 págs.
+2026-05-06 00:50:59,264 [INFO] backend.main: Subido '10.pdf' → 2 págs.
+2026-05-06 00:50:59,299 [INFO] backend.main: Subido '13.pdf' → 10 págs.
+2026-05-06 00:50:59,305 [INFO] backend.main: Subido '12.pdf' → 2 págs.
+2026-05-06 00:50:59,358 [INFO] backend.main: Subido '7.pdf' → 1 págs.
+2026-05-06 00:50:59,358 [INFO] backend.main: Subido '6.pdf' → 1 págs.
+2026-05-06 00:50:59,359 [INFO] backend.main: Subido '9.pdf' → 1 págs.
+2026-05-06 00:50:59,360 [INFO] backend.main: Subido '8.pdf' → 8 págs.
+2026-05-06 00:50:59,370 [INFO] backend.main: Subido '5.pdf' → 1 págs.
+2026-05-06 00:50:59,372 [INFO] backend.main: Subido '3.pdf' → 1 págs.
+2026-05-06 00:50:59,411 [INFO] backend.main: Subido '2.pdf' → 1 págs.
+2026-05-06 00:50:59,420 [INFO] backend.main: Subido '4.pdf' → 1 págs.
+2026-05-06 00:50:59,471 [INFO] backend.main: Subido '1.pdf' → 11 págs.
+2026-05-06 00:56:13,896 [INFO] backend.main: Subido '114.pdf' → 1 págs.
+2026-05-06 00:56:25,642 [INFO] backend.main: Tarea 854135cd-4064-4a5c-9baa-3363521344cf iniciada (114 archivos → expediente_2026_05_06_0056.pdf)
+2026-05-06 00:56:25,648 [INFO] backend.pdf_processor: Fusionado '20079c12-9ba9-4dc0-a18a-2e18a4c87cce.pdf'  11 págs.
+2026-05-06 00:56:25,650 [INFO] backend.pdf_processor: Fusionado '6fc1791e-f6da-4531-b8dd-de9b91d279e6.pdf'  1 págs.
+2026-05-06 00:56:25,652 [INFO] backend.pdf_processor: Fusionado '29e47699-e00f-4197-8271-e90c8898ce05.pdf'  1 págs.
+2026-05-06 00:56:25,656 [INFO] backend.pdf_processor: Fusionado 'b1d09467-96e4-4ac7-935a-487f47b1c10e.pdf'  1 págs.
+2026-05-06 00:56:25,658 [INFO] backend.pdf_processor: Fusionado '38cd9b8e-d36c-4cc8-92e3-734750786c08.pdf'  1 págs.
+2026-05-06 00:56:25,661 [INFO] backend.pdf_processor: Fusionado 'c431da27-8c8b-44f2-84bc-a16a56bb98ba.pdf'  1 págs.
+2026-05-06 00:56:25,663 [INFO] backend.pdf_processor: Fusionado '8b5d8c7a-283a-4c72-9c5c-8793e5b1e8da.pdf'  1 págs.
+2026-05-06 00:56:25,670 [INFO] backend.pdf_processor: Fusionado 'd49735bd-f82d-4d02-a14c-ba7825cd3400.pdf'  8 págs.
+2026-05-06 00:56:25,672 [INFO] backend.pdf_processor: Fusionado 'ca8a06f3-d306-40a5-8a93-a3358d7f3027.pdf'  1 págs.
+2026-05-06 00:56:25,679 [INFO] backend.pdf_processor: Fusionado '4519b0c5-b416-4f06-8ee1-8f54bc481012.pdf'  2 págs.
+2026-05-06 00:56:25,681 [INFO] backend.pdf_processor: Fusionado 'f539a4a1-f92d-4489-a520-25d155e1ac68.pdf'  1 págs.
+2026-05-06 00:56:25,687 [INFO] backend.pdf_processor: Fusionado '1ab922a1-5b58-4177-84da-3ec20826d25b.pdf'  2 págs.
+2026-05-06 00:56:25,690 [INFO] backend.pdf_processor: Fusionado 'f8ddaab0-0072-44b6-b191-c3d11da157ad.pdf'  10 págs.
+2026-05-06 00:56:25,693 [INFO] backend.pdf_processor: Fusionado '1044fc5c-25cd-4d4b-ae64-f6690cb58064.pdf'  2 págs.
+2026-05-06 00:56:25,696 [INFO] backend.pdf_processor: Fusionado '39f0bdb2-27e1-4034-a4d8-52edbd0c823d.pdf'  2 págs.
+2026-05-06 00:56:25,699 [INFO] backend.pdf_processor: Fusionado 'f004569b-7129-451c-a3ae-140db8be2cb6.pdf'  2 págs.
+2026-05-06 00:56:25,703 [INFO] backend.pdf_processor: Fusionado '52837c3b-7ad1-4c3f-8f92-8c0e7f8f6416.pdf'  2 págs.
+2026-05-06 00:56:25,706 [INFO] backend.pdf_processor: Fusionado 'af62c6c7-89a9-4b89-836a-fdf71ae89429.pdf'  2 págs.
+2026-05-06 00:56:25,710 [INFO] backend.pdf_processor: Fusionado '4e80d162-98f1-401f-8777-d67ea25d4c52.pdf'  2 págs.
+2026-05-06 00:56:25,713 [INFO] backend.pdf_processor: Fusionado 'e2729380-9c8b-4688-86a9-7adc94cbb7b4.pdf'  2 págs.
+2026-05-06 00:56:25,716 [INFO] backend.pdf_processor: Fusionado 'fa376e00-0ff4-4ce2-8649-03d690b95455.pdf'  2 págs.
+2026-05-06 00:56:25,719 [INFO] backend.pdf_processor: Fusionado '1a125992-215f-4433-ab1d-503d7c02aa7d.pdf'  2 págs.
+2026-05-06 00:56:25,722 [INFO] backend.pdf_processor: Fusionado '880ad2dc-6dda-4b7c-b91f-ff8f1151943c.pdf'  3 págs.
+2026-05-06 00:56:25,724 [INFO] backend.pdf_processor: Fusionado '9311ce7c-3ae9-42d9-b261-9bf643e118c9.pdf'  3 págs.
+2026-05-06 00:56:25,726 [INFO] backend.pdf_processor: Fusionado 'bbb40934-ae2d-4b46-a1ef-0634247b2658.pdf'  3 págs.
+2026-05-06 00:56:25,729 [INFO] backend.pdf_processor: Fusionado '56d30875-bd0b-499b-a36f-b625f38cf547.pdf'  3 págs.
+2026-05-06 00:56:25,732 [INFO] backend.pdf_processor: Fusionado '411a5cee-903a-4c10-8114-af653e3c911b.pdf'  3 págs.
+2026-05-06 00:56:25,735 [INFO] backend.pdf_processor: Fusionado '26721291-1b19-4657-9912-4d90ad80e860.pdf'  3 págs.
+2026-05-06 00:56:25,737 [INFO] backend.pdf_processor: Fusionado '769cab57-5cca-4b34-979f-ef1db8b11ae7.pdf'  3 págs.
+2026-05-06 00:56:25,740 [INFO] backend.pdf_processor: Fusionado 'e912ecef-e809-47dd-8adc-f6adc464c2d2.pdf'  3 págs.
+2026-05-06 00:56:25,743 [INFO] backend.pdf_processor: Fusionado '0742d2c4-c170-4d1a-8970-c8a8bf071961.pdf'  3 págs.
+2026-05-06 00:56:25,745 [INFO] backend.pdf_processor: Fusionado '8bf19b35-4523-47dd-8126-265666f6cab2.pdf'  3 págs.
+2026-05-06 00:56:25,748 [INFO] backend.pdf_processor: Fusionado 'b4475102-59e5-4db5-95b6-b08aa17cf4c1.pdf'  3 págs.
+2026-05-06 00:56:25,750 [INFO] backend.pdf_processor: Fusionado '75a22028-6793-4f1f-a726-d2500cf7d4d9.pdf'  3 págs.
+2026-05-06 00:56:25,752 [INFO] backend.pdf_processor: Fusionado '150a75bd-dbba-4445-96cf-cbfe191f0b2b.pdf'  1 págs.
+2026-05-06 00:56:25,754 [INFO] backend.pdf_processor: Fusionado '6058cdf7-63d5-4f2b-aec4-19ed1eb2dc54.pdf'  2 págs.
+2026-05-06 00:56:25,757 [INFO] backend.pdf_processor: Fusionado '0bd17395-551f-464f-b61f-c8bd071d9ac4.pdf'  1 págs.
+2026-05-06 00:56:25,759 [INFO] backend.pdf_processor: Fusionado '96c3695d-bcf6-4668-a44a-bbc88d0a4485.pdf'  1 págs.
+2026-05-06 00:56:25,763 [INFO] backend.pdf_processor: Fusionado '6918a950-8895-4940-a090-3ee531aab170.pdf'  2 págs.
+2026-05-06 00:56:25,774 [INFO] backend.pdf_processor: Fusionado 'd25e74aa-790e-4b5d-8681-b85bdecb607b.pdf'  4 págs.
+2026-05-06 00:56:25,778 [INFO] backend.pdf_processor: Fusionado 'e0ebf0a0-d851-4bc8-9a50-2850376f91c2.pdf'  3 págs.
+2026-05-06 00:56:25,781 [INFO] backend.pdf_processor: Fusionado '728bc6e9-f14d-47e9-8b73-b15ab312a15d.pdf'  2 págs.
+2026-05-06 00:56:25,783 [INFO] backend.pdf_processor: Fusionado 'bdb1bdd3-5b7f-4b4b-a769-4c5e7f1061a8.pdf'  1 págs.
+2026-05-06 00:56:25,785 [INFO] backend.pdf_processor: Fusionado 'fb67b126-ec46-4b5f-bac7-4f48c8b751d7.pdf'  1 págs.
+2026-05-06 00:56:25,787 [INFO] backend.pdf_processor: Fusionado 'ff6b7a70-573e-4633-aed9-15dd9da653e9.pdf'  1 págs.
+2026-05-06 00:56:25,789 [INFO] backend.pdf_processor: Fusionado 'bbc9c22c-01f5-467a-861d-1184ca1c64b5.pdf'  1 págs.
+2026-05-06 00:56:25,791 [INFO] backend.pdf_processor: Fusionado '66ec4537-5e1c-40e6-9fb2-1643bbf5693b.pdf'  1 págs.
+2026-05-06 00:56:25,794 [INFO] backend.pdf_processor: Fusionado '7d635c98-ff40-4dc6-a8e0-e9b2e915d946.pdf'  1 págs.
+2026-05-06 00:56:25,796 [INFO] backend.pdf_processor: Fusionado '4129569a-7898-4b5e-a19c-8282a32dfcc5.pdf'  1 págs.
+2026-05-06 00:56:25,800 [INFO] backend.pdf_processor: Fusionado '4c68582c-bf70-4bc1-86c6-18ecd23c3fdd.pdf'  2 págs.
+2026-05-06 00:56:25,803 [INFO] backend.pdf_processor: Fusionado '674f4785-358c-4296-a529-722418c9002b.pdf'  1 págs.
+2026-05-06 00:56:25,808 [INFO] backend.pdf_processor: Fusionado '05a8b721-55b6-466f-9ade-9d9e84e79206.pdf'  2 págs.
+2026-05-06 00:56:25,810 [INFO] backend.pdf_processor: Fusionado '770a23cf-e7c9-40a4-ac9b-1d1e706232d6.pdf'  1 págs.
+2026-05-06 00:56:25,812 [INFO] backend.pdf_processor: Fusionado '6c332c65-f52e-45ec-8182-9dc7d8b64475.pdf'  1 págs.
+2026-05-06 00:56:25,858 [INFO] backend.pdf_processor: Fusionado '6f74fa4a-e5fc-43fb-a98c-64c4a71912ad.pdf'  22 págs.
+2026-05-06 00:56:25,862 [INFO] backend.pdf_processor: Fusionado '8c869ac6-8555-4f37-a75a-413099eae6d6.pdf'  1 págs.
+2026-05-06 00:56:25,864 [INFO] backend.pdf_processor: Fusionado 'ea48b886-4c9f-4834-a3ec-ca3a6aa5f7a5.pdf'  1 págs.
+2026-05-06 00:56:25,870 [INFO] backend.pdf_processor: Fusionado 'dfa89f55-4255-4cd5-b8ff-fd3c5d3bb3aa.pdf'  3 págs.
+2026-05-06 00:56:25,907 [INFO] backend.pdf_processor: Fusionado 'd2a43f2b-b4a1-4793-b6b1-5205e5436705.pdf'  12 págs.
+2026-05-06 00:56:25,909 [INFO] backend.pdf_processor: Fusionado '34550c0b-736a-46ab-a018-83f78b857b2e.pdf'  2 págs.
+2026-05-06 00:56:25,912 [INFO] backend.pdf_processor: Fusionado '155c08df-16db-4927-ad88-0fd1e1a19e51.pdf'  1 págs.
+2026-05-06 00:56:25,914 [INFO] backend.pdf_processor: Fusionado '60bdbe04-d4fd-4f23-b849-619ca4976d53.pdf'  1 págs.
+2026-05-06 00:56:25,916 [INFO] backend.pdf_processor: Fusionado '73c0456a-a00d-4316-a996-730b417bfc16.pdf'  1 págs.
+2026-05-06 00:56:25,918 [INFO] backend.pdf_processor: Fusionado '9ec52be7-973b-4cd5-adfa-512a002c973c.pdf'  1 págs.
+2026-05-06 00:56:25,927 [INFO] backend.pdf_processor: Fusionado '965f23ab-642e-4c5c-9cd7-634356fb54c0.pdf'  3 págs.
+2026-05-06 00:56:25,929 [INFO] backend.pdf_processor: Fusionado '34a82899-7377-469f-96ed-dcb8b740edb3.pdf'  2 págs.
+2026-05-06 00:56:25,933 [INFO] backend.pdf_processor: Fusionado '30ff1f42-15ad-435b-b9ba-7c90dad3426c.pdf'  2 págs.
+2026-05-06 00:56:25,942 [INFO] backend.pdf_processor: Fusionado '791acaab-d02f-4c1b-8c42-78c530f2d184.pdf'  3 págs.
+2026-05-06 00:56:25,946 [INFO] backend.pdf_processor: Fusionado 'f2452c13-a435-4c2f-8e99-724631793a0c.pdf'  2 págs.
+2026-05-06 00:56:25,949 [INFO] backend.pdf_processor: Fusionado '698e3885-8019-4e9a-a8ec-dcff1d93b0a3.pdf'  2 págs.
+2026-05-06 00:56:25,952 [INFO] backend.pdf_processor: Fusionado '8b598f33-0d0f-47d3-8dfe-5e61b4fa1079.pdf'  2 págs.
+2026-05-06 00:56:25,955 [INFO] backend.pdf_processor: Fusionado 'b1741870-b882-4385-841c-c3423b6f230e.pdf'  2 págs.
+2026-05-06 00:56:25,957 [INFO] backend.pdf_processor: Fusionado '8e66852c-c103-465f-b66f-3ce3d5843f6f.pdf'  1 págs.
+2026-05-06 00:56:25,986 [INFO] backend.pdf_processor: Fusionado '560a9e42-29aa-4499-9de8-39efa4338a43.pdf'  11 págs.
+2026-05-06 00:56:25,988 [INFO] backend.pdf_processor: Fusionado 'b4bf30c0-b4b5-462d-92ef-4fe853ae50a5.pdf'  1 págs.
+2026-05-06 00:56:25,994 [INFO] backend.pdf_processor: Fusionado 'ffc5a198-b791-4ccc-916c-8db73955209c.pdf'  3 págs.
+2026-05-06 00:56:26,022 [INFO] backend.pdf_processor: Fusionado 'b3b78bac-ede8-434d-9149-531acf29d707.pdf'  11 págs.
+2026-05-06 00:56:26,088 [INFO] backend.pdf_processor: Fusionado '4e836016-40de-4533-be16-fc74c5d8490d.pdf'  24 págs.
+2026-05-06 00:56:26,092 [INFO] backend.pdf_processor: Fusionado '2385f7ce-e958-4e17-8136-906f18d80c8c.pdf'  3 págs.
+2026-05-06 00:56:26,094 [INFO] backend.pdf_processor: Fusionado '9649bff8-1d57-4171-a187-f95c489e01e7.pdf'  1 págs.
+2026-05-06 00:56:26,105 [INFO] backend.pdf_processor: Fusionado 'b5d91a11-1fd2-4fd8-b3e3-d91e060e4f9b.pdf'  4 págs.
+2026-05-06 00:56:26,107 [INFO] backend.pdf_processor: Fusionado 'e30de047-72d7-4b04-8d15-73ca6687a2bd.pdf'  2 págs.
+2026-05-06 00:56:26,110 [INFO] backend.pdf_processor: Fusionado '0c3143ae-3266-484a-a44b-e4815bc57e38.pdf'  2 págs.
+2026-05-06 00:56:26,114 [INFO] backend.pdf_processor: Fusionado 'e4999d99-fbac-468c-91ac-8af916b260e7.pdf'  2 págs.
+2026-05-06 00:56:26,118 [INFO] backend.pdf_processor: Fusionado '4045423d-84c3-48c6-a66a-acc247e32395.pdf'  2 págs.
+2026-05-06 00:56:26,122 [INFO] backend.pdf_processor: Fusionado '6cc65714-c887-493a-b601-dd056ccf005b.pdf'  2 págs.
+2026-05-06 00:56:26,125 [INFO] backend.pdf_processor: Fusionado '6420780a-e289-4883-8189-5ddb44425a4d.pdf'  2 págs.
+2026-05-06 00:56:26,137 [INFO] backend.pdf_processor: Fusionado '22d1b8d7-96b9-44ec-b774-bb5c5d0198de.pdf'  3 págs.
+2026-05-06 00:56:26,140 [INFO] backend.pdf_processor: Fusionado 'd02279e8-5503-4f9a-90d2-77b9e7492b10.pdf'  2 págs.
+2026-05-06 00:56:26,147 [INFO] backend.pdf_processor: Fusionado 'f1d792cd-ccc5-4ff4-b9ad-f694f4929846.pdf'  3 págs.
+2026-05-06 00:56:26,151 [INFO] backend.pdf_processor: Fusionado 'ff43575d-277c-439c-8433-eac2de502d0c.pdf'  2 págs.
+2026-05-06 00:56:26,156 [INFO] backend.pdf_processor: Fusionado '0eac9e58-c4ed-4029-9e3c-156f06b70541.pdf'  2 págs.
+2026-05-06 00:56:26,160 [INFO] backend.pdf_processor: Fusionado 'f05a3823-e6be-44fe-9ba2-57cd023a65fb.pdf'  2 págs.
+2026-05-06 00:56:26,165 [INFO] backend.pdf_processor: Fusionado '7a156d61-7a31-4fa7-9701-be1b9dc277c5.pdf'  2 págs.
+2026-05-06 00:56:26,169 [INFO] backend.pdf_processor: Fusionado '69688dbe-2f53-4368-9e0a-ffb1fd851bef.pdf'  2 págs.
+2026-05-06 00:56:26,172 [INFO] backend.pdf_processor: Fusionado '38ff5d4a-0803-4fbd-8933-4c160d4f73c0.pdf'  1 págs.
+2026-05-06 00:56:26,175 [INFO] backend.pdf_processor: Fusionado '4f43cbfd-d37c-4a35-8f85-e007fd96fff1.pdf'  1 págs.
+2026-05-06 00:56:26,182 [INFO] backend.pdf_processor: Fusionado 'acbf7650-c10d-4f1e-ba32-09d0365d5ecc.pdf'  2 págs.
+2026-05-06 00:56:26,185 [INFO] backend.pdf_processor: Fusionado '7408123e-dd0d-4fd4-a9b2-7bc0b7540354.pdf'  1 págs.
+2026-05-06 00:56:26,267 [INFO] backend.pdf_processor: Fusionado '8f2102d9-41f1-4943-9e8d-0c60d7650ce7.pdf'  17 págs.
+2026-05-06 00:56:26,287 [INFO] backend.pdf_processor: Fusionado '40c13158-83d6-4d24-8cd8-ce0b3b1b5dde.pdf'  7 págs.
+2026-05-06 00:56:26,291 [INFO] backend.pdf_processor: Fusionado 'b496a078-d528-4cdf-88d6-8f328cfb9e3a.pdf'  2 págs.
+2026-05-06 00:56:26,293 [INFO] backend.pdf_processor: Fusionado 'c87cc03d-31bf-4bbf-9202-3ff46a4abb82.pdf'  1 págs.
+2026-05-06 00:56:26,314 [INFO] backend.pdf_processor: Fusionado '30b0558f-f365-47ba-ad6e-ccf31f2f9452.pdf'  2 págs.
+2026-05-06 00:56:26,318 [INFO] backend.pdf_processor: Fusionado '47b3c7f6-8ebe-4c02-ab40-4a9e0ddc026e.pdf'  2 págs.
+2026-05-06 00:56:26,323 [INFO] backend.pdf_processor: Fusionado '3912ca59-c7dd-43c1-9944-ce6f34e3baf8.pdf'  3 págs.
+2026-05-06 00:56:26,330 [INFO] backend.pdf_processor: Fusionado '3e71d909-7443-43d2-b642-26051376b139.pdf'  5 págs.
+2026-05-06 00:56:26,333 [INFO] backend.pdf_processor: Fusionado 'a7cf5c45-f54a-47ba-b673-5f3f63d0961e.pdf'  1 págs.
+2026-05-06 00:56:26,360 [INFO] backend.pdf_processor: Fusionado 'b6fd1770-ab4f-4115-a21e-ece117a68a2e.pdf'  9 págs.
+2026-05-06 00:56:26,367 [INFO] backend.pdf_processor: Fusionado 'f843d1e3-9b3b-47d1-96f3-dab1a8306d3e.pdf'  3 págs.
+2026-05-06 00:56:26,371 [INFO] backend.pdf_processor: Fusionado 'bcb9d102-8e2f-4ae4-9c41-a011d1dc9eb5.pdf'  2 págs.
+2026-05-06 00:56:26,380 [INFO] backend.pdf_processor: Fusionado 'feb260a8-13be-4c00-96e2-2a0dcf43792a.pdf'  5 págs.
+2026-05-06 00:56:26,382 [INFO] backend.pdf_processor: Fusionado 'e2793bce-3359-4216-8edc-3020b8fa9c78.pdf'  1 págs.
+2026-05-06 00:56:26,387 [INFO] backend.pdf_processor: Fusionado 'f9ca8f9c-dc76-4ef6-ab84-467cd38a1f07.pdf'  1 págs.
+2026-05-06 00:56:31,853 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_06_0056.pdf'  343 págs.  0 fallos.
+2026-05-06 01:08:41,256 [INFO] backend.main: Subido 'TARJETA CARRO.pdf' → 2 págs.
+2026-05-06 01:08:41,261 [INFO] backend.main: Subido 'SUFI.pdf' → 1 págs.
+2026-05-06 01:08:41,265 [INFO] backend.main: Subido 'SUELDO.pdf' → 1 págs.
+2026-05-06 01:08:41,323 [INFO] backend.main: Subido 'SOLICITUD LEIDY JHOJANA CHOQUE JIMENEZ C.C. 1094904734.pdf' → 179 págs.
+2026-05-06 01:08:41,381 [INFO] backend.main: Subido 'IMPUESTO PREDIAL.pdf' → 1 págs.
+2026-05-06 01:08:41,382 [INFO] backend.main: Subido 'SOLICITUD INSOLVENCIA.pdf' → 8 págs.
+2026-05-06 01:08:41,389 [INFO] backend.main: Subido 'PODER.pdf' → 3 págs.
+2026-05-06 01:08:41,412 [INFO] backend.main: Subido 'SOLICITU ALBA YANETH PALACIO DIAZ C.C. 24394762.pdf' → 324 págs.
+2026-05-06 01:08:41,465 [INFO] backend.main: Subido 'FOTOCOPIA_CEDULA_ELKIN.pdf' → 1 págs.
+2026-05-06 01:08:41,471 [INFO] backend.main: Subido 'EXTRACTO BANCARIO davivienda .pdf' → 2 págs.
+2026-05-06 01:08:41,473 [INFO] backend.main: Subido 'EXTRACTO SERFINANZA.pdf' → 2 págs.
+2026-05-06 01:08:41,668 [INFO] backend.main: Subido 'expediente_2026_05_05_2352.pdf' → 936 págs.
+2026-05-06 01:08:41,686 [INFO] backend.main: Subido 'COMPROBANTE DE AFECTACION A MI ECONOMIA POR EMERGENCIA SANITARIA.pdf' → 1 págs.
+2026-05-06 01:08:41,730 [INFO] backend.main: Subido 'CERTIFICADO DE TRADICION.pdf' → 3 págs.
+2026-05-06 01:08:41,730 [INFO] backend.main: Subido 'COMPROBANDE DE SUELDO.pdf' → 1 págs.
+2026-05-06 01:08:41,731 [INFO] backend.main: Subido 'CERTIFICADO REDAM.pdf' → 1 págs.
+2026-05-06 01:08:41,742 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA SERFINANZA.pdf' → 3 págs.
+2026-05-06 01:08:41,785 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA DAVIVIENDA.pdf' → 9 págs.
+2026-05-06 01:08:41,786 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA BANCOLOMBIA.pdf' → 17 págs.
+2026-05-06 01:08:41,800 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA ALCALDIA.pdf' → 314 págs.
+2026-05-06 01:08:41,812 [INFO] backend.main: Subido 'CEDULA.pdf' → 2 págs.
+2026-05-06 01:08:41,813 [INFO] backend.main: Subido 'CEDULA (2).pdf' → 2 págs.
+2026-05-06 01:08:41,849 [INFO] backend.main: Subido 'CERT9F9CAD0 DEUDA.pdf' → 2 págs.
+2026-05-06 01:08:41,853 [INFO] backend.main: Subido 'CASO ARCHIVADO A FAVOR.pdf' → 3 págs.
+2026-05-06 01:09:03,132 [INFO] backend.main: Subido 'TARJETA CARRO.pdf' → 2 págs.
+2026-05-06 01:09:03,139 [INFO] backend.main: Subido 'SUELDO.pdf' → 1 págs.
+2026-05-06 01:09:03,144 [INFO] backend.main: Subido 'SUFI.pdf' → 1 págs.
+2026-05-06 01:09:03,194 [INFO] backend.main: Subido 'SOLICITUD LEIDY JHOJANA CHOQUE JIMENEZ C.C. 1094904734.pdf' → 179 págs.
+2026-05-06 01:09:03,249 [INFO] backend.main: Subido 'SOLICITUD INSOLVENCIA.pdf' → 8 págs.
+2026-05-06 01:09:13,733 [INFO] backend.main: Tarea 18e62c97-fa69-469c-ac12-5ed8c5465a69 iniciada (5 archivos → PRUEBA PARA CAMI.pdf)
+2026-05-06 01:09:13,736 [INFO] backend.pdf_processor: Fusionado '308e8818-06dd-40d2-92b4-3f689dbadaeb.pdf'  8 págs.
+2026-05-06 01:09:13,764 [INFO] backend.pdf_processor: Fusionado 'ac7c7923-28db-4fde-8cb8-3354d793fbde.pdf'  179 págs.
+2026-05-06 01:09:13,765 [INFO] backend.pdf_processor: Fusionado 'ee3f638e-0ff0-4a59-a6e2-e4fb2748d99c.pdf'  1 págs.
+2026-05-06 01:09:13,766 [INFO] backend.pdf_processor: Fusionado 'ea23ed7d-e5d4-41b3-9bfe-b38959b75d34.pdf'  1 págs.
+2026-05-06 01:09:13,767 [INFO] backend.pdf_processor: Fusionado '323b77e1-786f-436f-b794-6e12d6598328.pdf'  2 págs.
+2026-05-06 01:09:14,075 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/PRUEBA PARA CAMI.pdf'  191 págs.  0 fallos.
+2026-05-06 01:20:46,790 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-06 01:21:00,181 [INFO] backend.session_manager: [session] creada  → 8ea31b9a-6b1b-4217-950c-2f209d9f45ff
+2026-05-06 01:21:00,181 [INFO] backend.main: [session] nueva sesión: 8ea31b9a-6b1b-4217-950c-2f209d9f45ff
+2026-05-06 01:21:00,222 [INFO] backend.main: [upload] 'test_1.pdf' → sesión 8ea31b9a… | 1 págs. | 0.0 MB
+2026-05-06 01:21:00,245 [INFO] backend.main: [upload] 'test_2.pdf' → sesión 8ea31b9a… | 2 págs. | 0.0 MB
+2026-05-06 01:21:00,267 [INFO] backend.main: [upload] 'test_3.pdf' → sesión 8ea31b9a… | 3 págs. | 0.0 MB
+2026-05-06 01:21:15,461 [INFO] backend.session_manager: [session] creada  → 3fc4e91d-0b29-4a50-aafd-6f7adb33d66c
+2026-05-06 01:21:15,462 [INFO] backend.main: [session] nueva sesión: 3fc4e91d-0b29-4a50-aafd-6f7adb33d66c
+2026-05-06 01:21:15,487 [INFO] backend.main: [upload] 'test_1.pdf' → sesión 3fc4e91d… | 1 págs. | 0.0 MB
+2026-05-06 01:21:15,511 [INFO] backend.main: [upload] 'test_2.pdf' → sesión 3fc4e91d… | 2 págs. | 0.0 MB
+2026-05-06 01:21:15,534 [INFO] backend.main: [upload] 'test_3.pdf' → sesión 3fc4e91d… | 3 págs. | 0.0 MB
+2026-05-06 01:21:15,566 [INFO] backend.main: [tarea 67e12252-5e40-437f-b404-728bc2a95c3e] inicio del procesamiento
+2026-05-06 01:21:15,566 [INFO] backend.main: [proceso] tarea 67e12252-5e40-437f-b404-728bc2a95c3e iniciada — 3 archivo(s) → 'expediente_2026_05_06_0121.pdf' | sesiones: ['3fc4e91d…']
+2026-05-06 01:21:15,568 [INFO] backend.pdf_processor: Fusionado 'c863a91c-e43d-4072-b0a0-3b60aaa6e69b.pdf'  1 págs.
+2026-05-06 01:21:15,569 [INFO] backend.pdf_processor: Fusionado '8fb66124-212f-4ea4-b912-0030a0bca28e.pdf'  2 págs.
+2026-05-06 01:21:15,569 [INFO] backend.pdf_processor: Fusionado '0cb1bef1-a949-4dba-b7ee-f78175b59830.pdf'  3 págs.
+2026-05-06 01:21:15,576 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_06_0121.pdf'  6 págs.  0 fallos.
+2026-05-06 01:21:15,576 [INFO] backend.main: [tarea 67e12252-5e40-437f-b404-728bc2a95c3e] completada — 6 págs. | 0 fallo(s)
+2026-05-06 01:21:15,577 [INFO] backend.session_manager: [session] eliminada → 3fc4e91d-0b29-4a50-aafd-6f7adb33d66c
+2026-05-06 01:21:15,577 [INFO] backend.main: [tarea 67e12252-5e40-437f-b404-728bc2a95c3e] limpieza — 1 sesión(es) | 3 registro(s) en memoria
+2026-05-06 01:21:44,119 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-06 01:23:32,394 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-06 01:23:34,032 [INFO] backend.session_manager: [session] creada  → 2e5f09d0-e464-43c7-87aa-752ce5c7c373
+2026-05-06 01:23:34,032 [INFO] backend.main: [session] nueva sesión: 2e5f09d0-e464-43c7-87aa-752ce5c7c373
+2026-05-06 01:23:34,066 [INFO] backend.main: [upload] 'test_1.pdf' → sesión 2e5f09d0… | 1 págs. | 0.0 MB
+2026-05-06 01:23:34,087 [INFO] backend.main: [upload] 'test_2.pdf' → sesión 2e5f09d0… | 2 págs. | 0.0 MB
+2026-05-06 01:23:34,110 [INFO] backend.main: [upload] 'test_3.pdf' → sesión 2e5f09d0… | 3 págs. | 0.0 MB
+2026-05-06 01:23:34,155 [INFO] backend.main: [tarea 80b17b46-111a-4bb9-8e38-c1a820b1108e] inicio del procesamiento
+2026-05-06 01:23:34,155 [INFO] backend.main: [proceso] tarea 80b17b46-111a-4bb9-8e38-c1a820b1108e iniciada — 3 archivo(s) → 'expediente_2026_05_06_0123.pdf' | sesiones: ['2e5f09d0…']
+2026-05-06 01:23:34,157 [INFO] backend.pdf_processor: Fusionado 'f6b94731-c1f1-44ef-9de0-0fbe65947b24.pdf'  1 págs.
+2026-05-06 01:23:34,157 [INFO] backend.pdf_processor: Fusionado '6ba751d1-26ac-4895-934a-4b2e61364802.pdf'  2 págs.
+2026-05-06 01:23:34,158 [INFO] backend.pdf_processor: Fusionado 'a4c5951f-77d1-41bd-b017-4674c5a71b73.pdf'  3 págs.
+2026-05-06 01:23:34,164 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_06_0123.pdf'  6 págs.  0 fallos.
+2026-05-06 01:23:34,164 [INFO] backend.main: [tarea 80b17b46-111a-4bb9-8e38-c1a820b1108e] completada — 6 págs. | 0 fallo(s)
+2026-05-06 01:23:34,164 [INFO] backend.session_manager: [session] eliminada → 2e5f09d0-e464-43c7-87aa-752ce5c7c373
+2026-05-06 01:23:34,164 [INFO] backend.main: [tarea 80b17b46-111a-4bb9-8e38-c1a820b1108e] limpieza — 1 sesión(es) | 3 registro(s) en memoria
+2026-05-06 01:23:37,234 [INFO] backend.session_manager: [session] creada  → df273b21-ad4f-43d5-ae18-986a577efae2
+2026-05-06 01:23:37,234 [INFO] backend.main: [session] nueva sesión: df273b21-ad4f-43d5-ae18-986a577efae2
+2026-05-06 01:23:37,256 [INFO] backend.main: [upload] 'test_1.pdf' → sesión df273b21… | 1 págs. | 0.0 MB
+2026-05-06 01:23:37,281 [INFO] backend.main: [proceso] tarea bb3a2b60-05c5-4784-a235-65198ae38eef iniciada — 1 archivo(s) → 'expediente_2026_05_06_0123.pdf' | sesiones: ['df273b21…']
+2026-05-06 01:23:37,281 [INFO] backend.main: [tarea bb3a2b60-05c5-4784-a235-65198ae38eef] inicio del procesamiento
+2026-05-06 01:23:37,282 [ERROR] backend.pdf_processor: Error en '7114a5a0-3d42-40ed-b6de-dbfeb995c216.pdf': no such file: '/home/smogo/expediente/temp/session_df273b21-ad4f-43d5-ae18-986a577efae2/7114a5a0-3d42-40ed-b6de-dbfeb995c216.pdf'
+2026-05-06 01:23:37,282 [ERROR] backend.main: [tarea bb3a2b60-05c5-4784-a235-65198ae38eef] falló: No se pudo procesar ningún archivo. Fallaron: 7114a5a0-3d42-40ed-b6de-dbfeb995c216.pdf (no such file: '/home/smogo/expediente/temp/session_df273b21-ad4f-43d5-ae18-986a5)
+2026-05-06 01:23:37,283 [INFO] backend.session_manager: [session] eliminada → df273b21-ad4f-43d5-ae18-986a577efae2
+2026-05-06 01:23:37,283 [INFO] backend.main: [tarea bb3a2b60-05c5-4784-a235-65198ae38eef] limpieza — 1 sesión(es) | 1 registro(s) en memoria
+2026-05-06 01:24:46,799 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp

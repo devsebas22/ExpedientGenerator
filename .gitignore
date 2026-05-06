@@ -1,0 +1,33 @@
+# Archivos temporales de la app
+temp/
+logs/
+expedientes_generados/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Secretos y entorno local
+.env
+.env.*
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store

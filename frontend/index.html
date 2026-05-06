@@ -61,6 +61,27 @@
     <ul id="file-list"></ul>
   </div>
 
+  <!-- ── Page counter ──────────────────────────────────────────────────── -->
+  <div class="card" id="counter-card" style="display:none">
+    <div class="counter-header">
+      <span class="card-title" style="margin-bottom:0">Contador de páginas</span>
+      <button class="counter-refresh" id="btn-recount" title="Verificar conteo en el servidor">
+        🔄 Verificar
+      </button>
+    </div>
+    <div class="counter-wrap">
+      <!-- big animated number -->
+      <div class="counter-num-block">
+        <span class="counter-num" id="counter-num">0</span>
+        <span class="counter-num-label">páginas</span>
+      </div>
+      <!-- meta chips -->
+      <div class="counter-chips" id="counter-chips"></div>
+    </div>
+    <!-- warning strip (hidden unless big expediente) -->
+    <div class="counter-warn-strip" id="counter-warn" style="display:none"></div>
+  </div>
+
   <!-- ── Settings ───────────────────────────────────────────────────────── -->
   <div class="card">
     <div class="card-title">Configuración del foliado</div>
