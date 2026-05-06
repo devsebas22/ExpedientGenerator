@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expediente Digital</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+<header>
+  <span class="logo">📁</span>
+  <h1>Expediente Digital</h1>
+  <span class="version">v1.0</span>
+</header>
+
+<main>
+
+  <!-- ── Upload ─────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Cargar archivos PDF</div>
+
+    <div id="drop-zone">
+      <div class="dz-icon">⬆️</div>
+      <div class="dz-main">Arrastra y suelta tus PDFs aquí</div>
+      <div class="dz-sub">O usa los botones de abajo para seleccionar</div>
+    </div>
+
+    <div class="upload-row">
+      <button class="btn btn-primary" id="btn-files">
+        📄 Seleccionar archivos
+      </button>
+      <button class="btn btn-outline" id="btn-folder-browser">
+        📂 Seleccionar carpeta
+      </button>
+    </div>
+
+    <!-- carpeta por ruta de texto (para WSL / rutas locales) -->
+    <div class="folder-row" style="margin-top:.9rem;">
+      <input type="text" id="folder-path"
+             placeholder="O escribe la ruta de una carpeta: /home/usuario/documentos" />
+      <button class="btn btn-outline" id="btn-load-folder">Cargar</button>
+    </div>
+  </div>
+
+  <!-- ── File list ──────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="list-header">
+      <h2>Archivos cargados</h2>
+      <span class="badge blue" id="badge-files">0 archivos</span>
+      <span class="badge green" id="badge-pages">0 páginas</span>
+      <div class="list-header-actions">
+        <button class="btn btn-outline" id="btn-sort" title="Ordenar por nombre natural">
+          🔢 Auto-ordenar
+        </button>
+        <button class="btn btn-danger-ghost" id="btn-clear">
+          🗑 Limpiar todo
+        </button>
+      </div>
+    </div>
+    <ul id="file-list"></ul>
+  </div>
+
+  <!-- ── Settings ───────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Configuración del foliado</div>
+    <div class="settings-grid">
+
+      <div class="field">
+        <label>Posición del folio</label>
+        <select id="cfg-position">
+          <option value="top-right"    selected>Arriba derecha</option>
+          <option value="top-left">Arriba izquierda</option>
+          <option value="bottom-right">Abajo derecha</option>
+          <option value="bottom-left">Abajo izquierda</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Tamaño de letra (pt)</label>
+        <input type="number" id="cfg-fontsize" value="11" min="6" max="28" step="0.5" />
+      </div>
+
+      <div class="field">
+        <label>Margen superior (pt)</label>
+        <input type="number" id="cfg-margin-top" value="20" min="5" max="150" />
+      </div>
+
+      <div class="field">
+        <label>Margen lateral (pt)</label>
+        <input type="number" id="cfg-margin-right" value="30" min="5" max="150" />
+      </div>
+
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>Nombre del expediente (opcional)</label>
+        <input type="text" id="cfg-output-name"
+               placeholder="Se genera automáticamente: expediente_2026_05_05_1530.pdf" />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Action bar ─────────────────────────────────────────────────────── -->
+  <div class="card" id="action-bar">
+    <p class="summary" id="action-summary">
+      Carga al menos un PDF para continuar.
+    </p>
+    <button class="btn btn-primary btn-lg" id="btn-generate" disabled>
+      ⚡ Generar expediente
+    </button>
+  </div>
+
+  <!-- ── Progress ───────────────────────────────────────────────────────── -->
+  <div class="card" id="progress-section">
+    <div class="card-title">Procesando…</div>
+    <span id="progress-pct">0%</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <p id="progress-msg">Iniciando…</p>
+  </div>
+
+  <!-- ── Result ─────────────────────────────────────────────────────────── -->
+  <div class="card" id="result-section">
+    <div class="card-title">Expediente generado</div>
+    <div class="result-box">
+      <span class="result-icon">✅</span>
+      <div class="result-info">
+        <div class="result-name" id="result-name">—</div>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
+      <div class="result-actions">
+        <a class="btn btn-success" id="btn-download" href="#" download>
+          ⬇️ Descargar
+        </a>
+        <button class="btn btn-outline" id="btn-new">
+          ➕ Nuevo expediente
+        </button>
+      </div>
+    </div>
+    <div class="warn-box" id="failed-warn" style="display:none">
+      <strong>⚠️ Archivos con errores:</strong>
+      <ul id="failed-list"></ul>
+    </div>
+  </div>
+
+</main>
+
+<!-- hidden inputs -->
+<input type="file" id="file-input"   accept=".pdf" multiple hidden />
+<input type="file" id="folder-input" accept=".pdf" webkitdirectory multiple hidden />
+
+<div id="toast-container"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

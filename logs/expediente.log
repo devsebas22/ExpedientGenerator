@@ -1,0 +1,73 @@
+2026-05-05 23:48:59,359 [INFO] backend.main: Subido 'test_1.pdf' → 1 págs.
+2026-05-05 23:49:32,035 [INFO] backend.main: Subido 'test_1.pdf' → 1 págs.
+2026-05-05 23:49:32,063 [INFO] backend.main: Subido 'test_2.pdf' → 2 págs.
+2026-05-05 23:49:32,092 [INFO] backend.main: Subido 'test_3.pdf' → 3 págs.
+2026-05-05 23:49:32,117 [INFO] backend.pdf_processor: Fusionado '5e033422-2269-4653-aa46-e2d89e88c3d6.pdf'  1 págs.
+2026-05-05 23:49:32,117 [INFO] backend.main: Tarea 163435dc-da06-4b77-a137-e4d662c3e499 iniciada (3 archivos → expediente_2026_05_05_2349.pdf)
+2026-05-05 23:49:32,118 [INFO] backend.pdf_processor: Fusionado '07434dd4-3fd5-4feb-ad19-baacac3be780.pdf'  2 págs.
+2026-05-05 23:49:32,119 [INFO] backend.pdf_processor: Fusionado '4629dc1b-90da-46be-976c-10dc903ded8b.pdf'  3 págs.
+2026-05-05 23:49:32,126 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_05_2349.pdf'  6 págs.  0 fallos.
+2026-05-05 23:52:05,243 [INFO] backend.main: Subido 'COMPROBANTE DE AFECTACION A MI ECONOMIA POR EMERGENCIA SANITARIA.pdf' → 1 págs.
+2026-05-05 23:52:05,246 [INFO] backend.main: Subido 'CEDULA.pdf' → 2 págs.
+2026-05-05 23:52:05,248 [INFO] backend.main: Subido 'CERTIFICADO REDAM.pdf' → 1 págs.
+2026-05-05 23:52:05,254 [INFO] backend.main: Subido 'PODER.pdf' → 3 págs.
+2026-05-05 23:52:05,305 [INFO] backend.main: Subido 'COMPROBANDE DE SUELDO.pdf' → 1 págs.
+2026-05-05 23:52:05,312 [INFO] backend.main: Subido 'TARJETA CARRO.pdf' → 2 págs.
+2026-05-05 23:52:05,313 [INFO] backend.main: Subido 'SOLICITUD INSOLVENCIA.pdf' → 8 págs.
+2026-05-05 23:52:05,314 [INFO] backend.main: Subido 'CASO ARCHIVADO A FAVOR.pdf' → 3 págs.
+2026-05-05 23:52:05,365 [INFO] backend.main: Subido 'IMPUESTO PREDIAL.pdf' → 1 págs.
+2026-05-05 23:52:05,372 [INFO] backend.main: Subido 'CERTIFICADO DE TRADICION.pdf' → 3 págs.
+2026-05-05 23:52:05,377 [INFO] backend.main: Subido 'EXTRACTO SERFINANZA.pdf' → 2 págs.
+2026-05-05 23:52:05,393 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA ALCALDIA.pdf' → 314 págs.
+2026-05-05 23:52:05,457 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA SERFINANZA.pdf' → 3 págs.
+2026-05-05 23:52:05,460 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA DAVIVIENDA.pdf' → 9 págs.
+2026-05-05 23:52:05,467 [INFO] backend.main: Subido 'SUFI.pdf' → 1 págs.
+2026-05-05 23:52:05,468 [INFO] backend.main: Subido 'EXTRACTO BANCARIO davivienda .pdf' → 2 págs.
+2026-05-05 23:52:05,517 [INFO] backend.main: Subido 'CERT9F9CAD0 DEUDA.pdf' → 2 págs.
+2026-05-05 23:52:05,520 [INFO] backend.main: Subido 'SUELDO.pdf' → 1 págs.
+2026-05-05 23:52:05,524 [INFO] backend.main: Subido 'FOTOCOPIA_CEDULA_ELKIN.pdf' → 1 págs.
+2026-05-05 23:52:05,538 [INFO] backend.main: Subido 'CERTIFICADO DE EXISTENCIA BANCOLOMBIA.pdf' → 17 págs.
+2026-05-05 23:52:05,590 [INFO] backend.main: Subido 'SOLICITU ALBA YANETH PALACIO DIAZ C.C. 24394762.pdf' → 324 págs.
+2026-05-05 23:52:05,591 [INFO] backend.main: Subido 'CEDULA (2).pdf' → 2 págs.
+2026-05-05 23:52:05,593 [INFO] backend.main: Subido 'POSTER ARMENIA 2026-1.pdf' → 1 págs.
+2026-05-05 23:52:05,607 [INFO] backend.main: Subido 'SOLICITUD LEIDY JHOJANA CHOQUE JIMENEZ C.C. 1094904734.pdf' → 179 págs.
+2026-05-05 23:52:05,628 [INFO] backend.main: Subido 'AUTO_3_MARIA_ARGENIS_PUENTES_CULMA.pdf' → 3 págs.
+2026-05-05 23:52:05,635 [INFO] backend.main: Subido 'PDF prueba.pdf' → 1 págs.
+2026-05-05 23:52:05,645 [INFO] backend.main: Subido 'SOLICITUD NOLBERTO LOPEZ RIASCOS.pdf' → 19 págs.
+2026-05-05 23:52:05,662 [INFO] backend.main: Subido '1. ENLACE DE LA SOLICITUD.pdf' → 1 págs.
+2026-05-05 23:52:05,715 [INFO] backend.main: Subido 'NegociarPro Proceso Administrativo.pdf' → 13 págs.
+2026-05-05 23:52:05,719 [INFO] backend.main: Subido 'NEGOCIAR PRO SEGUNDA ETAPA.pdf' → 5 págs.
+2026-05-05 23:52:05,729 [INFO] backend.main: Subido 'Ajustes NegociarPro docx.pdf' → 11 págs.
+2026-05-05 23:52:17,662 [INFO] backend.main: Tarea cb8a7662-a226-421d-879c-d508544ce768 iniciada (31 archivos → expediente_2026_05_05_2352.pdf)
+2026-05-05 23:52:17,664 [INFO] backend.pdf_processor: Fusionado 'e37926a5-7e52-4494-b3da-bde0dc9019b8.pdf'  1 págs.
+2026-05-05 23:52:17,668 [INFO] backend.pdf_processor: Fusionado 'ff0b90b9-e338-417d-a6eb-7a00a8b7d589.pdf'  11 págs.
+2026-05-05 23:52:17,671 [INFO] backend.pdf_processor: Fusionado 'a83ceacf-78a5-449a-8da4-5bc298b7ac4f.pdf'  3 págs.
+2026-05-05 23:52:17,675 [INFO] backend.pdf_processor: Fusionado 'e6bf3e95-b8b3-4a73-b00e-6b4972a9fb10.pdf'  3 págs.
+2026-05-05 23:52:17,676 [INFO] backend.pdf_processor: Fusionado '518a5e6e-9b43-4ea0-ab58-d1f7f9dfb759.pdf'  2 págs.
+2026-05-05 23:52:17,677 [INFO] backend.pdf_processor: Fusionado '5c869830-fef6-4697-b0dc-66b28747e40b.pdf'  2 págs.
+2026-05-05 23:52:17,679 [INFO] backend.pdf_processor: Fusionado 'b017851b-f8e1-43b4-bbc2-f0773f3fc64b.pdf'  2 págs.
+2026-05-05 23:52:17,712 [INFO] backend.pdf_processor: Fusionado 'd8e05694-d3aa-4dfa-b8fa-11034b433bdd.pdf'  314 págs.
+2026-05-05 23:52:17,725 [INFO] backend.pdf_processor: Fusionado 'fd5fe876-6bb8-43ee-ab8a-bc4e394cb00f.pdf'  17 págs.
+2026-05-05 23:52:17,731 [INFO] backend.pdf_processor: Fusionado '198c0f31-ace1-4c62-bcca-e0f29c847879.pdf'  9 págs.
+2026-05-05 23:52:17,734 [INFO] backend.pdf_processor: Fusionado 'bc334764-3769-4453-9c44-6229992a696d.pdf'  3 págs.
+2026-05-05 23:52:17,736 [INFO] backend.pdf_processor: Fusionado 'a6305205-12b0-48ea-837a-0c502a5da837.pdf'  3 págs.
+2026-05-05 23:52:17,737 [INFO] backend.pdf_processor: Fusionado '4d8774c3-b415-430d-af5d-cdfc09516853.pdf'  1 págs.
+2026-05-05 23:52:17,737 [INFO] backend.pdf_processor: Fusionado 'feee06c5-a7e1-42f0-b015-787473571c55.pdf'  1 págs.
+2026-05-05 23:52:17,738 [INFO] backend.pdf_processor: Fusionado 'ccf90eeb-c3a2-4985-ad8e-02dfb809d466.pdf'  1 págs.
+2026-05-05 23:52:17,741 [INFO] backend.pdf_processor: Fusionado 'cb4c1c74-8029-4770-b2ff-18e715907af6.pdf'  2 págs.
+2026-05-05 23:52:17,756 [INFO] backend.pdf_processor: Fusionado '71d47da4-a3c1-4fd2-875c-5be8ec0848c9.pdf'  2 págs.
+2026-05-05 23:52:17,757 [INFO] backend.pdf_processor: Fusionado '757a952f-ff31-480a-94d5-a69f55f5ccc6.pdf'  1 págs.
+2026-05-05 23:52:17,758 [INFO] backend.pdf_processor: Fusionado 'add765da-08f3-4805-965b-9af3d6992f7b.pdf'  1 págs.
+2026-05-05 23:52:17,765 [INFO] backend.pdf_processor: Fusionado '51e62e08-73e7-494f-8db5-21a8f2f23cb1.pdf'  5 págs.
+2026-05-05 23:52:17,774 [INFO] backend.pdf_processor: Fusionado '7945877b-85b0-4ec8-9892-7e33acae2240.pdf'  13 págs.
+2026-05-05 23:52:17,776 [INFO] backend.pdf_processor: Fusionado 'a9ef355f-53bf-4317-8429-945aa7cf8b88.pdf'  1 págs.
+2026-05-05 23:52:17,779 [INFO] backend.pdf_processor: Fusionado '44d6a533-dcc6-423b-b41a-91a582dbbcc8.pdf'  3 págs.
+2026-05-05 23:52:17,780 [INFO] backend.pdf_processor: Fusionado 'a9e2e90d-4ddc-4c22-929b-39c0744e5748.pdf'  1 págs.
+2026-05-05 23:52:17,822 [INFO] backend.pdf_processor: Fusionado '99e78544-5b32-4555-bff6-b72239feac8d.pdf'  324 págs.
+2026-05-05 23:52:17,824 [INFO] backend.pdf_processor: Fusionado 'e0f21bd5-0935-42c3-b8f7-bdb89f738b0a.pdf'  8 págs.
+2026-05-05 23:52:17,856 [INFO] backend.pdf_processor: Fusionado 'e5fbb5b8-80a3-4d0d-b0bc-db79f75492b3.pdf'  179 págs.
+2026-05-05 23:52:17,865 [INFO] backend.pdf_processor: Fusionado 'fb01ef4e-d1ca-42ee-80eb-298f88cc048a.pdf'  19 págs.
+2026-05-05 23:52:17,866 [INFO] backend.pdf_processor: Fusionado '73fd1c0f-0604-4e34-b277-041af57ab8ad.pdf'  1 págs.
+2026-05-05 23:52:17,867 [INFO] backend.pdf_processor: Fusionado '0c01eacc-5007-40b0-b49c-3ef8aacda1ae.pdf'  1 págs.
+2026-05-05 23:52:17,868 [INFO] backend.pdf_processor: Fusionado '645ff3c2-0c49-498d-9c1a-dd16be7c759a.pdf'  2 págs.
+2026-05-05 23:52:20,578 [INFO] backend.pdf_processor: Guardado en 'expedientes_generados/expediente_2026_05_05_2352.pdf'  936 págs.  0 fallos.
