@@ -12,6 +12,7 @@ Flujo de archivos temporales:
 import asyncio
 import hashlib
 import logging
+import os
 import platform
 import re
 import shutil
@@ -35,7 +36,7 @@ from .pdf_processor import get_page_count, merge_and_foliate, natural_sort_key
 from .session_manager import SessionManager
 
 # ── Licencia ───────────────────────────────────────────────────────────────────
-_LICENSE_SERVER = "https://TU_APP.up.railway.app"
+_LICENSE_SERVER = "https://expediente-licencias-production.up.railway.app"
 import time as _time
 
 
@@ -69,9 +70,13 @@ def _registrar_expediente(output_path: str) -> tuple[bool, int]:
 
 # ── Resolución de rutas (dev vs. frozen) ──────────────────────────────────────
 def _base_dir() -> Path:
-    """Directorio de datos de usuario: junto al .exe en producción, raíz en dev."""
+    """Directorio de datos de usuario.
+    - Frozen (.exe): %LOCALAPPDATA%\\ExpedienteDigital  (nunca junto al .exe)
+    - Dev:           raíz del proyecto
+    """
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).parent
+        local_app = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+        return Path(local_app) / "ExpedienteDigital"
     return Path(__file__).parent.parent
 
 
