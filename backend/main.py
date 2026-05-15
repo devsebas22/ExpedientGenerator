@@ -10,9 +10,12 @@ Flujo de archivos temporales:
 """
 
 import asyncio
+import hashlib
 import logging
+import platform
 import re
 import shutil
+import sys
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
@@ -21,6 +24,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import aiofiles
+import requests as _requests
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -30,23 +34,109 @@ from .models import CountRequest, FileInfo, FolderRequest, FolioConfig, ProcessR
 from .pdf_processor import get_page_count, merge_and_foliate, natural_sort_key
 from .session_manager import SessionManager
 
+# ── Licencia ───────────────────────────────────────────────────────────────────
+_LICENSE_SERVER = "https://TU_APP.up.railway.app"
+import time as _time
+
+
+def _get_hardware_id() -> str:
+    mac = ':'.join(['{:02x}'.format((uuid.getnode() >> e) & 0xff) for e in range(0, 48, 8)][::-1])
+    raw = f"{mac}-{platform.processor()}-{platform.system()}{platform.version()}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:32]
+
+
+def _registrar_expediente(output_path: str) -> tuple[bool, int]:
+    """
+    Registra el expediente en el servidor ANTES de entregarlo al usuario.
+    Retorna (ok, total_mes). Si falla, retorna (False, 0).
+    """
+    try:
+        with open(output_path, "rb") as f:
+            content = f.read()
+        ts_bytes   = str(_time.time()).encode()
+        hash_exp   = hashlib.sha256(content + ts_bytes).hexdigest()
+        hardware_id = _get_hardware_id()
+        resp = _requests.post(
+            f"{_LICENSE_SERVER}/api/expediente/registrar",
+            json={"hardware_id": hardware_id, "hash_expediente": hash_exp},
+            timeout=10,
+        )
+        data = resp.json()
+        return data.get("ok", False), data.get("total_mes", 0)
+    except Exception as exc:
+        logger.error("[expediente] fallo al registrar: %s", exc)
+        return False, 0
+
+# ── Resolución de rutas (dev vs. frozen) ──────────────────────────────────────
+def _base_dir() -> Path:
+    """Directorio de datos de usuario: junto al .exe en producción, raíz en dev."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent
+    return Path(__file__).parent.parent
+
+
+def _frontend_dir() -> Path:
+    """Directorio de archivos estáticos: _MEIPASS/frontend en frozen, /frontend en dev."""
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS) / "frontend"
+    return Path(__file__).parent.parent / "frontend"
+
+
 # ── Rutas base ─────────────────────────────────────────────────────────────────
-TEMP_DIR   = Path("temp")
-OUTPUT_DIR = Path("expedientes_generados")
-LOG_DIR    = Path("logs")
+_BASE      = _base_dir()
+TEMP_DIR   = _BASE / "temp"
+OUTPUT_DIR = _BASE / "expedientes_generados"
+LOG_DIR    = _BASE / "logs"
 
 for _d in (TEMP_DIR, OUTPUT_DIR, LOG_DIR):
     _d.mkdir(exist_ok=True)
 
 # ── Logging ────────────────────────────────────────────────────────────────────
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.FileHandler(LOG_DIR / "expediente.log", encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
-)
+def _setup_logging(log_dir: Path) -> None:
+    """
+    Configura el logging de forma compatible con PyInstaller frozen mode.
+
+    Por qué NO usar logging.basicConfig ni logging.config.dictConfig:
+    - basicConfig es no-op si algún import ya tocó el root logger antes.
+    - dictConfig resuelve clases por string ("uvicorn.logging.DefaultFormatter")
+      usando importlib, que falla en frozen mode aunque el módulo esté bundled.
+
+    Esta función construye los handlers directamente con objetos Python puros,
+    sin ninguna resolución de nombres por string, lo que funciona siempre.
+    """
+    root = logging.getLogger()
+
+    # No agregar handlers duplicados si alguien llama esto dos veces
+    if root.handlers:
+        root.handlers.clear()
+
+    root.setLevel(logging.INFO)
+    fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+    # Handler de archivo — falla de forma silenciosa si no tiene permisos
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        fh = logging.FileHandler(log_dir / "expediente.log", encoding="utf-8")
+        fh.setFormatter(fmt)
+        root.addHandler(fh)
+    except Exception as exc:
+        print(f"[logging] No se pudo crear log file: {exc}", file=sys.stderr)
+
+    # Handler de consola — siempre presente (útil en dev y en .exe con console=True)
+    sh = logging.StreamHandler(sys.stderr)
+    sh.setFormatter(fmt)
+    root.addHandler(sh)
+
+    # Silenciar los loggers de uvicorn al nivel WARNING para no saturar el log.
+    # Como no llamamos logging.config.dictConfig, uvicorn no tiene formateadores
+    # propios — sus mensajes llegan al root logger y usan nuestro formato.
+    for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+        uv_log = logging.getLogger(name)
+        uv_log.setLevel(logging.WARNING)
+        uv_log.propagate = True
+
+
+_setup_logging(LOG_DIR)
 logger = logging.getLogger(__name__)
 
 # ── Gestión de sesiones (singleton) ───────────────────────────────────────────
@@ -79,7 +169,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FRONTEND = Path(__file__).parent.parent / "frontend"
+FRONTEND = _frontend_dir()
 if FRONTEND.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND)), name="static")
 
@@ -360,17 +450,30 @@ def _run_task(
         logger.info("[tarea %s] inicio del procesamiento", task_id)
         result = merge_and_foliate(file_paths, output_path, config, cb)
 
+        # Registrar en el servidor ANTES de marcar como listo
+        cb("Registrando expediente…", 98)
+        ok, total_mes = _registrar_expediente(output_path)
+        if not ok:
+            task.update(
+                status  = "error",
+                message = "No se pudo registrar el expediente. Verifica tu conexión a internet.",
+                error   = "registro_fallido",
+            )
+            logger.error("[tarea %s] registro fallido — expediente no entregado", task_id)
+            return
+
         task.update(
             status       = "done",
             progress     = 100,
-            message      = f"¡Listo! {result['total_pages']} páginas",
+            message      = f"¡Listo! {result['total_pages']} páginas · expediente #{total_mes} del mes",
             result_file  = output_name,
             total_pages  = result["total_pages"],
             failed_files = result["failed_files"],
+            total_mes    = total_mes,
         )
         logger.info(
-            "[tarea %s] completada — %d págs. | %d fallo(s)",
-            task_id, result["total_pages"], len(result["failed_files"]),
+            "[tarea %s] completada — %d págs. | %d fallo(s) | exp. mes: %d",
+            task_id, result["total_pages"], len(result["failed_files"]), total_mes,
         )
 
     except Exception as exc:
@@ -477,3 +580,32 @@ async def health():
         "active_tasks":     sum(1 for t in tasks.values() if t["status"] == "processing"),
         "active_sessions":  len(sessions.active_sessions()),
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Estado de licencia (para la UI)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/licencia")
+async def licencia_status():
+    hardware_id = _get_hardware_id()
+    try:
+        resp = _requests.post(
+            f"{_LICENSE_SERVER}/api/verificar",
+            json={"hardware_id": hardware_id},
+            timeout=6,
+        )
+        data = resp.json()
+        return {
+            "hardware_id": hardware_id,
+            "activa":      data.get("activa", False),
+            "es_prueba":   data.get("es_prueba", False),
+            "mensaje":     data.get("mensaje", ""),
+        }
+    except Exception as e:
+        return {
+            "hardware_id": hardware_id,
+            "activa":      False,
+            "es_prueba":   False,
+            "mensaje":     f"Sin conexión al servidor de licencias.",
+        }

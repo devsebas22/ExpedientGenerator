@@ -519,6 +519,24 @@ main {
 .counter-warn-strip.warn   { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
 .counter-warn-strip.danger { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
+/* ── Licencia banner ──────────────────────────────────────────────────────── */
+.lic-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
+  padding: .6rem 1.25rem; font-size: .85rem;
+  border-bottom: 1px solid var(--border);
+}
+.lic-banner.lic-ok    { background: rgba(34,197,94,.08);  color: #16a34a; }
+.lic-banner.lic-error { background: rgba(239,68,68,.1);   color: #dc2626; }
+.lic-banner.lic-warn  { background: rgba(234,179,8,.1);   color: #b45309; }
+.lic-hw { display:flex; align-items:center; gap:.35rem; }
+.lic-hw code { font-family: monospace; font-size: .82rem; user-select: all; }
+.lic-hw button, .lic-banner button {
+  background: rgba(0,0,0,.15); border: 1px solid rgba(0,0,0,.12);
+  border-radius: 4px; padding: 1px 6px; cursor: pointer; font-size: .8rem;
+  color: inherit; transition: background .15s;
+}
+.lic-hw button:hover, .lic-banner button:hover { background: rgba(0,0,0,.25); }
+
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
 #file-list::-webkit-scrollbar { width: 6px; }
 #file-list::-webkit-scrollbar-track { background: transparent; }
@@ -530,4 +548,127 @@ main {
   .card { padding: 1rem; }
   .upload-row { flex-direction: column; }
   .result-box { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Activation screen ────────────────────────────────────────────────────── */
+#activacion-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.activacion-wrap {
+  width: 100%;
+  max-width: 440px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.activacion-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: .25rem;
+}
+
+.activacion-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -.3px;
+}
+
+.activacion-sub {
+  font-size: .9rem;
+  color: #94a3b8;
+  line-height: 1.55;
+}
+
+.activacion-hw-box {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin: .25rem 0;
+}
+
+.activacion-hw-label {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #64748b;
+  margin-bottom: .45rem;
+}
+
+.activacion-hw-value {
+  font-family: "Courier New", Courier, monospace;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #7dd3fc;
+  letter-spacing: .04em;
+  word-break: break-all;
+  margin-bottom: .65rem;
+  min-height: 1.4em;
+}
+
+.activacion-copy-btn {
+  background: #1e3a5f;
+  border: 1px solid #1d4ed8;
+  color: #93c5fd;
+  border-radius: 6px;
+  padding: .35rem .85rem;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.activacion-copy-btn:hover { background: #1d4ed8; color: #fff; }
+
+.activacion-contacto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .65rem;
+  width: 100%;
+}
+.activacion-contacto p {
+  font-size: .85rem;
+  color: #94a3b8;
+}
+
+.activacion-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: #16a34a;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 9px;
+  padding: .6rem 1.5rem;
+  font-size: .92rem;
+  font-weight: 700;
+  width: 100%;
+  justify-content: center;
+  transition: background .15s, transform .1s;
+}
+.activacion-wa-btn:hover { background: #15803d; transform: translateY(-1px); }
+
+.activacion-msg {
+  font-size: .83rem;
+  color: #f87171;
+  min-height: 1.3em;
 }

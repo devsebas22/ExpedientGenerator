@@ -639,6 +639,10 @@ function showResult(task) {
   resultSec.classList.add("visible");
   toast(`¡Expediente listo! ${task.total_pages} páginas`, "success", 5000);
   resultSec.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  if (task.total_mes !== undefined) {
+    window.dispatchEvent(new CustomEvent("expediente-registrado", { detail: { total_mes: task.total_mes } }));
+  }
 }
 
 function resetResult() {

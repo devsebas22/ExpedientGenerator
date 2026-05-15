@@ -14,7 +14,31 @@
   <span class="version">v1.0</span>
 </header>
 
-<main>
+<!-- ── Pantalla de activación (se muestra si la licencia no está activa) ─── -->
+<div id="activacion-screen" style="display:none">
+  <div class="activacion-wrap">
+    <div class="activacion-icon">🔒</div>
+    <h2 class="activacion-title">Licencia no activada</h2>
+    <p class="activacion-sub">Para usar Expediente Digital necesitas una licencia activa.</p>
+    <div class="activacion-hw-box">
+      <div class="activacion-hw-label">Tu Hardware ID</div>
+      <div class="activacion-hw-value" id="hw-id-display">—</div>
+      <button class="activacion-copy-btn" id="btn-copy-hw" onclick="copyHwId()">📋 Copiar</button>
+    </div>
+    <div class="activacion-contacto">
+      <p>Comparte tu Hardware ID con Sebastian para activar tu licencia.</p>
+      <a class="activacion-wa-btn" id="wa-link" href="#" target="_blank">
+        💬 Contactar por WhatsApp
+      </a>
+    </div>
+    <div class="activacion-msg" id="activacion-msg"></div>
+  </div>
+</div>
+
+<!-- ── Licencia status banner (visible cuando está activa) ─────────────── -->
+<div id="lic-banner" style="display:none"></div>
+
+<main id="app-main">
 
   <!-- ── Upload ─────────────────────────────────────────────────────────── -->
   <div class="card">
@@ -174,5 +198,70 @@
 <div id="toast-container"></div>
 
 <script src="/static/app.js"></script>
+<script>
+const WA_NUMBER = '573164698626';
+let _licHardwareId = '';
+
+function copyHwId() {
+  navigator.clipboard.writeText(_licHardwareId)
+    .then(() => { document.getElementById('btn-copy-hw').textContent = '✓ Copiado'; })
+    .catch(() => {});
+}
+
+(async () => {
+  const activacionScreen = document.getElementById('activacion-screen');
+  const appMain          = document.getElementById('app-main');
+  const banner           = document.getElementById('lic-banner');
+
+  try {
+    const r = await fetch('/api/licencia');
+    const d = await r.json();
+    _licHardwareId = d.hardware_id || '';
+
+    if (d.activa) {
+      // ── Licencia activa: mostrar app normal con banner ──────────────────
+      const prueba = d.es_prueba ? ' <span style="background:rgba(99,102,241,.18);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:.75rem">PRUEBA</span>' : '';
+      banner.innerHTML = `
+        <span style="font-weight:700;color:#22c55e">✅ Licencia activa${prueba}</span>
+        <span class="lic-hw">
+          ID: <code>${_licHardwareId}</code>
+          <button onclick="copyHwId()" title="Copiar Hardware ID">📋</button>
+        </span>`;
+      banner.className = 'lic-banner lic-ok';
+      banner.style.display = 'flex';
+      appMain.style.display = 'block';
+    } else {
+      // ── Licencia inactiva: mostrar pantalla de activación ───────────────
+      document.getElementById('hw-id-display').textContent = _licHardwareId;
+      document.getElementById('activacion-msg').textContent = d.mensaje || '';
+      const waMsg = encodeURIComponent(`Hola Sebastian, necesito activar mi licencia de Expediente Digital.\nMi Hardware ID es: ${_licHardwareId}`);
+      document.getElementById('wa-link').href = `https://wa.me/${WA_NUMBER}?text=${waMsg}`;
+      activacionScreen.style.display = 'flex';
+      appMain.style.display = 'none';
+    }
+  } catch {
+    // Sin conexión: mostrar aviso pero dejar la app accesible
+    banner.innerHTML = '⚠️ No se pudo verificar la licencia. Sin conexión al servidor.';
+    banner.className = 'lic-banner lic-warn';
+    banner.style.display = 'flex';
+    appMain.style.display = 'block';
+  }
+
+  // Escuchar evento custom del app.js cuando se completa un expediente
+  window.addEventListener('expediente-registrado', (e) => {
+    const n = e.detail?.total_mes;
+    if (n !== undefined) {
+      const hw = _licHardwareId;
+      const prueba = document.querySelector('.lic-banner .lic-prueba-tag') ? ' <span style="background:rgba(99,102,241,.18);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:.75rem">PRUEBA</span>' : '';
+      banner.innerHTML = `
+        <span style="font-weight:700;color:#22c55e">✅ Licencia activa${prueba} · <strong>${n}</strong> expediente${n === 1 ? '' : 's'} este mes</span>
+        <span class="lic-hw">
+          ID: <code>${hw}</code>
+          <button onclick="copyHwId()" title="Copiar Hardware ID">📋</button>
+        </span>`;
+    }
+  });
+})();
+</script>
 </body>
 </html>
