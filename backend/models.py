@@ -17,6 +17,7 @@ class FolioConfig(BaseModel):
     margin_top: float = 20.0
     margin_right: float = 30.0
     position: str = "top-right"  # top-right | top-left | bottom-right | bottom-left
+    foliar: bool = True
 
 
 class ProcessRequest(BaseModel):

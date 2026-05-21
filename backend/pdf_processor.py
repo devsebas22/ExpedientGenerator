@@ -1,6 +1,9 @@
 import re
 import logging
 import os
+import shutil
+import subprocess
+from pathlib import Path
 from typing import Callable
 
 import fitz  # PyMuPDF
@@ -15,14 +18,94 @@ def natural_sort_key(s: str) -> list:
 
 
 def get_page_count(file_path: str) -> int:
+    count, _ = analyze_pdf_file(file_path)
+    return count
+
+
+def analyze_pdf_file(file_path: str) -> tuple[int, str | None]:
+    """Returns (page_count, error_msg). page_count is -1 if the file can't be used."""
     try:
+        size = os.path.getsize(file_path)
+        if size == 0:
+            return -1, "Este archivo está vacío y no puede incluirse."
         doc = fitz.open(file_path)
+        if doc.is_encrypted:
+            if not doc.authenticate(""):
+                doc.close()
+                return -1, "Este archivo está protegido con contraseña. Desbloquéalo antes de subirlo."
         count = len(doc)
         doc.close()
-        return count
+        if count == 0:
+            return -1, "Este archivo no tiene páginas legibles."
+        return count, None
     except Exception as exc:
+        err_str = str(exc).lower()
+        if "password" in err_str or "encrypt" in err_str:
+            return -1, "Este archivo está protegido con contraseña. Desbloquéalo antes de subirlo."
         logger.error("Error leyendo %s: %s", file_path, exc)
-        return -1
+        return -1, "Este archivo está dañado y no puede leerse."
+
+
+def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
+    """Convert a JPEG/PNG/etc. image to a single-page PDF using Pillow."""
+    from PIL import Image
+    img = Image.open(src_path)
+    if img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+    img.save(dst_path, "PDF", resolution=150.0)
+    logger.info("Imagen convertida: '%s' → '%s'", os.path.basename(src_path), os.path.basename(dst_path))
+
+
+def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
+    """
+    Convert .docx to PDF. Tries LibreOffice first, then python-docx+reportlab.
+    Returns True on success, False if both fail.
+    """
+    # Try LibreOffice (available on Linux/WSL dev environments)
+    lo = shutil.which("libreoffice") or shutil.which("soffice")
+    if lo:
+        try:
+            out_dir = str(Path(dst_path).parent)
+            result = subprocess.run(
+                [lo, "--headless", "--convert-to", "pdf", "--outdir", out_dir, src_path],
+                capture_output=True, timeout=60,
+            )
+            if result.returncode == 0:
+                generated = Path(out_dir) / (Path(src_path).stem + ".pdf")
+                if generated.exists():
+                    generated.rename(dst_path)
+                    logger.info("DOCX convertido con LibreOffice: '%s'", os.path.basename(dst_path))
+                    return True
+        except Exception as exc:
+            logger.warning("LibreOffice no disponible: %s", exc)
+
+    # Fallback: python-docx + reportlab (basic text extraction)
+    try:
+        from docx import Document
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.units import inch
+
+        doc = Document(src_path)
+        pdf = SimpleDocTemplate(str(dst_path), pagesize=letter,
+                                leftMargin=inch, rightMargin=inch,
+                                topMargin=inch, bottomMargin=inch)
+        styles = getSampleStyleSheet()
+        story = []
+        for para in doc.paragraphs:
+            txt = para.text.strip()
+            if txt:
+                story.append(Paragraph(txt, styles["Normal"]))
+                story.append(Spacer(1, 4))
+        if not story:
+            story.append(Paragraph("(Documento sin contenido de texto visible)", styles["Normal"]))
+        pdf.build(story)
+        logger.info("DOCX convertido con reportlab: '%s'", os.path.basename(dst_path))
+        return True
+    except Exception as exc:
+        logger.warning("Conversión DOCX falló: %s", exc)
+        return False
 
 
 def merge_and_foliate(
@@ -70,29 +153,30 @@ def merge_and_foliate(
 
     total_pages = len(output_doc)
 
-    # ── Phase 2: foliate ──────────────────────────────────────────────────────
-    font_size   = float(config.get("font_size",   11))
-    margin_top  = float(config.get("margin_top",  20))
-    margin_right = float(config.get("margin_right", 30))
-    position    = config.get("position", "top-right")
+    # ── Phase 2: foliate (optional) ───────────────────────────────────────────
+    if config.get("foliar", True):
+        font_size    = float(config.get("font_size",    11))
+        margin_top   = float(config.get("margin_top",   20))
+        margin_right = float(config.get("margin_right", 30))
+        position     = config.get("position", "top-right")
 
-    for page_num in range(total_pages):
-        if page_num % 25 == 0 or page_num == total_pages - 1:
-            pct = 48 + ((page_num + 1) / total_pages) * 46
-            progress_cb(
-                f"Foliando página {page_num + 1} de {total_pages}", pct
-            )
-        try:
-            _stamp_folio(
-                output_doc[page_num],
-                page_num + 1,
-                font_size,
-                margin_top,
-                margin_right,
-                position,
-            )
-        except Exception as exc:
-            logger.warning("No se pudo foliar página %d: %s", page_num + 1, exc)
+        for page_num in range(total_pages):
+            if page_num % 25 == 0 or page_num == total_pages - 1:
+                pct = 48 + ((page_num + 1) / total_pages) * 46
+                progress_cb(f"Foliando página {page_num + 1} de {total_pages}", pct)
+            try:
+                _stamp_folio(
+                    output_doc[page_num],
+                    page_num + 1,
+                    font_size,
+                    margin_top,
+                    margin_right,
+                    position,
+                )
+            except Exception as exc:
+                logger.warning("No se pudo foliar página %d: %s", page_num + 1, exc)
+    else:
+        progress_cb("Sin foliación — omitiendo numeración…", 94)
 
     # ── Phase 3: save ─────────────────────────────────────────────────────────
     progress_cb("Guardando expediente…", 95)

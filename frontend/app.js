@@ -141,6 +141,20 @@ function setProcessing(on) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   File type helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+const _IMG_EXT  = new Set(["jpg","jpeg","png","gif","bmp","tiff","webp"]);
+const _WORD_EXT = new Set(["docx","doc"]);
+const _ALL_EXT  = new Set([..._IMG_EXT, ..._WORD_EXT, "pdf"]);
+
+function fileIcon(name) {
+  const ext = name.split(".").pop().toLowerCase();
+  if (_IMG_EXT.has(ext))  return "🖼️";
+  if (_WORD_EXT.has(ext)) return "📝";
+  return "📄";
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Render file list
    ═════════════════════════════════════════════════════════════════════════ */
 function renderList() {
@@ -149,16 +163,19 @@ function renderList() {
   files.forEach((f, i) => {
     const li = document.createElement("li");
     const isUploading = !!f.uploading;
+    const hasError    = !isUploading && f.pages <= 0;
 
-    li.className   = isUploading ? "file-item uploading-item" : "file-item";
-    li.draggable   = !isUploading;
-    li.dataset.id  = f.id;
+    li.className  = isUploading ? "file-item uploading-item"
+                  : hasError    ? "file-item error-item"
+                  : "file-item";
+    li.draggable  = !isUploading;
+    li.dataset.id = f.id;
 
     const pagesHtml = isUploading
       ? `<span class="pages-loading"><span class="spinner-sm"></span> subiendo…</span>`
       : f.pages > 0
         ? `<span class="pages-badge">${f.pages} págs.</span>`
-        : `<span class="err">⚠ Error leyendo</span>`;
+        : `<span class="err" title="${esc(f.error || '')}">⚠ ${esc(f.error || "Error leyendo")}</span>`;
 
     const removeBtn = isUploading
       ? `<span style="width:26px"></span>`
@@ -167,7 +184,7 @@ function renderList() {
     li.innerHTML = `
       <span class="handle" style="${isUploading ? "opacity:.3" : ""}">⠿</span>
       <span class="file-num">${i + 1}</span>
-      <span class="file-icon">📄</span>
+      <span class="file-icon">${fileIcon(f.name)}</span>
       <div class="file-info">
         <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
         <div class="file-meta">${pagesHtml}${esc(fmtSize(f.size))}</div>
@@ -363,14 +380,17 @@ async function uploadFile(file) {
 async function handleFileObjects(fileArray) {
   if (!fileArray.length) return;
 
-  const pdfs = fileArray.filter((f) => f.name.toLowerCase().endsWith(".pdf"));
-  const skipped = fileArray.length - pdfs.length;
-  if (skipped > 0) toast(`${skipped} archivo(s) ignorados (no son PDF)`, "warn");
-  if (!pdfs.length) return;
+  const supported = fileArray.filter((f) => {
+    const ext = f.name.split(".").pop().toLowerCase();
+    return _ALL_EXT.has(ext);
+  });
+  const skipped = fileArray.length - supported.length;
+  if (skipped > 0) toast(`${skipped} archivo(s) ignorados (tipo no compatible)`, "warn");
+  if (!supported.length) return;
 
   const existing = new Set(files.map((f) => f.name));
-  const toUpload = pdfs.filter((f) => !existing.has(f.name));
-  const dups = pdfs.length - toUpload.length;
+  const toUpload = supported.filter((f) => !existing.has(f.name));
+  const dups = supported.length - toUpload.length;
   if (dups > 0) toast(`${dups} ya cargados, omitidos`, "warn");
   if (!toUpload.length) return;
 
@@ -528,11 +548,13 @@ btnGenerate.addEventListener("click", generate);
 async function generate() {
   if (!files.length) return;
 
+  const foliar = document.getElementById("cfg-foliar").checked;
   const config = {
     font_size:    parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
     margin_top:   parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
     margin_right: parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
     position:     document.getElementById("cfg-position").value,
+    foliar,
   };
   const outputName = document.getElementById("cfg-output-name").value.trim();
 
@@ -718,6 +740,56 @@ async function callCountPages() {
 }
 
 document.getElementById("btn-recount").addEventListener("click", callCountPages);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Folio toggle + preview
+   ═════════════════════════════════════════════════════════════════════════ */
+function updateFolioPreview() {
+  const foliar     = document.getElementById("cfg-foliar").checked;
+  const options    = document.getElementById("foliar-options");
+  const previewSec = document.getElementById("folio-preview-section");
+  const numEl      = document.getElementById("folio-num-preview");
+  const infoEl     = document.getElementById("folio-preview-info");
+
+  options.style.display    = foliar ? "" : "none";
+  previewSec.style.display = foliar ? "" : "none";
+  if (!foliar) return;
+
+  const position = document.getElementById("cfg-position").value;
+  const fontSize = parseFloat(document.getElementById("cfg-fontsize").value)    || 11;
+  const mTop     = parseFloat(document.getElementById("cfg-margin-top").value)  || 20;
+  const mRight   = parseFloat(document.getElementById("cfg-margin-right").value)|| 30;
+
+  // Scale: preview page is ~85px wide vs real A4 ~595pt → factor ~0.143
+  const scale = 85 / 595;
+  numEl.style.fontSize = `${Math.max(7, Math.round(fontSize * scale * 6))}px`;
+  numEl.style.top      = position.startsWith("top")    ? `${Math.round(mTop   * scale)}px` : "auto";
+  numEl.style.bottom   = position.startsWith("bottom") ? `${Math.round(mTop   * scale)}px` : "auto";
+  numEl.style.right    = position.endsWith("right")    ? `${Math.round(mRight * scale)}px` : "auto";
+  numEl.style.left     = position.endsWith("left")     ? `${Math.round(mRight * scale)}px` : "auto";
+
+  const posLabel = {
+    "top-right":    "Arriba derecha",
+    "top-left":     "Arriba izquierda",
+    "bottom-right": "Abajo derecha",
+    "bottom-left":  "Abajo izquierda",
+  }[position] || position;
+
+  infoEl.innerHTML = `
+    <div class="folio-preview-row"><span>Posición</span><strong>${posLabel}</strong></div>
+    <div class="folio-preview-row"><span>Tamaño letra</span><strong>${fontSize} pt</strong></div>
+    <div class="folio-preview-row"><span>Márgenes</span><strong>${mTop} pt / ${mRight} pt</strong></div>
+  `;
+}
+
+["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right"].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("change", updateFolioPreview);
+    el.addEventListener("input",  updateFolioPreview);
+  }
+});
+updateFolioPreview();
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 renderList();

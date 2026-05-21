@@ -32,7 +32,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import CountRequest, FileInfo, FolderRequest, FolioConfig, ProcessRequest
-from .pdf_processor import get_page_count, merge_and_foliate, natural_sort_key
+from .pdf_processor import (
+    get_page_count, analyze_pdf_file, merge_and_foliate, natural_sort_key,
+    convert_image_to_pdf, convert_docx_to_pdf,
+)
 from .session_manager import SessionManager
 
 # ── Licencia ───────────────────────────────────────────────────────────────────
@@ -222,52 +225,95 @@ async def delete_session(session_id: str):
 # Upload
 # ═══════════════════════════════════════════════════════════════════════════════
 
+_IMAGE_EXT = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"}
+_WORD_EXT  = {".docx", ".doc"}
+_ALL_EXT   = {".pdf"} | _IMAGE_EXT | _WORD_EXT
+
+
 @app.post("/api/upload")
 async def upload_file(
     file: UploadFile = File(...),
     session_id: Optional[str] = Query(None, description="ID de sesión temporal"),
 ):
     """
-    Recibe un PDF y lo guarda en temp/session_<id>/<uuid>.pdf.
-    Si no se provee session_id (o es inválido/expirado), crea una nueva sesión.
+    Recibe PDF, imagen o Word y lo convierte a PDF si hace falta.
+    Guarda el resultado en temp/session_<id>/<uuid>.pdf.
     """
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(400, f"Solo se aceptan PDFs: {file.filename}")
+    ext = Path(file.filename).suffix.lower()
+    if ext not in _ALL_EXT:
+        raise HTTPException(
+            400,
+            f"Tipo de archivo no compatible: {file.filename}. "
+            "Soportados: PDF, JPEG, PNG y DOCX.",
+        )
 
-    # Crear sesión si no viene o está vencida
     if not session_id or not sessions.exists(session_id):
         session_id = sessions.create()
         logger.debug("[upload] sesión creada automáticamente: %s", session_id)
 
     file_id   = str(uuid.uuid4())
-    file_path = sessions.file_path(session_id, f"{file_id}.pdf")
+    orig_path = sessions.file_path(session_id, f"{file_id}{ext}")
+    pdf_path  = sessions.file_path(session_id, f"{file_id}.pdf")
 
     try:
-        async with aiofiles.open(str(file_path), "wb") as fh:
-            while chunk := await file.read(1024 * 1024):   # 1 MB chunks
+        # 1. Guardar el archivo original
+        async with aiofiles.open(str(orig_path), "wb") as fh:
+            while chunk := await file.read(1024 * 1024):
                 await fh.write(chunk)
 
-        pages = get_page_count(str(file_path))
+        # 2. Convertir si no es PDF
+        if ext in _IMAGE_EXT:
+            try:
+                convert_image_to_pdf(str(orig_path), str(pdf_path))
+            finally:
+                if orig_path.exists():
+                    orig_path.unlink()
+
+        elif ext in _WORD_EXT:
+            orig_path.unlink() if orig_path == pdf_path else None
+            ok = convert_docx_to_pdf(str(orig_path), str(pdf_path))
+            if orig_path.exists():
+                orig_path.unlink()
+            if not ok:
+                info = FileInfo(
+                    id=file_id, name=file.filename,
+                    size=0, pages=-1, path="",
+                    session_id=session_id,
+                    error="No se pudo convertir el archivo Word. Por favor conviértalo a PDF manualmente.",
+                )
+                return info
+
+        else:
+            # PDF: orig_path ya tiene extensión .pdf, son la misma ruta
+            pdf_path = orig_path
+
+        # 3. Analizar el PDF resultante
+        pages, error_msg = analyze_pdf_file(str(pdf_path))
 
         info = FileInfo(
             id         = file_id,
             name       = file.filename,
-            size       = file_path.stat().st_size,
+            size       = pdf_path.stat().st_size if pdf_path.exists() else 0,
             pages      = pages,
-            path       = str(file_path),
+            path       = str(pdf_path) if pdf_path.exists() else "",
             session_id = session_id,
-            error      = "No se pudo leer el PDF" if pages == -1 else None,
+            error      = error_msg,
         )
-        uploaded_files[file_id] = info
+        if pages > 0:
+            uploaded_files[file_id] = info
         logger.info(
             "[upload] '%s' → sesión %.8s… | %d págs. | %.1f MB",
-            file.filename, session_id, pages, info.size / 1_048_576,
+            file.filename, session_id, pages,
+            (pdf_path.stat().st_size if pdf_path.exists() else 0) / 1_048_576,
         )
         return info
 
+    except HTTPException:
+        raise
     except Exception as exc:
-        if file_path.exists():
-            file_path.unlink()
+        for p in (orig_path, pdf_path):
+            if p.exists():
+                p.unlink()
         logger.error("[upload] error subiendo '%s': %s", file.filename, exc)
         raise HTTPException(500, str(exc))
 

@@ -109,7 +109,19 @@
   <!-- ── Settings ───────────────────────────────────────────────────────── -->
   <div class="card">
     <div class="card-title">Configuración del foliado</div>
-    <div class="settings-grid">
+
+    <!-- Toggle de foliación -->
+    <div class="foliar-toggle-wrap">
+      <label class="foliar-toggle-label">
+        <input type="checkbox" id="cfg-foliar" checked />
+        <span class="foliar-toggle-track">
+          <span class="foliar-toggle-thumb"></span>
+        </span>
+        <span class="foliar-toggle-text">Agregar foliación al expediente</span>
+      </label>
+    </div>
+
+    <div class="settings-grid" id="foliar-options">
 
       <div class="field">
         <label>Posición del folio</label>
@@ -136,12 +148,28 @@
         <input type="number" id="cfg-margin-right" value="30" min="5" max="150" />
       </div>
 
+    </div>
+
+    <!-- Vista previa del folio -->
+    <div id="folio-preview-section">
+      <div class="folio-preview-label">Vista previa</div>
+      <div class="folio-preview-wrap">
+        <div class="folio-page" id="folio-page">
+          <div class="folio-dot-lines">
+            <div></div><div></div><div></div>
+          </div>
+          <div class="folio-num-preview" id="folio-num-preview">001</div>
+        </div>
+        <div class="folio-preview-info" id="folio-preview-info"></div>
+      </div>
+    </div>
+
+    <div class="settings-grid" style="margin-top:.75rem">
       <div class="field" style="grid-column: 1 / -1;">
         <label>Nombre del expediente (opcional)</label>
         <input type="text" id="cfg-output-name"
                placeholder="Se genera automáticamente: expediente_2026_05_05_1530.pdf" />
       </div>
-
     </div>
   </div>
 
@@ -192,8 +220,12 @@
 </main>
 
 <!-- hidden inputs -->
-<input type="file" id="file-input"   accept=".pdf" multiple hidden />
-<input type="file" id="folder-input" accept=".pdf" webkitdirectory multiple hidden />
+<input type="file" id="file-input"
+       accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc"
+       multiple hidden />
+<input type="file" id="folder-input"
+       accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc"
+       webkitdirectory multiple hidden />
 
 <div id="toast-container"></div>
 
