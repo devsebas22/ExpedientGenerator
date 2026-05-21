@@ -45,13 +45,39 @@ def analyze_pdf_file(file_path: str) -> tuple[int, str | None]:
 
 
 def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
-    """Convert a JPEG/PNG/etc. image to a single-page PDF using Pillow."""
+    """
+    Convert a JPEG/PNG/etc. image to a single-page A4 PDF.
+
+    Scaling is pixel-based: DPI metadata is ignored entirely.
+    Every image is fitted within a 515×762 pt content area (A4 with ~40 pt margins)
+    and centered on a 595×842 pt page, so page size is always consistent.
+    """
+    import io
     from PIL import Image
-    img = Image.open(src_path)
-    if img.mode not in ("RGB", "L"):
-        img = img.convert("RGB")
-    img.save(dst_path, "PDF", resolution=150.0)
-    logger.info("Imagen convertida: '%s' → '%s'", os.path.basename(src_path), os.path.basename(dst_path))
+
+    with Image.open(src_path) as img:
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
+        img_w, img_h = img.size          # pixel dimensions — ignore DPI
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")      # lossless round-trip for fitz
+        img_bytes = buf.getvalue()
+
+    # Fit within 515×762 pt content area (A4 minus ~40 pt margins each side)
+    ratio = min(515 / img_w, 762 / img_h)
+    new_w = img_w * ratio
+    new_h = img_h * ratio
+
+    # Create A4 page (595×842 pt) and center the scaled image
+    doc  = fitz.open()
+    page = doc.new_page(width=595, height=842)
+    x0   = (595 - new_w) / 2
+    y0   = (842 - new_h) / 2
+    page.insert_image(fitz.Rect(x0, y0, x0 + new_w, y0 + new_h), stream=img_bytes)
+    doc.save(dst_path, garbage=3, deflate=True)
+    doc.close()
+    logger.info("Imagen convertida: '%s' → %dx%d px → %.0f×%.0f pt en A4",
+                os.path.basename(src_path), img_w, img_h, new_w, new_h)
 
 
 def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
