@@ -389,3 +389,152 @@
 2026-05-06 01:23:37,283 [INFO] backend.session_manager: [session] eliminada → df273b21-ad4f-43d5-ae18-986a577efae2
 2026-05-06 01:23:37,283 [INFO] backend.main: [tarea bb3a2b60-05c5-4784-a235-65198ae38eef] limpieza — 1 sesión(es) | 1 registro(s) en memoria
 2026-05-06 01:24:46,799 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-06 01:32:14,660 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-11 19:28:24,033 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-11 19:28:24,043 [INFO] backend.session_manager: [session] obsoleta eliminada → session_8ea31b9a-6b1b-4217-950c-2f209d9f45ff
+2026-05-11 19:28:24,043 [INFO] backend.main: [inicio] 1 sesión(es) obsoleta(s) eliminada(s)
+2026-05-11 19:28:24,048 [ERROR] uvicorn.error: [Errno 98] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+2026-05-11 19:28:39,688 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-11 19:28:39,696 [ERROR] uvicorn.error: [Errno 98] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+2026-05-11 19:28:55,520 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-11 19:29:09,644 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-11 19:29:09,654 [ERROR] uvicorn.error: [Errno 98] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+2026-05-13 11:19:53,897 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-13 11:26:05,436 [INFO] backend.session_manager: [session] creada  → a3dc3df7-480f-47b7-bd68-03e3849040d8
+2026-05-13 11:26:05,437 [INFO] backend.main: [session] nueva sesión: a3dc3df7-480f-47b7-bd68-03e3849040d8
+2026-05-13 11:26:05,443 [INFO] backend.session_manager: [session] creada  → 38275fc8-4550-4f6c-ad71-d96a8127e49c
+2026-05-13 11:26:05,444 [INFO] backend.main: [session] nueva sesión: 38275fc8-4550-4f6c-ad71-d96a8127e49c
+2026-05-13 11:26:05,448 [INFO] backend.session_manager: [session] creada  → aa8cb434-71c1-4c26-9ad9-718bd2cfd3f3
+2026-05-13 11:26:05,448 [INFO] backend.main: [session] nueva sesión: aa8cb434-71c1-4c26-9ad9-718bd2cfd3f3
+2026-05-13 11:26:05,452 [INFO] backend.session_manager: [session] creada  → e71a680e-9b9d-4388-b393-5e1017d21746
+2026-05-13 11:26:05,452 [INFO] backend.main: [session] nueva sesión: e71a680e-9b9d-4388-b393-5e1017d21746
+2026-05-13 11:26:05,731 [INFO] backend.main: [upload] 'AUTO DE ADMISIÓN NOLBERTO LOPEZ RIASCOS .pdf' → sesión 38275fc8… | 7 págs. | 0.4 MB
+2026-05-13 11:26:05,132 [INFO] backend.main: [upload] 'SOLICITUD NORBERTO LOPEZ.pdf' → sesión a3dc3df7… | 19 págs. | 5.4 MB
+2026-05-13 11:26:05,147 [INFO] backend.main: [upload] 'SOLICITUD LEIDY JOHANA CHOQUE (1).pdf' → sesión e71a680e… | 179 págs. | 5.9 MB
+2026-05-13 11:26:05,158 [INFO] backend.main: [upload] 'SOLICITUD LEIDY JOHANA CHOQUE.pdf' → sesión aa8cb434… | 179 págs. | 6.6 MB
+2026-05-13 11:26:03,777 [INFO] backend.main: [upload] 'document.pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:03,787 [INFO] backend.main: [upload] 'document (9).pdf' → sesión aa8cb434… | 3 págs. | 0.7 MB
+2026-05-13 11:26:03,807 [INFO] backend.main: [upload] 'Notes_260511_193534.pdf' → sesión aa8cb434… | 2 págs. | 0.3 MB
+2026-05-13 11:26:03,834 [INFO] backend.main: [upload] 'SOLICITUD ALEXANDER DIAZ RIAÑO.pdf' → sesión aa8cb434… | 41 págs. | 2.1 MB
+2026-05-13 11:26:03,926 [INFO] backend.main: [upload] 'document (8).pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:03,933 [INFO] backend.main: [upload] 'document (5).pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:03,963 [INFO] backend.main: [upload] 'document (7).pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:03,968 [INFO] backend.main: [upload] 'document (6).pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:04,017 [INFO] backend.main: [upload] 'document (1).pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:04,052 [INFO] backend.main: [upload] 'document (3).pdf' → sesión aa8cb434… | 4 págs. | 0.1 MB
+2026-05-13 11:26:04,060 [INFO] backend.main: [upload] 'document (4).pdf' → sesión aa8cb434… | 4 págs. | 0.1 MB
+2026-05-13 11:26:04,068 [INFO] backend.main: [upload] 'document (2).pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:04,134 [INFO] backend.main: [upload] 'TARJETA CARRO.pdf' → sesión aa8cb434… | 2 págs. | 0.1 MB
+2026-05-13 11:26:04,141 [INFO] backend.main: [upload] 'AUTO 6 MARTHA LUCIA BARRIOS DUQUE.pdf' → sesión aa8cb434… | 13 págs. | 0.6 MB
+2026-05-13 11:26:04,162 [INFO] backend.main: [upload] '31266@Documento de solicitud sin aceptacion.pdf' → sesión aa8cb434… | 23 págs. | 0.2 MB
+2026-05-13 11:26:04,173 [INFO] backend.main: [upload] 'SUFI.pdf' → sesión aa8cb434… | 1 págs. | 0.6 MB
+2026-05-13 11:26:04,309 [INFO] backend.main: [upload] 'SUELDO.pdf' → sesión aa8cb434… | 1 págs. | 0.0 MB
+2026-05-13 11:26:04,401 [INFO] backend.main: [upload] 'SOLICITUDES NORBERTO LOPEZ (1).pdf' → sesión aa8cb434… | 19 págs. | 2.3 MB
+2026-05-13 11:26:04,424 [INFO] backend.main: [upload] 'SOLICITUD NOLBERTO LOPEZ RIASCOS.pdf' → sesión aa8cb434… | 19 págs. | 2.8 MB
+2026-05-13 11:26:04,504 [INFO] backend.main: [upload] 'SOLICITUDES NORBERTO LOPEZ.pdf' → sesión aa8cb434… | 19 págs. | 5.4 MB
+2026-05-13 11:26:04,616 [INFO] backend.main: [upload] 'SOLICITUD INSOLVENCIA.pdf' → sesión aa8cb434… | 8 págs. | 0.2 MB
+2026-05-13 11:26:04,633 [INFO] backend.main: [upload] 'puertosAI.pdf' → sesión aa8cb434… | 4 págs. | 0.1 MB
+2026-05-13 11:26:04,724 [INFO] backend.main: [upload] 'SOLICITU ALBA YANETH PALACIO DIAZ C.C. 24394762.pdf' → sesión aa8cb434… | 324 págs. | 3.6 MB
+2026-05-13 11:26:04,779 [INFO] backend.main: [upload] 'SOLICITUD LEIDY JHOJANA CHOQUE JIMENEZ C.C. 1094904734.pdf' → sesión aa8cb434… | 179 págs. | 6.6 MB
+2026-05-13 11:26:04,832 [INFO] backend.main: [upload] 'POSTER ARMENIA 2026-1.pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:04,891 [INFO] backend.main: [upload] 'PODER.pdf' → sesión aa8cb434… | 3 págs. | 1.0 MB
+2026-05-13 11:26:04,919 [INFO] backend.main: [upload] 'Politicas de Membrecías ACONES - Versión # 3..pdf' → sesión aa8cb434… | 10 págs. | 1.4 MB
+2026-05-13 11:26:05,047 [INFO] backend.main: [upload] 'PRUEBA PARA CAMI.pdf' → sesión aa8cb434… | 191 págs. | 6.6 MB
+2026-05-13 11:26:05,111 [INFO] backend.main: [upload] 'IMPUESTO PREDIAL.pdf' → sesión aa8cb434… | 1 págs. | 0.0 MB
+2026-05-13 11:26:05,116 [INFO] backend.main: [upload] 'OF SUSPENSIÓN JUAN CARLOS CAMARGO GUTIERREZ.pdf' → sesión aa8cb434… | 3 págs. | 0.2 MB
+2026-05-13 11:26:05,121 [INFO] backend.main: [upload] 'FOTOCOPIA_CEDULA_ELKIN.pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:05,139 [INFO] backend.main: [upload] 'OF SUSPENSIÓN JUAN CARLOS CAMARGO GUTIERREZ-1-3.pdf' → sesión aa8cb434… | 3 págs. | 0.2 MB
+2026-05-13 11:26:05,221 [INFO] backend.main: [upload] 'EXTRACTO BANCARIO davivienda .pdf' → sesión aa8cb434… | 2 págs. | 0.8 MB
+2026-05-13 11:26:05,244 [INFO] backend.main: [upload] 'EXTRACTO SERFINANZA.pdf' → sesión aa8cb434… | 2 págs. | 0.6 MB
+2026-05-13 11:26:06,338 [INFO] backend.main: [upload] 'expediente_2026_05_05_2352.pdf' → sesión aa8cb434… | 936 págs. | 29.4 MB
+2026-05-13 11:26:07,288 [INFO] backend.main: [upload] 'EXPEDIENTE DIEGO ANDRES MEDINA.pdf' → sesión aa8cb434… | 343 págs. | 85.6 MB
+2026-05-13 11:26:07,372 [INFO] backend.main: [upload] 'COMPROBANTE DE AFECTACION A MI ECONOMIA POR EMERGENCIA SANITARIA.pdf' → sesión aa8cb434… | 1 págs. | 0.0 MB
+2026-05-13 11:26:07,377 [INFO] backend.main: [upload] 'CERTIFICADO DE TRADICION.pdf' → sesión aa8cb434… | 3 págs. | 0.1 MB
+2026-05-13 11:26:07,414 [INFO] backend.main: [upload] 'COMPROBANDE DE SUELDO.pdf' → sesión aa8cb434… | 1 págs. | 0.0 MB
+2026-05-13 11:26:07,417 [INFO] backend.main: [upload] 'CERTIFICADO REDAM.pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:07,456 [INFO] backend.main: [upload] 'CERTIFICADO DE EXISTENCIA SERFINANZA.pdf' → sesión aa8cb434… | 3 págs. | 0.2 MB
+2026-05-13 11:26:07,487 [INFO] backend.main: [upload] 'CERTIFICADO DE EXISTENCIA DAVIVIENDA.pdf' → sesión aa8cb434… | 9 págs. | 0.4 MB
+2026-05-13 11:26:07,495 [INFO] backend.main: [upload] 'CERTIFICADO DE EXISTENCIA BANCOLOMBIA.pdf' → sesión aa8cb434… | 17 págs. | 0.7 MB
+2026-05-13 11:26:07,540 [INFO] backend.main: [upload] 'CERTIFICADO DE EXISTENCIA ALCALDIA.pdf' → sesión aa8cb434… | 314 págs. | 2.3 MB
+2026-05-13 11:26:07,574 [INFO] backend.main: [upload] 'CERT9F9CAD0 DEUDA.pdf' → sesión aa8cb434… | 2 págs. | 0.0 MB
+2026-05-13 11:26:07,613 [INFO] backend.main: [upload] 'CEDULA.pdf' → sesión aa8cb434… | 2 págs. | 0.1 MB
+2026-05-13 11:26:07,623 [INFO] backend.main: [upload] 'CEDULA (2).pdf' → sesión aa8cb434… | 2 págs. | 0.1 MB
+2026-05-13 11:26:07,630 [INFO] backend.main: [upload] 'CASO ARCHIVADO A FAVOR.pdf' → sesión aa8cb434… | 3 págs. | 0.3 MB
+2026-05-13 11:26:07,682 [INFO] backend.main: [upload] 'AUTO_3_MARIA_ARGENIS_PUENTES_CULMA.pdf' → sesión aa8cb434… | 3 págs. | 0.2 MB
+2026-05-13 11:26:07,686 [INFO] backend.main: [upload] '1.pdf' → sesión aa8cb434… | 1 págs. | 0.3 MB
+2026-05-13 11:26:07,714 [INFO] backend.main: [upload] 'PDF prueba.pdf' → sesión aa8cb434… | 1 págs. | 1.0 MB
+2026-05-13 11:26:07,716 [INFO] backend.main: [upload] '1. ENLACE DE LA SOLICITUD.pdf' → sesión aa8cb434… | 1 págs. | 0.1 MB
+2026-05-13 11:26:07,818 [INFO] backend.main: [upload] 'Ajustes NegociarPro docx.pdf' → sesión aa8cb434… | 11 págs. | 0.8 MB
+2026-05-13 11:26:07,834 [INFO] backend.main: [upload] 'HOJA DE VIDA SEBAS 2026.pdf.pdf' → sesión aa8cb434… | 1 págs. | 0.2 MB
+2026-05-13 11:26:07,887 [INFO] backend.main: [upload] 'NEGOCIAR PRO SEGUNDA ETAPA.pdf' → sesión aa8cb434… | 5 págs. | 3.9 MB
+2026-05-13 11:26:07,891 [INFO] backend.main: [upload] 'NegociarPro Proceso Administrativo.pdf' → sesión aa8cb434… | 13 págs. | 4.0 MB
+2026-05-13 11:26:53,202 [INFO] backend.main: [tarea 0ef6e427-aa02-443b-b510-0203e97b773e] inicio del procesamiento
+2026-05-13 11:26:53,202 [INFO] backend.main: [proceso] tarea 0ef6e427-aa02-443b-b510-0203e97b773e iniciada — 60 archivo(s) → 'EXPEDIENTE ANDRES DIAZ ACEVEDO.pdf' | sesiones: ['e71a680e…', '38275fc8…', 'a3dc3df7…', 'aa8cb434…']
+2026-05-13 11:26:53,214 [INFO] backend.pdf_processor: Fusionado '343928b5-7129-4e6a-a744-a69590ad5c45.pdf'  1 págs.
+2026-05-13 11:26:53,219 [INFO] backend.pdf_processor: Fusionado '56333fad-00d4-4079-98c2-18615e1c2ccf.pdf'  1 págs.
+2026-05-13 11:26:53,224 [INFO] backend.pdf_processor: Fusionado '0a26c0b2-8a81-4b98-bf7b-db99b95c0c98.pdf'  23 págs.
+2026-05-13 11:26:53,234 [INFO] backend.pdf_processor: Fusionado '2730756e-7733-4113-9c1c-904f987ee5d4.pdf'  11 págs.
+2026-05-13 11:26:53,243 [INFO] backend.pdf_processor: Fusionado '5146caae-5aad-4ca4-9e83-cd98f67e1158.pdf'  13 págs.
+2026-05-13 11:26:53,259 [INFO] backend.pdf_processor: Fusionado 'ded7df6f-b343-4ba2-ba75-5b1c50bea405.pdf'  7 págs.
+2026-05-13 11:26:53,263 [INFO] backend.pdf_processor: Fusionado '2de18a06-9164-47f1-86e8-81075ebc3da0.pdf'  3 págs.
+2026-05-13 11:26:53,272 [INFO] backend.pdf_processor: Fusionado 'e22beb3c-e6b2-4107-a0e3-076f00ccef23.pdf'  3 págs.
+2026-05-13 11:26:53,275 [INFO] backend.pdf_processor: Fusionado '3d5a028b-dadb-4b91-b76f-a87c2ef6a8c1.pdf'  2 págs.
+2026-05-13 11:26:53,277 [INFO] backend.pdf_processor: Fusionado '02194a7d-c547-4dfc-8890-8f79c1a115bd.pdf'  2 págs.
+2026-05-13 11:26:53,279 [INFO] backend.pdf_processor: Fusionado 'be76eb90-976a-4e36-928d-3dd45a15c99a.pdf'  2 págs.
+2026-05-13 11:26:53,350 [INFO] backend.pdf_processor: Fusionado '1c8c6bd0-33bb-4c32-99f2-be5ee60fcd4b.pdf'  314 págs.
+2026-05-13 11:26:53,373 [INFO] backend.pdf_processor: Fusionado '9f5c10f3-0c3c-4209-855e-98689890857f.pdf'  17 págs.
+2026-05-13 11:26:53,386 [INFO] backend.pdf_processor: Fusionado 'cc4d2ed6-295a-49ce-a2f8-e0d15c19ccca.pdf'  9 págs.
+2026-05-13 11:26:53,391 [INFO] backend.pdf_processor: Fusionado '1352304a-3d1b-43e0-96b7-343e5ef1f16b.pdf'  3 págs.
+2026-05-13 11:26:53,396 [INFO] backend.pdf_processor: Fusionado 'f6fdb054-26d8-42ee-acc0-008ecb14d4dc.pdf'  3 págs.
+2026-05-13 11:26:53,398 [INFO] backend.pdf_processor: Fusionado '1496d8b9-06d0-421f-b31f-b3c8ebc3e16f.pdf'  1 págs.
+2026-05-13 11:26:53,400 [INFO] backend.pdf_processor: Fusionado 'ab40bffc-f514-4c83-9ee0-9c7b4ca501e9.pdf'  1 págs.
+2026-05-13 11:26:53,401 [INFO] backend.pdf_processor: Fusionado 'b34c801c-2411-4a83-b890-dcdf6b692462.pdf'  1 págs.
+2026-05-13 11:26:53,404 [INFO] backend.pdf_processor: Fusionado 'bdc69ec6-3a24-4b9c-b899-73a283b7382c.pdf'  1 págs.
+2026-05-13 11:26:53,407 [INFO] backend.pdf_processor: Fusionado '052d5d37-fa51-4388-b15d-999d7ff2135a.pdf'  1 págs.
+2026-05-13 11:26:53,411 [INFO] backend.pdf_processor: Fusionado 'bf0a9dd2-56d1-4dd2-b20b-2693dc4527ed.pdf'  4 págs.
+2026-05-13 11:26:53,416 [INFO] backend.pdf_processor: Fusionado 'bdb6c74c-64de-4128-9235-7bdb50e35b1a.pdf'  4 págs.
+2026-05-13 11:26:53,420 [INFO] backend.pdf_processor: Fusionado '53f6e788-6041-4c2e-850f-86d2d484b6c7.pdf'  1 págs.
+2026-05-13 11:26:53,422 [INFO] backend.pdf_processor: Fusionado '0eeac315-6ae9-4eb1-b46b-c0ed3b126f77.pdf'  1 págs.
+2026-05-13 11:26:53,424 [INFO] backend.pdf_processor: Fusionado '0a3ac084-7674-4ef5-a63c-71d26e6f0203.pdf'  1 págs.
+2026-05-13 11:26:53,426 [INFO] backend.pdf_processor: Fusionado 'cc9cdf6d-946b-4c2a-9c26-c5bcc91ec3df.pdf'  1 págs.
+2026-05-13 11:26:53,436 [INFO] backend.pdf_processor: Fusionado 'b776ccc1-74ff-4581-aa06-f6f3e8d7c23e.pdf'  3 págs.
+2026-05-13 11:26:53,439 [INFO] backend.pdf_processor: Fusionado '1113085b-b22b-4e75-8c19-5e70da050e39.pdf'  1 págs.
+2026-05-13 11:26:53,970 [INFO] backend.pdf_processor: Fusionado '0077e2e3-f0ff-4161-8884-d40f33661196.pdf'  343 págs.
+2026-05-13 11:26:54,453 [INFO] backend.pdf_processor: Fusionado '460453b9-d91c-4d7f-9bb3-4a5d02c5b0c2.pdf'  936 págs.
+2026-05-13 11:26:54,466 [INFO] backend.pdf_processor: Fusionado '478e0212-54e8-4164-bb49-8a7363b7d04a.pdf'  2 págs.
+2026-05-13 11:26:54,499 [INFO] backend.pdf_processor: Fusionado 'b48e3d6c-2f81-4846-8259-bc8bb4d9bfcc.pdf'  2 págs.
+2026-05-13 11:26:54,502 [INFO] backend.pdf_processor: Fusionado 'f41dfb24-27ad-4e67-af23-e0a5d4094bdb.pdf'  1 págs.
+2026-05-13 11:26:54,508 [INFO] backend.pdf_processor: Fusionado '01601b58-9385-4a98-8515-981a1d8a698d.pdf'  1 págs.
+2026-05-13 11:26:54,510 [INFO] backend.pdf_processor: Fusionado '59024b96-5eb5-486d-8129-9c1876720364.pdf'  1 págs.
+2026-05-13 11:26:54,539 [INFO] backend.pdf_processor: Fusionado '876c8cfc-c364-4193-8295-3e58390fb009.pdf'  5 págs.
+2026-05-13 11:26:54,568 [INFO] backend.pdf_processor: Fusionado '1d6040bc-44f5-4430-990a-5d91262dddb3.pdf'  13 págs.
+2026-05-13 11:26:54,573 [INFO] backend.pdf_processor: Fusionado '37e5030a-70b4-43cc-9b17-336572765ca2.pdf'  2 págs.
+2026-05-13 11:26:54,582 [INFO] backend.pdf_processor: Fusionado 'c61a3aa2-5e8c-49a9-b11c-eed6714d156e.pdf'  3 págs.
+2026-05-13 11:26:54,592 [INFO] backend.pdf_processor: Fusionado '881165ef-981e-4705-9304-d437f26b40c7.pdf'  3 págs.
+2026-05-13 11:26:54,603 [INFO] backend.pdf_processor: Fusionado '2bba7628-c976-4cbd-929b-889bef5553da.pdf'  1 págs.
+2026-05-13 11:26:54,617 [INFO] backend.pdf_processor: Fusionado 'eb6c5e67-4fff-4898-ab9f-72dc01a368c8.pdf'  3 págs.
+2026-05-13 11:26:54,642 [INFO] backend.pdf_processor: Fusionado '0696d43c-7fd3-4e0e-af2b-ea7e2041f8b0.pdf'  10 págs.
+2026-05-13 11:26:54,649 [INFO] backend.pdf_processor: Fusionado '019f83ca-1570-45c0-8e89-e91adb7c7948.pdf'  1 págs.
+2026-05-13 11:26:54,778 [INFO] backend.pdf_processor: Fusionado '9b195822-7b4a-49e9-a881-2573f7f8bbb9.pdf'  191 págs.
+2026-05-13 11:26:54,784 [INFO] backend.pdf_processor: Fusionado '4c3b4a40-c8cb-494c-a279-d4b28ed291b2.pdf'  4 págs.
+2026-05-13 11:26:55,006 [INFO] backend.pdf_processor: Fusionado 'cfa7f3e2-9950-46c0-8bcf-2b34ef749a7f.pdf'  324 págs.
+2026-05-13 11:26:55,045 [INFO] backend.pdf_processor: Fusionado 'f3c3fe35-6bd6-4d85-9404-00d95e3b9428.pdf'  41 págs.
+2026-05-13 11:26:55,051 [INFO] backend.pdf_processor: Fusionado 'c1055372-21d9-49a8-9909-4702983dc115.pdf'  8 págs.
+2026-05-13 11:26:55,196 [INFO] backend.pdf_processor: Fusionado 'c759fb08-634f-472e-8287-66f653223cb0.pdf'  179 págs.
+2026-05-13 11:26:55,327 [INFO] backend.pdf_processor: Fusionado '612b0ef3-1445-40f6-8b65-2af170d9c755.pdf'  179 págs.
+2026-05-13 11:26:55,449 [INFO] backend.pdf_processor: Fusionado 'f1f6f7d0-86e2-45fb-904c-b4917db96173.pdf'  179 págs.
+2026-05-13 11:26:55,475 [INFO] backend.pdf_processor: Fusionado '2dd93c78-503b-45b6-bf11-1c3cd2157e68.pdf'  19 págs.
+2026-05-13 11:26:55,566 [INFO] backend.pdf_processor: Fusionado '3e5bcf61-8c62-4659-99a0-63cc17f40c7a.pdf'  19 págs.
+2026-05-13 11:26:55,595 [INFO] backend.pdf_processor: Fusionado '4fcd0f08-fdc9-4e91-b89e-cebf008663e7.pdf'  19 págs.
+2026-05-13 11:26:55,704 [INFO] backend.pdf_processor: Fusionado '4907e8e4-e727-48b9-92c0-672a4492bcc9.pdf'  19 págs.
+2026-05-13 11:26:55,707 [INFO] backend.pdf_processor: Fusionado '42f33a95-360e-4f66-8a4c-a411367e0adc.pdf'  1 págs.
+2026-05-13 11:26:55,713 [INFO] backend.pdf_processor: Fusionado 'de2d7435-d70e-44bc-a1dd-47f3219f355b.pdf'  1 págs.
+2026-05-13 11:26:55,716 [INFO] backend.pdf_processor: Fusionado 'dbd2988f-2422-4ab1-99c5-585beeef5ebc.pdf'  2 págs.
+2026-05-13 11:27:58,658 [INFO] backend.pdf_processor: Guardado en '/home/smogo/expediente/expedientes_generados/EXPEDIENTE ANDRES DIAZ ACEVEDO.pdf'  2947 págs.  0 fallos.
+2026-05-13 11:27:58,659 [INFO] backend.main: [tarea 0ef6e427-aa02-443b-b510-0203e97b773e] completada — 2947 págs. | 0 fallo(s)
+2026-05-13 11:27:58,670 [INFO] backend.session_manager: [session] eliminada → e71a680e-9b9d-4388-b393-5e1017d21746
+2026-05-13 11:27:58,671 [INFO] backend.session_manager: [session] eliminada → 38275fc8-4550-4f6c-ad71-d96a8127e49c
+2026-05-13 11:27:58,678 [INFO] backend.session_manager: [session] eliminada → a3dc3df7-480f-47b7-bd68-03e3849040d8
+2026-05-13 11:27:58,817 [INFO] backend.session_manager: [session] eliminada → aa8cb434-71c1-4c26-9ad9-718bd2cfd3f3
+2026-05-13 11:27:58,817 [INFO] backend.main: [tarea 0ef6e427-aa02-443b-b510-0203e97b773e] limpieza — 4 sesión(es) | 60 registro(s) en memoria
+2026-05-13 11:33:17,998 [INFO] backend.main: [cleanup] 0 archivo(s) y 0 sesión(es) eliminadas
