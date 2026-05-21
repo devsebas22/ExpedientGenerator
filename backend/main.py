@@ -16,7 +16,10 @@ import os
 import platform
 import re
 import shutil
+import subprocess
 import sys
+import tempfile
+import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
@@ -30,6 +33,7 @@ from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from .models import CountRequest, FileInfo, FolderRequest, FolioConfig, ProcessRequest
 from .pdf_processor import (
@@ -38,8 +42,9 @@ from .pdf_processor import (
 )
 from .session_manager import SessionManager
 
-# ── Licencia ───────────────────────────────────────────────────────────────────
+# ── Versión y servidor de licencias ───────────────────────────────────────────
 _LICENSE_SERVER = "https://expediente-licencias-production.up.railway.app"
+VERSION_ACTUAL  = "1.0.0"
 import time as _time
 
 
@@ -617,6 +622,125 @@ async def cleanup():
         file_count, len(session_ids),
     )
     return {"files_removed": file_count, "sessions_removed": len(session_ids)}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Auto-update
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _version_gt(v1: str, v2: str) -> bool:
+    """Returns True if version string v1 is greater than v2 (semver comparison)."""
+    try:
+        return tuple(int(x) for x in v1.split(".")) > tuple(int(x) for x in v2.split("."))
+    except Exception:
+        return False
+
+
+_update_job: dict = {"status": "idle", "progress": 0, "path": "", "error": ""}
+
+
+@app.get("/api/update/check")
+async def update_check():
+    """Compare VERSION_ACTUAL against the latest version on the license server."""
+    try:
+        resp = _requests.get(f"{_LICENSE_SERVER}/api/version/latest", timeout=5)
+        data = resp.json()
+        version_nueva = data.get("version")
+        if not version_nueva:
+            return {"disponible": False}
+        if _version_gt(version_nueva, VERSION_ACTUAL):
+            return {
+                "disponible":     True,
+                "version_actual": VERSION_ACTUAL,
+                "version_nueva":  version_nueva,
+                "url":            data.get("url_descarga", ""),
+                "obligatoria":    data.get("es_obligatoria", False),
+                "notas":          data.get("notas", ""),
+            }
+        return {"disponible": False}
+    except Exception as exc:
+        logger.warning("[update] check falló: %s", exc)
+        return {"disponible": False}
+
+
+class UpdateStartRequest(BaseModel):
+    url: str
+
+
+@app.post("/api/update/start")
+async def update_start(req: UpdateStartRequest):
+    """Begin background download of the new .exe."""
+    if _update_job.get("status") == "downloading":
+        return {"ok": True, "msg": "ya en curso"}
+    _update_job.update(status="downloading", progress=0, path="", error="")
+    loop = asyncio.get_running_loop()
+    asyncio.ensure_future(loop.run_in_executor(executor, _download_update, req.url))
+    return {"ok": True}
+
+
+def _download_update(url: str) -> None:
+    import urllib.request
+    try:
+        dst = str(_BASE / "ExpedienteDigital_new.exe")
+
+        def _hook(count, block_size, total_size):
+            if total_size > 0:
+                pct = min(99, int(count * block_size * 100 / total_size))
+                _update_job["progress"] = pct
+
+        urllib.request.urlretrieve(url, dst, _hook)
+        _update_job.update(status="done", progress=100, path=dst)
+        logger.info("[update] descarga completa → %s", dst)
+    except Exception as exc:
+        logger.error("[update] descarga falló: %s", exc)
+        _update_job.update(status="error", error=str(exc))
+
+
+@app.get("/api/update/status")
+async def update_status():
+    return _update_job
+
+
+@app.post("/api/update/apply")
+async def update_apply():
+    """Launch a bat script that replaces the running .exe and restarts the app."""
+    if _update_job.get("status") != "done":
+        raise HTTPException(400, "Descarga no completada")
+    path_nuevo = _update_job.get("path", "")
+    if not Path(path_nuevo).exists():
+        raise HTTPException(500, "Archivo descargado no encontrado")
+
+    if not getattr(sys, "frozen", False):
+        logger.warning("[update] modo dev — apply omitido")
+        return {"ok": True, "dev": True}
+
+    _apply_update(path_nuevo)
+    return {"ok": True}
+
+
+def _apply_update(path_nuevo: str) -> None:
+    path_actual = sys.executable
+    bat = (
+        "@echo off\r\n"
+        "timeout /t 2 /nobreak > nul\r\n"
+        f'move /y "{path_nuevo}" "{path_actual}"\r\n'
+        f'start "" "{path_actual}"\r\n'
+    )
+    bat_path = str(Path(tempfile.gettempdir()) / "update_ed.bat")
+    with open(bat_path, "w") as f:
+        f.write(bat)
+    subprocess.Popen(
+        ["cmd", "/c", bat_path],
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        close_fds=True,
+    )
+
+    def _exit():
+        import time
+        time.sleep(0.5)
+        os._exit(0)
+
+    threading.Thread(target=_exit, daemon=True).start()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

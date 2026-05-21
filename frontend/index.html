@@ -38,6 +38,37 @@
 <!-- ── Licencia status banner (visible cuando está activa) ─────────────── -->
 <div id="lic-banner" style="display:none"></div>
 
+<!-- ── Update banner (opcional — con botón "Ahora no") ─────────────────── -->
+<div id="update-banner" style="display:none">
+  <span id="update-banner-text"></span>
+  <div class="update-banner-actions">
+    <button class="btn btn-primary btn-sm" id="update-btn-banner">⬆️ Actualizar</button>
+    <button class="btn btn-outline btn-sm" id="update-btn-dismiss">Ahora no</button>
+  </div>
+</div>
+
+<!-- ── Update modal (obligatoria o durante descarga) ───────────────────── -->
+<div id="update-overlay" style="display:none">
+  <div id="update-modal">
+    <div class="update-modal-icon">⬆️</div>
+    <h2 class="update-modal-title" id="update-modal-title">Nueva versión disponible</h2>
+    <div class="update-modal-ver" id="update-modal-ver"></div>
+    <div class="update-modal-notes" id="update-modal-notes"></div>
+
+    <div id="update-progress-wrap" style="display:none">
+      <div class="progress-bar-wrap" style="margin:.75rem 0 .3rem">
+        <div class="progress-bar-fill" id="update-progress-fill" style="background:var(--primary)"></div>
+      </div>
+      <div class="update-progress-msg" id="update-progress-msg">Preparando…</div>
+    </div>
+
+    <div class="update-modal-actions" id="update-modal-actions">
+      <button class="btn btn-primary" id="update-btn-start">⬆️ Actualizar ahora</button>
+      <button class="btn btn-outline" id="update-btn-later">Ahora no</button>
+    </div>
+  </div>
+</div>
+
 <main id="app-main">
 
   <!-- ── Upload ─────────────────────────────────────────────────────────── -->
@@ -46,8 +77,12 @@
 
     <div id="drop-zone">
       <div class="dz-icon">⬆️</div>
-      <div class="dz-main">Arrastra y suelta tus PDFs aquí</div>
+      <div class="dz-main">Arrastra y suelta tus archivos aquí</div>
       <div class="dz-sub">O usa los botones de abajo para seleccionar</div>
+      <div class="dz-formats">
+        Formatos aceptados: PDF, JPEG, PNG, GIF, BMP, TIFF, WEBP, DOCX, DOC<br>
+        Para mejor calidad en el resultado final, se recomienda usar PDF.
+      </div>
     </div>
 
     <div class="upload-row">
@@ -279,6 +314,17 @@ function copyHwId() {
     appMain.style.display = 'block';
   }
 
+  // Verificar actualizaciones después de confirmar licencia activa
+  if (d.activa) {
+    (async () => {
+      try {
+        const ur = await fetch('/api/update/check');
+        const ud = await ur.json();
+        if (ud.disponible) _showUpdateNotice(ud);
+      } catch {}
+    })();
+  }
+
   // Escuchar evento custom del app.js cuando se completa un expediente
   window.addEventListener('expediente-registrado', (e) => {
     const n = e.detail?.total_mes;
@@ -294,6 +340,83 @@ function copyHwId() {
     }
   });
 })();
+
+/* ── Update notice ─────────────────────────────────────────────────────── */
+let _updateUrl = '';
+let _updatePollTimer = null;
+
+function _showUpdateNotice(info) {
+  _updateUrl = info.url || '';
+  const verText = `Nueva versión v${info.version_nueva} disponible`;
+  const notesText = info.notas ? ` — ${info.notas}` : '';
+
+  if (info.obligatoria) {
+    // Modal que no se puede cerrar
+    document.getElementById('update-modal-title').textContent = '⬆️ Actualización requerida';
+    document.getElementById('update-modal-ver').textContent   = verText + notesText;
+    document.getElementById('update-modal-notes').textContent = 'Esta actualización es obligatoria para continuar usando la aplicación.';
+    document.getElementById('update-btn-later').style.display = 'none';
+    document.getElementById('update-overlay').style.display  = 'flex';
+    document.getElementById('app-main').style.display        = 'none';
+  } else {
+    // Banner no intrusivo
+    document.getElementById('update-banner-text').textContent = verText + notesText;
+    document.getElementById('update-banner').style.display    = 'flex';
+  }
+}
+
+function _startUpdate() {
+  const wrap   = document.getElementById('update-progress-wrap');
+  const fill   = document.getElementById('update-progress-fill');
+  const msg    = document.getElementById('update-progress-msg');
+  const actions = document.getElementById('update-modal-actions');
+
+  // Mostrar modal con progreso si no está visible
+  document.getElementById('update-overlay').style.display = 'flex';
+  document.getElementById('update-banner').style.display  = 'none';
+  document.getElementById('update-modal-title').textContent = 'Descargando actualización…';
+  wrap.style.display    = '';
+  actions.style.display = 'none';
+
+  fetch('/api/update/start', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ url: _updateUrl }),
+  }).catch(() => {});
+
+  _updatePollTimer = setInterval(async () => {
+    try {
+      const r = await fetch('/api/update/status');
+      const d = await r.json();
+      const pct = d.progress || 0;
+      fill.style.width = `${pct}%`;
+
+      if (d.status === 'done') {
+        clearInterval(_updatePollTimer);
+        fill.style.width = '100%';
+        msg.textContent  = 'Aplicando actualización…';
+        await fetch('/api/update/apply', { method: 'POST' });
+        msg.textContent = 'Reiniciando… la app se abrirá en unos segundos.';
+      } else if (d.status === 'error') {
+        clearInterval(_updatePollTimer);
+        msg.textContent = `Error: ${d.error}. Intenta descargar manualmente.`;
+        actions.style.display = '';
+        document.getElementById('update-btn-start').textContent = '🔄 Reintentar';
+      } else {
+        msg.textContent = `Descargando… ${pct}%`;
+      }
+    } catch {}
+  }, 600);
+}
+
+document.getElementById('update-btn-start').addEventListener('click',   _startUpdate);
+document.getElementById('update-btn-banner').addEventListener('click',  _startUpdate);
+document.getElementById('update-btn-later').addEventListener('click',   () => {
+  document.getElementById('update-overlay').style.display = 'none';
+});
+document.getElementById('update-btn-dismiss').addEventListener('click', () => {
+  document.getElementById('update-banner').style.display = 'none';
+});
 </script>
 </body>
 </html>

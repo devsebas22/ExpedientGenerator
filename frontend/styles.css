@@ -88,9 +88,15 @@ main {
   border-color: var(--primary);
   background: #eff6ff;
 }
-#drop-zone .dz-icon { font-size: 2.4rem; margin-bottom: .5rem; }
-#drop-zone .dz-main { font-weight: 600; font-size: 1rem; margin-bottom: .3rem; }
-#drop-zone .dz-sub  { font-size: .84rem; color: var(--muted); }
+#drop-zone .dz-icon    { font-size: 2.4rem; margin-bottom: .5rem; }
+#drop-zone .dz-main    { font-weight: 600; font-size: 1rem; margin-bottom: .3rem; }
+#drop-zone .dz-sub     { font-size: .84rem; color: var(--muted); }
+#drop-zone .dz-formats {
+  font-size: .77rem;
+  color: #94a3b8;
+  margin-top: .55rem;
+  line-height: 1.55;
+}
 
 .upload-row {
   display: flex;
@@ -789,3 +795,52 @@ main {
 }
 .folio-preview-row span  { color: var(--muted); min-width: 90px; }
 .folio-preview-row strong { color: var(--text); }
+
+/* ── Update banner ───────────────────────────────────────────────────────── */
+#update-banner {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  padding: .55rem 1rem;
+  font-size: .84rem;
+  color: #92400e;
+  font-weight: 500;
+}
+.update-banner-actions { display: flex; gap: .5rem; margin-left: auto; }
+.btn-sm { padding: .3rem .75rem !important; font-size: .8rem !important; }
+
+/* ── Update modal overlay ────────────────────────────────────────────────── */
+#update-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(15,23,42,.75);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+#update-modal {
+  width: 100%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  text-align: center;
+}
+.update-modal-icon  { font-size: 2.5rem; margin-bottom: .75rem; }
+.update-modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: .4rem; }
+.update-modal-ver   { font-size: .9rem; color: var(--primary); font-weight: 600; margin-bottom: .3rem; }
+.update-modal-notes { font-size: .83rem; color: var(--muted); margin-bottom: 1.25rem; }
+.update-modal-actions { display: flex; gap: .65rem; justify-content: center; margin-top: 1.25rem; }
+.update-progress-msg {
+  font-size: .82rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: .25rem;
+}
