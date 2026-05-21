@@ -1,8 +1,6 @@
 import re
 import logging
 import os
-import shutil
-import subprocess
 from pathlib import Path
 from typing import Callable
 
@@ -58,28 +56,9 @@ def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
 
 def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
     """
-    Convert .docx to PDF. Tries LibreOffice first, then python-docx+reportlab.
-    Returns True on success, False if both fail.
+    Convert .docx to PDF using python-docx + reportlab (pure Python, no LibreOffice).
+    Returns True on success, False if conversion fails.
     """
-    # Try LibreOffice (available on Linux/WSL dev environments)
-    lo = shutil.which("libreoffice") or shutil.which("soffice")
-    if lo:
-        try:
-            out_dir = str(Path(dst_path).parent)
-            result = subprocess.run(
-                [lo, "--headless", "--convert-to", "pdf", "--outdir", out_dir, src_path],
-                capture_output=True, timeout=60,
-            )
-            if result.returncode == 0:
-                generated = Path(out_dir) / (Path(src_path).stem + ".pdf")
-                if generated.exists():
-                    generated.rename(dst_path)
-                    logger.info("DOCX convertido con LibreOffice: '%s'", os.path.basename(dst_path))
-                    return True
-        except Exception as exc:
-            logger.warning("LibreOffice no disponible: %s", exc)
-
-    # Fallback: python-docx + reportlab (basic text extraction)
     try:
         from docx import Document
         from reportlab.lib.pagesizes import letter
@@ -88,9 +67,11 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
         from reportlab.lib.units import inch
 
         doc = Document(src_path)
-        pdf = SimpleDocTemplate(str(dst_path), pagesize=letter,
-                                leftMargin=inch, rightMargin=inch,
-                                topMargin=inch, bottomMargin=inch)
+        pdf = SimpleDocTemplate(
+            str(dst_path), pagesize=letter,
+            leftMargin=inch, rightMargin=inch,
+            topMargin=inch, bottomMargin=inch,
+        )
         styles = getSampleStyleSheet()
         story = []
         for para in doc.paragraphs:
@@ -101,7 +82,7 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
         if not story:
             story.append(Paragraph("(Documento sin contenido de texto visible)", styles["Normal"]))
         pdf.build(story)
-        logger.info("DOCX convertido con reportlab: '%s'", os.path.basename(dst_path))
+        logger.info("DOCX convertido: '%s'", os.path.basename(dst_path))
         return True
     except Exception as exc:
         logger.warning("Conversión DOCX falló: %s", exc)
