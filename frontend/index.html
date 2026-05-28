@@ -44,43 +44,10 @@
 <!-- ── Licencia status banner (visible cuando está activa) ─────────────── -->
 <div id="lic-banner" style="display:none"></div>
 
-<!-- ── Update banner (opcional — con botón "Ahora no") ─────────────────── -->
+<!-- ── Update banner ──────────────────────────────────────────────────────── -->
 <div id="update-banner" style="display:none">
   <span id="update-banner-text"></span>
-  <div class="update-banner-actions">
-    <button class="btn btn-primary btn-sm" id="update-btn-banner">
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-      Actualizar
-    </button>
-    <button class="btn btn-secondary btn-sm" id="update-btn-dismiss">Ahora no</button>
-  </div>
-</div>
-
-<!-- ── Update modal (obligatoria o durante descarga) ───────────────────── -->
-<div id="update-overlay" style="display:none">
-  <div id="update-modal">
-    <div class="update-modal-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-    </div>
-    <h2 class="update-modal-title" id="update-modal-title">Nueva versión disponible</h2>
-    <div class="update-modal-ver" id="update-modal-ver"></div>
-    <div class="update-modal-notes" id="update-modal-notes"></div>
-
-    <div id="update-progress-wrap" style="display:none">
-      <div class="progress-bar-wrap" style="margin:.75rem 0 .3rem">
-        <div class="progress-bar-fill" id="update-progress-fill"></div>
-      </div>
-      <div class="update-progress-msg" id="update-progress-msg">Preparando…</div>
-    </div>
-
-    <div class="update-modal-actions" id="update-modal-actions">
-      <button class="btn btn-primary" id="update-btn-start">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-        Actualizar ahora
-      </button>
-      <button class="btn btn-secondary" id="update-btn-later">Ahora no</button>
-    </div>
-  </div>
+  <button class="btn btn-secondary btn-sm" id="update-btn-dismiss">Cerrar</button>
 </div>
 
 <main id="app-main">
@@ -292,7 +259,6 @@ let _licHardwareId = '';
 const _ICO_COPY = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`;
 const _ICO_CHECK_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 const _ICO_WARN_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-const _ICO_UP_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
 
 function copyHwId() {
   navigator.clipboard.writeText(_licHardwareId)
@@ -379,76 +345,14 @@ function copyHwId() {
 })();
 
 /* ── Update notice ─────────────────────────────────────────────────────── */
-let _updateUrl = '';
-let _updatePollTimer = null;
-
 function _showUpdateNotice(info) {
-  _updateUrl = info.url || '';
-  const verText = `Nueva versión v${info.version_nueva} disponible`;
-  const notesText = info.notas ? ` — ${info.notas}` : '';
-
-  if (info.obligatoria) {
-    document.getElementById('update-modal-title').textContent = 'Actualización requerida';
-    document.getElementById('update-modal-ver').textContent   = verText + notesText;
-    document.getElementById('update-modal-notes').textContent = 'Esta actualización es obligatoria para continuar usando la aplicación.';
-    document.getElementById('update-btn-later').style.display = 'none';
-    document.getElementById('update-overlay').style.display  = 'flex';
-    document.getElementById('app-main').style.display        = 'none';
-  } else {
-    document.getElementById('update-banner-text').textContent = verText + notesText;
-    document.getElementById('update-banner').style.display    = 'flex';
-  }
+  const verText   = `v${info.version_nueva} disponible`;
+  const notasText = info.notas ? ` — ${info.notas}` : '';
+  const hint      = ' · Cierra y vuelve a abrir para actualizar.';
+  document.getElementById('update-banner-text').textContent = verText + notasText + hint;
+  document.getElementById('update-banner').style.display = 'flex';
 }
 
-function _startUpdate() {
-  const wrap    = document.getElementById('update-progress-wrap');
-  const fill    = document.getElementById('update-progress-fill');
-  const msg     = document.getElementById('update-progress-msg');
-  const actions = document.getElementById('update-modal-actions');
-
-  document.getElementById('update-overlay').style.display = 'flex';
-  document.getElementById('update-banner').style.display  = 'none';
-  document.getElementById('update-modal-title').textContent = 'Descargando actualización…';
-  wrap.style.display    = '';
-  actions.style.display = 'none';
-
-  fetch('/api/update/start', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ url: _updateUrl }),
-  }).catch(() => {});
-
-  _updatePollTimer = setInterval(async () => {
-    try {
-      const r = await fetch('/api/update/status');
-      const d = await r.json();
-      const pct = d.progress || 0;
-      fill.style.width = `${pct}%`;
-
-      if (d.status === 'done') {
-        clearInterval(_updatePollTimer);
-        fill.style.width = '100%';
-        msg.textContent  = 'Aplicando actualización…';
-        await fetch('/api/update/apply', { method: 'POST' });
-        msg.textContent = 'Reiniciando… la app se abrirá en unos segundos.';
-      } else if (d.status === 'error') {
-        clearInterval(_updatePollTimer);
-        msg.textContent = `Error: ${d.error}. Intenta descargar manualmente.`;
-        actions.style.display = '';
-        document.getElementById('update-btn-start').innerHTML =
-          `${_ICO_UP_SM} Reintentar`;
-      } else {
-        msg.textContent = `Descargando… ${pct}%`;
-      }
-    } catch {}
-  }, 600);
-}
-
-document.getElementById('update-btn-start').addEventListener('click',   _startUpdate);
-document.getElementById('update-btn-banner').addEventListener('click',  _startUpdate);
-document.getElementById('update-btn-later').addEventListener('click',   () => {
-  document.getElementById('update-overlay').style.display = 'none';
-});
 document.getElementById('update-btn-dismiss').addEventListener('click', () => {
   document.getElementById('update-banner').style.display = 'none';
 });
