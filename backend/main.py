@@ -722,7 +722,9 @@ def _apply_update(path_nuevo: str) -> None:
     path_actual = sys.executable
     bat = (
         "@echo off\r\n"
-        "timeout /t 2 /nobreak > nul\r\n"
+        "timeout /t 5 /nobreak > nul\r\n"
+        # Liberar carpetas _MEI que el proceso anterior dejó en Temp
+        'for /d %%i in ("%LOCALAPPDATA%\\Temp\\_MEI*") do rd /s /q "%%i" 2>nul\r\n'
         f'move /y "{path_nuevo}" "{path_actual}"\r\n'
         f'start "" "{path_actual}"\r\n'
     )
