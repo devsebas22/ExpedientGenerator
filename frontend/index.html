@@ -87,7 +87,7 @@
 
   <!-- ── Upload ─────────────────────────────────────────────────────────── -->
   <div class="card">
-    <div class="card-title">Cargar archivos PDF</div>
+    <div class="card-title">Cargar archivos</div>
 
     <div id="drop-zone">
       <div class="dz-icon">
@@ -114,7 +114,7 @@
 
     <div class="folder-row" style="margin-top:.9rem;">
       <input type="text" id="folder-path"
-             placeholder="O escribe la ruta de una carpeta: /home/usuario/documentos" />
+             placeholder="O escribe la ruta: C:\Users\usuario\Documentos" />
       <button class="btn btn-secondary" id="btn-load-folder">Cargar</button>
     </div>
   </div>
@@ -229,8 +229,8 @@
       Carga al menos un PDF para continuar.
     </p>
     <button class="btn btn-primary btn-lg" id="btn-generate" disabled>
-      <svg id="btn-generate-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      Generar expediente
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Carga al menos un archivo para continuar
     </button>
   </div>
 
@@ -325,8 +325,8 @@ function copyHwId() {
           Licencia activa${prueba}
         </span>
         <span class="lic-hw">
-          ID: <code>${_licHardwareId}</code>
-          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar Hardware ID">${_ICO_COPY}</button>
+          ID: <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
+          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar ID completo">${_ICO_COPY}</button>
         </span>`;
       banner.className = 'lic-banner lic-ok';
       banner.style.display = 'flex';
@@ -371,8 +371,8 @@ function copyHwId() {
           Licencia activa${prueba} · <strong>${n}</strong> expediente${n === 1 ? '' : 's'} este mes
         </span>
         <span class="lic-hw">
-          ID: <code>${_licHardwareId}</code>
-          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar Hardware ID">${_ICO_COPY}</button>
+          ID: <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
+          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar ID completo">${_ICO_COPY}</button>
         </span>`;
     }
   });

@@ -146,6 +146,7 @@ main {
   font-size: .8rem;
   color: var(--text-sub);
   user-select: all;
+  cursor: help;
 }
 .lic-hw button, .lic-copy-btn {
   background: transparent;
@@ -321,6 +322,7 @@ main {
   color: var(--text-muted);
   box-shadow: none;
   opacity: 1;
+  font-size: .875rem;
 }
 
 /* ── File list header ─────────────────────────────────────────────────────────── */
@@ -505,7 +507,7 @@ main {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: .875rem;
   margin-top: 1rem;
 }

@@ -12,6 +12,7 @@ var ICO_IMAGE  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
 var ICO_WORD   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`;
 var ICO_GRIP   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
 var ICO_ZAP    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+var ICO_UPLOAD = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
 var ICO_REFRESH= `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
 var ICO_FOLDER_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
 var ICO_CLOCK  = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
@@ -151,11 +152,21 @@ function toast(msg, type = "info", dur = 3500) {
   setTimeout(() => t.remove(), dur);
 }
 
+function setGenerateBtn() {
+  const ready = files.filter((f) => !f.uploading).length;
+  btnGenerate.disabled = ready === 0;
+  btnGenerate.innerHTML = ready === 0
+    ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
+    : `${ICO_ZAP} Generar expediente`;
+}
+
 function setProcessing(on) {
-  btnGenerate.disabled = on || files.length === 0;
+  btnGenerate.disabled = on || files.filter((f) => !f.uploading).length === 0;
   btnGenerate.innerHTML = on
     ? `<span class="spinner"></span> Procesando…`
-    : `${ICO_ZAP} Generar expediente`;
+    : files.filter((f) => !f.uploading).length === 0
+      ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
+      : `${ICO_ZAP} Generar expediente`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -241,11 +252,11 @@ function updateSummary() {
   }
 
   // ── Generate button ──────────────────────────────────────────────────────
-  btnGenerate.disabled = ready.length === 0;
+  setGenerateBtn();
 
   // ── Action summary text ──────────────────────────────────────────────────
   if (files.length === 0) {
-    actionSummary.innerHTML = "Carga al menos un PDF para continuar.";
+    actionSummary.innerHTML = "Arrastra archivos aquí o usa los botones de arriba.";
   } else if (uploading.length > 0) {
     actionSummary.innerHTML =
       `Subiendo <strong>${uploading.length}</strong> archivo(s)… espera para continuar.`;
