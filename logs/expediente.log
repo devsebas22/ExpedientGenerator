@@ -538,3 +538,6 @@
 2026-05-13 11:27:58,817 [INFO] backend.session_manager: [session] eliminada → aa8cb434-71c1-4c26-9ad9-718bd2cfd3f3
 2026-05-13 11:27:58,817 [INFO] backend.main: [tarea 0ef6e427-aa02-443b-b510-0203e97b773e] limpieza — 4 sesión(es) | 60 registro(s) en memoria
 2026-05-13 11:33:17,998 [INFO] backend.main: [cleanup] 0 archivo(s) y 0 sesión(es) eliminadas
+2026-05-21 16:07:56,353 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-21 17:13:24,043 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
+2026-05-21 17:13:37,394 [INFO] backend.session_manager: [session] base temp: /home/smogo/expediente/temp
