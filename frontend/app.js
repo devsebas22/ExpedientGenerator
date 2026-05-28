@@ -6,6 +6,23 @@
 const API = "";          // same origin
 const POLL_MS = 700;     // progress poll interval
 
+/* ── SVG icon strings ────────────────────────────────────────────────────── */
+var ICO_FILE   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+var ICO_IMAGE  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+var ICO_WORD   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`;
+var ICO_GRIP   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
+var ICO_ZAP    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+var ICO_REFRESH= `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+var ICO_FOLDER_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+var ICO_CLOCK  = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+var ICO_WARN   = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_WARN_MD= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>`;
+var ICO_OK_TOAST    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+var ICO_ERR_TOAST   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+var ICO_WARN_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_INFO_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
 /* ── State ──────────────────────────────────────────────────────────────── */
 // [{id, name, size, pages, session_id, error}]  — ordered as the user sees them
 let files          = [];
@@ -50,11 +67,11 @@ function estimateTime(pages, fileCount) {
 
 function sizeCategory(pages) {
   if (pages === 0)   return null;
-  if (pages < 100)   return { cls: "ok",  label: "📋 Pequeño"   };
-  if (pages < 500)   return { cls: "",    label: "📂 Mediano"   };
-  if (pages < 1000)  return { cls: "big", label: "📦 Grande"    };
-  if (pages < 2000)  return { cls: "big", label: "📦 Muy grande" };
-  return               { cls: "huge", label: "🗄️ Masivo"     };
+  if (pages < 100)   return { cls: "ok",  label: "Pequeño"    };
+  if (pages < 500)   return { cls: "",    label: "Mediano"    };
+  if (pages < 1000)  return { cls: "big", label: "Grande"     };
+  if (pages < 2000)  return { cls: "big", label: "Muy grande" };
+  return               { cls: "huge", label: "Masivo"      };
 }
 
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
@@ -126,9 +143,10 @@ function fmtSize(bytes) {
 }
 
 function toast(msg, type = "info", dur = 3500) {
+  const icons = { success: ICO_OK_TOAST, error: ICO_ERR_TOAST, warn: ICO_WARN_TOAST, info: ICO_INFO_TOAST };
   const t = document.createElement("div");
   t.className = `toast ${type}`;
-  t.textContent = msg;
+  t.innerHTML = `<span class="toast-icon">${icons[type] || ICO_INFO_TOAST}</span><span class="toast-msg">${msg}</span>`;
   document.getElementById("toast-container").append(t);
   setTimeout(() => t.remove(), dur);
 }
@@ -137,7 +155,7 @@ function setProcessing(on) {
   btnGenerate.disabled = on || files.length === 0;
   btnGenerate.innerHTML = on
     ? `<span class="spinner"></span> Procesando…`
-    : "⚡ Generar expediente";
+    : `${ICO_ZAP} Generar expediente`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -149,9 +167,9 @@ const _ALL_EXT  = new Set([..._IMG_EXT, ..._WORD_EXT, "pdf"]);
 
 function fileIcon(name) {
   const ext = name.split(".").pop().toLowerCase();
-  if (_IMG_EXT.has(ext))  return "🖼️";
-  if (_WORD_EXT.has(ext)) return "📝";
-  return "📄";
+  if (_IMG_EXT.has(ext))  return ICO_IMAGE;
+  if (_WORD_EXT.has(ext)) return ICO_WORD;
+  return ICO_FILE;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -182,7 +200,7 @@ function renderList() {
       : `<button class="btn-remove" title="Eliminar" data-id="${f.id}">✕</button>`;
 
     li.innerHTML = `
-      <span class="handle" style="${isUploading ? "opacity:.3" : ""}">⠿</span>
+      <span class="handle" style="${isUploading ? "opacity:.15;pointer-events:none" : ""}">${ICO_GRIP}</span>
       <span class="file-num">${i + 1}</span>
       <span class="file-icon">${fileIcon(f.name)}</span>
       <div class="file-info">
@@ -255,15 +273,15 @@ function updateSummary() {
   const time = estimateTime(total, ready.length);
   const cat  = sizeCategory(total);
   const chipsHtml = [
-    `<span class="chip">📁 ${ready.length} archivo${ready.length !== 1 ? "s" : ""}</span>`,
+    `<span class="chip">${ICO_FOLDER_SM} ${ready.length} archivo${ready.length !== 1 ? "s" : ""}</span>`,
     uploading.length
       ? `<span class="chip"><span class="spinner-sm"></span> ${uploading.length} subiendo</span>`
       : "",
     time
-      ? `<span class="chip time">⏱ ${time}</span>`
+      ? `<span class="chip time">${ICO_CLOCK} ${time}</span>`
       : "",
     errored.length
-      ? `<span class="chip err">⚠ ${errored.length} con error</span>`
+      ? `<span class="chip err">${ICO_WARN} ${errored.length} con error</span>`
       : "",
     cat
       ? `<span class="chip ${cat.cls}">${cat.label}</span>`
@@ -276,13 +294,13 @@ function updateSummary() {
     counterWarn.style.display = "";
     counterWarn.className = "counter-warn-strip danger";
     counterWarn.innerHTML =
-      `🔴 <span>Expediente masivo: <strong>${total.toLocaleString("es")} páginas</strong>. ` +
+      `${ICO_WARN_MD} <span>Expediente masivo: <strong>${total.toLocaleString("es")} páginas</strong>. ` +
       `El procesamiento puede tardar varios minutos.</span>`;
   } else if (total > 1000) {
     counterWarn.style.display = "";
     counterWarn.className = "counter-warn-strip warn";
     counterWarn.innerHTML =
-      `⚠️ <span>Este expediente supera <strong>1.000 páginas</strong>. ` +
+      `${ICO_WARN_MD} <span>Este expediente supera <strong>1.000 páginas</strong>. ` +
       `El procesamiento puede tardar algunos segundos adicionales.</span>`;
   } else {
     counterWarn.style.display = "none";
@@ -727,7 +745,7 @@ async function callCountPages() {
       toast(`Conteo actualizado: ${corrected} archivo(s) corregido(s)`, "info");
     }
     toast(
-      `✅ Verificado: ${data.total_pages.toLocaleString("es")} páginas en ${readyIds.length} archivo(s)`,
+      `Verificado: ${data.total_pages.toLocaleString("es")} páginas en ${readyIds.length} archivo(s)`,
       "success",
       4500
     );
@@ -735,7 +753,7 @@ async function callCountPages() {
     toast(`Error al verificar: ${e.message}`, "error", 5000);
   } finally {
     btn.disabled = false;
-    btn.textContent = "🔄 Verificar";
+    btn.innerHTML = `${ICO_REFRESH} Verificar`;
   }
 }
 

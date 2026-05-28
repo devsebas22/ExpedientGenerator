@@ -9,26 +9,32 @@
 <body>
 
 <header>
-  <span class="logo">📁</span>
+  <span class="header-dot"></span>
   <h1>Expediente Digital</h1>
-  <span class="version">v1.0</span>
+  <span class="version">v1.1</span>
 </header>
 
 <!-- ── Pantalla de activación (se muestra si la licencia no está activa) ─── -->
 <div id="activacion-screen" style="display:none">
   <div class="activacion-wrap">
-    <div class="activacion-icon">🔒</div>
+    <div class="activacion-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
     <h2 class="activacion-title">Licencia no activada</h2>
     <p class="activacion-sub">Para usar Expediente Digital necesitas una licencia activa.</p>
     <div class="activacion-hw-box">
       <div class="activacion-hw-label">Tu Hardware ID</div>
       <div class="activacion-hw-value" id="hw-id-display">—</div>
-      <button class="activacion-copy-btn" id="btn-copy-hw" onclick="copyHwId()">📋 Copiar</button>
+      <button class="activacion-copy-btn" id="btn-copy-hw" onclick="copyHwId()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        Copiar
+      </button>
     </div>
     <div class="activacion-contacto">
       <p>Comparte tu Hardware ID con Sebastian para activar tu licencia.</p>
       <a class="activacion-wa-btn" id="wa-link" href="#" target="_blank">
-        💬 Contactar por WhatsApp
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Contactar por WhatsApp
       </a>
     </div>
     <div class="activacion-msg" id="activacion-msg"></div>
@@ -42,29 +48,37 @@
 <div id="update-banner" style="display:none">
   <span id="update-banner-text"></span>
   <div class="update-banner-actions">
-    <button class="btn btn-primary btn-sm" id="update-btn-banner">⬆️ Actualizar</button>
-    <button class="btn btn-outline btn-sm" id="update-btn-dismiss">Ahora no</button>
+    <button class="btn btn-primary btn-sm" id="update-btn-banner">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+      Actualizar
+    </button>
+    <button class="btn btn-secondary btn-sm" id="update-btn-dismiss">Ahora no</button>
   </div>
 </div>
 
 <!-- ── Update modal (obligatoria o durante descarga) ───────────────────── -->
 <div id="update-overlay" style="display:none">
   <div id="update-modal">
-    <div class="update-modal-icon">⬆️</div>
+    <div class="update-modal-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </div>
     <h2 class="update-modal-title" id="update-modal-title">Nueva versión disponible</h2>
     <div class="update-modal-ver" id="update-modal-ver"></div>
     <div class="update-modal-notes" id="update-modal-notes"></div>
 
     <div id="update-progress-wrap" style="display:none">
       <div class="progress-bar-wrap" style="margin:.75rem 0 .3rem">
-        <div class="progress-bar-fill" id="update-progress-fill" style="background:var(--primary)"></div>
+        <div class="progress-bar-fill" id="update-progress-fill"></div>
       </div>
       <div class="update-progress-msg" id="update-progress-msg">Preparando…</div>
     </div>
 
     <div class="update-modal-actions" id="update-modal-actions">
-      <button class="btn btn-primary" id="update-btn-start">⬆️ Actualizar ahora</button>
-      <button class="btn btn-outline" id="update-btn-later">Ahora no</button>
+      <button class="btn btn-primary" id="update-btn-start">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        Actualizar ahora
+      </button>
+      <button class="btn btn-secondary" id="update-btn-later">Ahora no</button>
     </div>
   </div>
 </div>
@@ -76,7 +90,9 @@
     <div class="card-title">Cargar archivos PDF</div>
 
     <div id="drop-zone">
-      <div class="dz-icon">⬆️</div>
+      <div class="dz-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </div>
       <div class="dz-main">Arrastra y suelta tus archivos aquí</div>
       <div class="dz-sub">O usa los botones de abajo para seleccionar</div>
       <div class="dz-formats">
@@ -87,18 +103,19 @@
 
     <div class="upload-row">
       <button class="btn btn-primary" id="btn-files">
-        📄 Seleccionar archivos
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Seleccionar archivos
       </button>
-      <button class="btn btn-outline" id="btn-folder-browser">
-        📂 Seleccionar carpeta
+      <button class="btn btn-secondary" id="btn-folder-browser">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Seleccionar carpeta
       </button>
     </div>
 
-    <!-- carpeta por ruta de texto (para WSL / rutas locales) -->
     <div class="folder-row" style="margin-top:.9rem;">
       <input type="text" id="folder-path"
              placeholder="O escribe la ruta de una carpeta: /home/usuario/documentos" />
-      <button class="btn btn-outline" id="btn-load-folder">Cargar</button>
+      <button class="btn btn-secondary" id="btn-load-folder">Cargar</button>
     </div>
   </div>
 
@@ -109,11 +126,13 @@
       <span class="badge blue" id="badge-files">0 archivos</span>
       <span class="badge green" id="badge-pages">0 páginas</span>
       <div class="list-header-actions">
-        <button class="btn btn-outline" id="btn-sort" title="Ordenar por nombre natural">
-          🔢 Auto-ordenar
+        <button class="btn btn-ghost" id="btn-sort" title="Ordenar por nombre natural">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+          Auto-ordenar
         </button>
         <button class="btn btn-danger-ghost" id="btn-clear">
-          🗑 Limpiar todo
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Limpiar todo
         </button>
       </div>
     </div>
@@ -125,27 +144,24 @@
     <div class="counter-header">
       <span class="card-title" style="margin-bottom:0">Contador de páginas</span>
       <button class="counter-refresh" id="btn-recount" title="Verificar conteo en el servidor">
-        🔄 Verificar
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Verificar
       </button>
     </div>
     <div class="counter-wrap">
-      <!-- big animated number -->
       <div class="counter-num-block">
         <span class="counter-num" id="counter-num">0</span>
         <span class="counter-num-label">páginas</span>
       </div>
-      <!-- meta chips -->
       <div class="counter-chips" id="counter-chips"></div>
     </div>
-    <!-- warning strip (hidden unless big expediente) -->
     <div class="counter-warn-strip" id="counter-warn" style="display:none"></div>
   </div>
 
   <!-- ── Settings ───────────────────────────────────────────────────────── -->
-  <div class="card">
+  <div class="card" id="settings-card">
     <div class="card-title">Configuración del foliado</div>
 
-    <!-- Toggle de foliación -->
     <div class="foliar-toggle-wrap">
       <label class="foliar-toggle-label">
         <input type="checkbox" id="cfg-foliar" checked />
@@ -185,7 +201,6 @@
 
     </div>
 
-    <!-- Vista previa del folio -->
     <div id="folio-preview-section">
       <div class="folio-preview-label">Vista previa</div>
       <div class="folio-preview-wrap">
@@ -214,7 +229,8 @@
       Carga al menos un PDF para continuar.
     </p>
     <button class="btn btn-primary btn-lg" id="btn-generate" disabled>
-      ⚡ Generar expediente
+      <svg id="btn-generate-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Generar expediente
     </button>
   </div>
 
@@ -232,22 +248,26 @@
   <div class="card" id="result-section">
     <div class="card-title">Expediente generado</div>
     <div class="result-box">
-      <span class="result-icon">✅</span>
+      <span class="result-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </span>
       <div class="result-info">
         <div class="result-name" id="result-name">—</div>
         <div class="result-meta" id="result-meta"></div>
       </div>
       <div class="result-actions">
-        <a class="btn btn-success" id="btn-download" href="#" download>
-          ⬇️ Descargar
+        <a class="btn btn-primary" id="btn-download" href="#" download>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar
         </a>
-        <button class="btn btn-outline" id="btn-new">
-          ➕ Nuevo expediente
+        <button class="btn btn-secondary" id="btn-new">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo expediente
         </button>
       </div>
     </div>
     <div class="warn-box" id="failed-warn" style="display:none">
-      <strong>⚠️ Archivos con errores:</strong>
+      <strong>Archivos con errores:</strong>
       <ul id="failed-list"></ul>
     </div>
   </div>
@@ -269,9 +289,18 @@
 const WA_NUMBER = '573164698626';
 let _licHardwareId = '';
 
+const _ICO_COPY = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`;
+const _ICO_CHECK_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const _ICO_WARN_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const _ICO_UP_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+
 function copyHwId() {
   navigator.clipboard.writeText(_licHardwareId)
-    .then(() => { document.getElementById('btn-copy-hw').textContent = '✓ Copiado'; })
+    .then(() => {
+      const btn = document.getElementById('btn-copy-hw');
+      btn.innerHTML = _ICO_CHECK_SM + ' Copiado';
+      setTimeout(() => { btn.innerHTML = _ICO_COPY + ' Copiar'; }, 2000);
+    })
     .catch(() => {});
 }
 
@@ -280,25 +309,29 @@ function copyHwId() {
   const appMain          = document.getElementById('app-main');
   const banner           = document.getElementById('lic-banner');
 
+  let d = {};
   try {
     const r = await fetch('/api/licencia');
-    const d = await r.json();
+    d = await r.json();
     _licHardwareId = d.hardware_id || '';
 
     if (d.activa) {
-      // ── Licencia activa: mostrar app normal con banner ──────────────────
-      const prueba = d.es_prueba ? ' <span style="background:rgba(99,102,241,.18);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:.75rem">PRUEBA</span>' : '';
+      const prueba = d.es_prueba
+        ? ` <span class="lic-prueba-badge">PRUEBA</span>`
+        : '';
       banner.innerHTML = `
-        <span style="font-weight:700;color:#22c55e">✅ Licencia activa${prueba}</span>
+        <span class="lic-ok-text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Licencia activa${prueba}
+        </span>
         <span class="lic-hw">
           ID: <code>${_licHardwareId}</code>
-          <button onclick="copyHwId()" title="Copiar Hardware ID">📋</button>
+          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar Hardware ID">${_ICO_COPY}</button>
         </span>`;
       banner.className = 'lic-banner lic-ok';
       banner.style.display = 'flex';
       appMain.style.display = 'block';
     } else {
-      // ── Licencia inactiva: mostrar pantalla de activación ───────────────
       document.getElementById('hw-id-display').textContent = _licHardwareId;
       document.getElementById('activacion-msg').textContent = d.mensaje || '';
       const waMsg = encodeURIComponent(`Hola Sebastian, necesito activar mi licencia de Expediente Digital.\nMi Hardware ID es: ${_licHardwareId}`);
@@ -307,14 +340,15 @@ function copyHwId() {
       appMain.style.display = 'none';
     }
   } catch {
-    // Sin conexión: mostrar aviso pero dejar la app accesible
-    banner.innerHTML = '⚠️ No se pudo verificar la licencia. Sin conexión al servidor.';
+    banner.innerHTML = `
+      <span style="display:inline-flex;align-items:center;gap:.4rem;color:#7c5e1a">
+        ${_ICO_WARN_SM} No se pudo verificar la licencia. Sin conexión al servidor.
+      </span>`;
     banner.className = 'lic-banner lic-warn';
     banner.style.display = 'flex';
     appMain.style.display = 'block';
   }
 
-  // Verificar actualizaciones después de confirmar licencia activa
   if (d.activa) {
     (async () => {
       try {
@@ -325,17 +359,20 @@ function copyHwId() {
     })();
   }
 
-  // Escuchar evento custom del app.js cuando se completa un expediente
   window.addEventListener('expediente-registrado', (e) => {
     const n = e.detail?.total_mes;
     if (n !== undefined) {
-      const hw = _licHardwareId;
-      const prueba = document.querySelector('.lic-banner .lic-prueba-tag') ? ' <span style="background:rgba(99,102,241,.18);color:#818cf8;border-radius:4px;padding:1px 6px;font-size:.75rem">PRUEBA</span>' : '';
+      const prueba = banner.querySelector('.lic-prueba-badge')
+        ? ` <span class="lic-prueba-badge">PRUEBA</span>`
+        : '';
       banner.innerHTML = `
-        <span style="font-weight:700;color:#22c55e">✅ Licencia activa${prueba} · <strong>${n}</strong> expediente${n === 1 ? '' : 's'} este mes</span>
+        <span class="lic-ok-text">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Licencia activa${prueba} · <strong>${n}</strong> expediente${n === 1 ? '' : 's'} este mes
+        </span>
         <span class="lic-hw">
-          ID: <code>${hw}</code>
-          <button onclick="copyHwId()" title="Copiar Hardware ID">📋</button>
+          ID: <code>${_licHardwareId}</code>
+          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar Hardware ID">${_ICO_COPY}</button>
         </span>`;
     }
   });
@@ -351,27 +388,24 @@ function _showUpdateNotice(info) {
   const notesText = info.notas ? ` — ${info.notas}` : '';
 
   if (info.obligatoria) {
-    // Modal que no se puede cerrar
-    document.getElementById('update-modal-title').textContent = '⬆️ Actualización requerida';
+    document.getElementById('update-modal-title').textContent = 'Actualización requerida';
     document.getElementById('update-modal-ver').textContent   = verText + notesText;
     document.getElementById('update-modal-notes').textContent = 'Esta actualización es obligatoria para continuar usando la aplicación.';
     document.getElementById('update-btn-later').style.display = 'none';
     document.getElementById('update-overlay').style.display  = 'flex';
     document.getElementById('app-main').style.display        = 'none';
   } else {
-    // Banner no intrusivo
     document.getElementById('update-banner-text').textContent = verText + notesText;
     document.getElementById('update-banner').style.display    = 'flex';
   }
 }
 
 function _startUpdate() {
-  const wrap   = document.getElementById('update-progress-wrap');
-  const fill   = document.getElementById('update-progress-fill');
-  const msg    = document.getElementById('update-progress-msg');
+  const wrap    = document.getElementById('update-progress-wrap');
+  const fill    = document.getElementById('update-progress-fill');
+  const msg     = document.getElementById('update-progress-msg');
   const actions = document.getElementById('update-modal-actions');
 
-  // Mostrar modal con progreso si no está visible
   document.getElementById('update-overlay').style.display = 'flex';
   document.getElementById('update-banner').style.display  = 'none';
   document.getElementById('update-modal-title').textContent = 'Descargando actualización…';
@@ -401,7 +435,8 @@ function _startUpdate() {
         clearInterval(_updatePollTimer);
         msg.textContent = `Error: ${d.error}. Intenta descargar manualmente.`;
         actions.style.display = '';
-        document.getElementById('update-btn-start').textContent = '🔄 Reintentar';
+        document.getElementById('update-btn-start').innerHTML =
+          `${_ICO_UP_SM} Reintentar`;
       } else {
         msg.textContent = `Descargando… ${pct}%`;
       }
