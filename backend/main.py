@@ -55,7 +55,7 @@ def _read_version_actual() -> str:
             return ver_file.read_text(encoding="utf-8").strip()
     except Exception:
         pass
-    return "1.1.6"  # fallback para modo dev o primera ejecución
+    return "1.1.7"  # fallback para modo dev o primera ejecución
 
 
 def _get_hardware_id() -> str:
@@ -461,6 +461,15 @@ async def process_pdfs(request: ProcessRequest):
     })
 
     task_id = str(uuid.uuid4())
+    # Limpiar tareas finalizadas con más de 1 hora de antigüedad
+    _cutoff = _time.time() - 3600
+    stale = [tid for tid, t in tasks.items()
+             if t["status"] in ("done", "error") and t.get("created_at", 0) < _cutoff]
+    for tid in stale:
+        tasks.pop(tid, None)
+    if stale:
+        logger.info("[proceso] %d tarea(s) antigua(s) eliminadas de memoria", len(stale))
+
     tasks[task_id] = {
         "id":           task_id,
         "status":       "processing",
@@ -470,6 +479,7 @@ async def process_pdfs(request: ProcessRequest):
         "total_pages":  None,
         "failed_files": [],
         "error":        None,
+        "created_at":   _time.time(),
     }
 
     loop = asyncio.get_running_loop()
