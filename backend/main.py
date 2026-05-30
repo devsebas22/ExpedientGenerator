@@ -55,7 +55,7 @@ def _read_version_actual() -> str:
             return ver_file.read_text(encoding="utf-8").strip()
     except Exception:
         pass
-    return "1.1.5"  # fallback para modo dev o primera ejecución
+    return "1.1.6"  # fallback para modo dev o primera ejecución
 
 
 def _get_hardware_id() -> str:
