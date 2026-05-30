@@ -15,15 +15,17 @@ echo ""
 python.exe -m PyInstaller Launcher.spec --noconfirm
 
 echo ""
-echo " [3/3] Empacando distribución..."
+echo " [3/3] Compilando instalador (ExpedienteDigital_Setup.exe)..."
 echo ""
-rm -rf dist/release && mkdir -p dist/release
-cp dist/ExpedienteDigital.exe     dist/release/ExpedienteDigital.exe
-cp dist/ExpedienteDigital_app.exe dist/release/ExpedienteDigital_app.exe
+mkdir -p dist/installer
+iscc.exe installer/ExpedienteDigital.iss 2>/dev/null || \
+  "C:/Program Files (x86)/Inno Setup 6/ISCC.exe" installer/ExpedienteDigital.iss 2>/dev/null || {
+    echo " Inno Setup no encontrado."
+    echo " Instalar desde https://jrsoftware.org/isdl.php"
+    echo " Luego abrir installer/ExpedienteDigital.iss y compilar con Ctrl+F9."
+    echo " Los .exe están en dist/ listos para distribuir como .zip."
+  }
 
 echo ""
-echo " ✔  Listo. Archivos en dist/release/:"
-ls -lh dist/release/
-echo ""
-echo " Para distribuir: zip dist/release/ y compartir."
-echo " El usuario descomprime y ejecuta ExpedienteDigital.exe."
+echo " ✔  Listo."
+ls -lh dist/installer/ dist/ExpedienteDigital.exe dist/ExpedienteDigital_app.exe 2>/dev/null

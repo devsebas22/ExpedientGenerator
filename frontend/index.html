@@ -11,7 +11,7 @@
 <header>
   <span class="header-dot"></span>
   <h1>Expediente Digital</h1>
-  <span class="version">v1.1</span>
+  <span class="version" id="app-version">v…</span>
 </header>
 
 <!-- ── Pantalla de activación (se muestra si la licencia no está activa) ─── -->
@@ -44,17 +44,27 @@
 <!-- ── Licencia status banner (visible cuando está activa) ─────────────── -->
 <div id="lic-banner" style="display:none"></div>
 
-<!-- ── Update banner ──────────────────────────────────────────────────────── -->
+<!-- ── Update banner (actualizaciones opcionales) ─────────────────────── -->
 <div id="update-banner" style="display:none">
   <span id="update-banner-text"></span>
   <button class="btn btn-secondary btn-sm" id="update-btn-dismiss">Cerrar</button>
+</div>
+
+<!-- ── Update modal (actualizaciones obligatorias — bloquea la UI) ─────── -->
+<div id="update-modal">
+  <div class="update-modal-box">
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#e85d04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <h2>Actualización obligatoria</h2>
+    <p id="update-modal-text"></p>
+    <p class="update-modal-hint">Cierra la aplicación y vuelve a abrirla.<br>La actualización se instalará automáticamente.</p>
+  </div>
 </div>
 
 <main id="app-main">
 
   <!-- ── Upload ─────────────────────────────────────────────────────────── -->
   <div class="card">
-    <div class="card-title">Cargar archivos</div>
+    <div class="card-title">Cargar documentos</div>
 
     <div id="drop-zone">
       <div class="dz-icon">
@@ -270,6 +280,15 @@ function copyHwId() {
     .catch(() => {});
 }
 
+fetch('/api/version').then(r => r.json()).then(d => {
+  const v = 'v' + d.version;
+  document.getElementById('app-version').textContent = v;
+  localStorage.setItem('app_version', v);
+}).catch(() => {
+  document.getElementById('app-version').textContent =
+    localStorage.getItem('app_version') || 'v1.1.5';
+});
+
 (async () => {
   const activacionScreen = document.getElementById('activacion-screen');
   const appMain          = document.getElementById('app-main');
@@ -348,9 +367,17 @@ function copyHwId() {
 function _showUpdateNotice(info) {
   const verText   = `v${info.version_nueva} disponible`;
   const notasText = info.notas ? ` — ${info.notas}` : '';
-  const hint      = ' · Cierra y vuelve a abrir para actualizar.';
-  document.getElementById('update-banner-text').textContent = verText + notasText + hint;
-  document.getElementById('update-banner').style.display = 'flex';
+
+  if (info.obligatoria) {
+    document.getElementById('update-modal-text').textContent =
+      `Se requiere la versión ${info.version_nueva} para continuar.${info.notas ? ' ' + info.notas : ''}`;
+    document.getElementById('update-modal').classList.add('visible');
+    document.getElementById('app-main').style.pointerEvents = 'none';
+    document.getElementById('app-main').style.opacity = '0.3';
+  } else {
+    document.getElementById('update-banner-text').textContent = verText + notasText + ' · Cierra y vuelve a abrir para actualizar.';
+    document.getElementById('update-banner').style.display = 'flex';
+  }
 }
 
 document.getElementById('update-btn-dismiss').addEventListener('click', () => {

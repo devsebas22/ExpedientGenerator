@@ -55,7 +55,7 @@ def _read_version_actual() -> str:
             return ver_file.read_text(encoding="utf-8").strip()
     except Exception:
         pass
-    return "1.1.2"  # fallback para modo dev o primera ejecución
+    return "1.1.5"  # fallback para modo dev o primera ejecución
 
 
 def _get_hardware_id() -> str:
@@ -183,7 +183,7 @@ async def lifespan(_app: FastAPI):
 
 
 # ── FastAPI ────────────────────────────────────────────────────────────────────
-app = FastAPI(title="Expediente Digital", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Expediente Digital", version=_read_version_actual(), lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -652,7 +652,7 @@ async def update_check():
     La instalación la hace el launcher al próximo inicio — la app solo notifica."""
     try:
         version_actual = _read_version_actual()
-        resp = _requests.get(f"{_LICENSE_SERVER}/api/version/latest", timeout=5)
+        resp = _requests.get(f"{_LICENSE_SERVER}/api/version/latest", timeout=10)
         data = resp.json()
         version_nueva = data.get("version")
         if not version_nueva:
@@ -674,6 +674,11 @@ async def update_check():
 # ═══════════════════════════════════════════════════════════════════════════════
 # Health
 # ═══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/version")
+async def version():
+    return {"version": _read_version_actual()}
+
 
 @app.get("/api/health")
 async def health():

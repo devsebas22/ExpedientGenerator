@@ -37,8 +37,8 @@ body {
 
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
 header {
-  background: var(--bg);
-  border-bottom: 1px solid var(--border-light);
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@ header {
 .header-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #22c55e;
   flex-shrink: 0;
 }
 
@@ -60,13 +60,13 @@ header h1 {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: -.2px;
-  color: var(--text);
+  color: #f1f5f9;
 }
 
 header .version {
   margin-left: auto;
   font-size: .75rem;
-  color: var(--text-muted);
+  color: #94a3b8;
   font-weight: 400;
 }
 
@@ -1130,6 +1130,32 @@ main {
   margin-top: .3rem;
 }
 
+/* ── Update modal obligatorio ──────────────────────────────────────────────────── */
+#update-modal {
+  display: none;
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(0,0,0,.72);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+#update-modal.visible { display: flex; }
+.update-modal-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem 2rem 1.75rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,.3);
+}
+.update-modal-box svg  { margin-bottom: 1rem; }
+.update-modal-box h2   { font-size: 1.15rem; color: #1a1a1a; margin-bottom: .5rem; }
+.update-modal-box p    { color: #555; line-height: 1.55; margin-bottom: 1.25rem; font-size: .95rem; }
+.update-modal-hint     { color: #888 !important; font-size: .82rem !important; margin-bottom: 0 !important; }
+
 /* ── Responsive ────────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   main { padding: .9rem .75rem 2rem; }
@@ -1137,4 +1163,5 @@ main {
   .upload-row { flex-direction: column; }
   .result-box { flex-direction: column; align-items: flex-start; }
   header { padding: 0 1rem; }
+  .update-modal-box { padding: 1.5rem 1.25rem; }
 }
