@@ -195,7 +195,15 @@ def _do_update(app_exe: Path, url_dl: str, ver_nueva: str) -> bool:
         try:
             _log("INFO", f"Descarga intento {attempt}/3")
             _download_app(url_dl, tmp)
-            tmp.replace(app_exe)
+            # Esperar a que Windows Defender libere el archivo tras escanearlo
+            for rename_try in range(8):
+                try:
+                    tmp.replace(app_exe)
+                    break
+                except OSError:
+                    if rename_try == 7:
+                        raise
+                    _t.sleep(1.5)
             _write_local_version(ver_nueva)
             _log("INFO", f"Actualización instalada correctamente: {ver_nueva}")
             return True
