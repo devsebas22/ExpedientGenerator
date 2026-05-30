@@ -44,13 +44,15 @@ def analyze_pdf_file(file_path: str) -> tuple[int, str | None]:
         return -1, "Este archivo está dañado y no puede leerse."
 
 
+# Oficio colombiano: 216 × 330 mm = 612 × 935 pt
+_OFICIO_W = 612.0
+_OFICIO_H = 935.0
+
+
 def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
     """
-    Convert a JPEG/PNG/etc. image to a single-page A4 PDF.
-
-    Scaling is pixel-based: DPI metadata is ignored entirely.
-    Every image is fitted within a 515×762 pt content area (A4 with ~40 pt margins)
-    and centered on a 595×842 pt page, so page size is always consistent.
+    Convierte imagen a PDF de una página en tamaño Oficio (612×935 pt).
+    Escalado por píxeles; DPI ignorado. Imagen centrada con ~40 pt de margen.
     """
     import io
     from PIL import Image
@@ -58,25 +60,24 @@ def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
     with Image.open(src_path) as img:
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
-        img_w, img_h = img.size          # pixel dimensions — ignore DPI
+        img_w, img_h = img.size
         buf = io.BytesIO()
-        img.save(buf, format="PNG")      # lossless round-trip for fitz
+        img.save(buf, format="PNG")
         img_bytes = buf.getvalue()
 
-    # Fit within 515×762 pt content area (A4 minus ~40 pt margins each side)
-    ratio = min(515 / img_w, 762 / img_h)
-    new_w = img_w * ratio
-    new_h = img_h * ratio
+    content_w = _OFICIO_W - 80
+    content_h = _OFICIO_H - 80
+    ratio = min(content_w / img_w, content_h / img_h)
+    new_w, new_h = img_w * ratio, img_h * ratio
 
-    # Create A4 page (595×842 pt) and center the scaled image
     doc  = fitz.open()
-    page = doc.new_page(width=595, height=842)
-    x0   = (595 - new_w) / 2
-    y0   = (842 - new_h) / 2
+    page = doc.new_page(width=_OFICIO_W, height=_OFICIO_H)
+    x0   = (_OFICIO_W - new_w) / 2
+    y0   = (_OFICIO_H - new_h) / 2
     page.insert_image(fitz.Rect(x0, y0, x0 + new_w, y0 + new_h), stream=img_bytes)
     doc.save(dst_path, garbage=3, deflate=True)
     doc.close()
-    logger.info("Imagen convertida: '%s' → %dx%d px → %.0f×%.0f pt en A4",
+    logger.info("Imagen → Oficio: '%s' %dx%d px → %.0f×%.0f pt",
                 os.path.basename(src_path), img_w, img_h, new_w, new_h)
 
 
@@ -87,14 +88,14 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
     """
     try:
         from docx import Document
-        from reportlab.lib.pagesizes import letter
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.units import inch
 
+        _oficio_rl = (_OFICIO_W, _OFICIO_H)   # reportlab usa (ancho, alto) en pt
         doc = Document(src_path)
         pdf = SimpleDocTemplate(
-            str(dst_path), pagesize=letter,
+            str(dst_path), pagesize=_oficio_rl,
             leftMargin=inch, rightMargin=inch,
             topMargin=inch, bottomMargin=inch,
         )
@@ -113,6 +114,27 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
     except Exception as exc:
         logger.warning("Conversión DOCX falló: %s", exc)
         return False
+
+
+def _insert_normalized(output_doc: fitz.Document, src: fitz.Document) -> None:
+    """
+    Inserta todas las páginas de src en output_doc normalizadas a Oficio.
+    Si la página ya es Oficio (tolerancia 2 pt), se inserta directamente sin
+    re-renderizar para preservar calidad. Si no, se escala proporcionalmente
+    y se centra sobre una página Oficio en blanco.
+    """
+    for pno in range(len(src)):
+        sw = src[pno].rect.width
+        sh = src[pno].rect.height
+        if abs(sw - _OFICIO_W) <= 2 and abs(sh - _OFICIO_H) <= 2:
+            output_doc.insert_pdf(src, from_page=pno, to_page=pno)
+        else:
+            scale  = min(_OFICIO_W / sw, _OFICIO_H / sh)
+            nw, nh = sw * scale, sh * scale
+            x0 = (_OFICIO_W - nw) / 2
+            y0 = (_OFICIO_H - nh) / 2
+            page = output_doc.new_page(width=_OFICIO_W, height=_OFICIO_H)
+            page.show_pdf_page(fitz.Rect(x0, y0, x0 + nw, y0 + nh), src, pno)
 
 
 def merge_and_foliate(
@@ -143,7 +165,7 @@ def merge_and_foliate(
                     failed_files.append(f"{fname} (encriptado, sin contraseña)")
                     src.close()
                     continue
-            output_doc.insert_pdf(src)
+            _insert_normalized(output_doc, src)
             page_count = len(src)
             src.close()
             logger.info("Fusionado '%s'  %d págs.", fname, page_count)

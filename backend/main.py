@@ -285,7 +285,6 @@ async def upload_file(
                     orig_path.unlink()
 
         elif ext in _WORD_EXT:
-            orig_path.unlink() if orig_path == pdf_path else None
             ok = convert_docx_to_pdf(str(orig_path), str(pdf_path))
             if orig_path.exists():
                 orig_path.unlink()
