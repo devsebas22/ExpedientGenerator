@@ -253,7 +253,9 @@ if FRONTEND.exists():
 
 @app.get("/")
 async def root():
-    return FileResponse(str(FRONTEND / "index.html"))
+    from fastapi.responses import HTMLResponse
+    html = (FRONTEND / "index.html").read_text(encoding="utf-8")
+    return HTMLResponse(content=html, headers={"Cache-Control": "no-cache"})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
