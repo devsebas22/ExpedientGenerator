@@ -122,19 +122,39 @@ def _insert_normalized(output_doc: fitz.Document, src: fitz.Document) -> None:
     Si la página ya es Oficio (tolerancia 2 pt), se inserta directamente sin
     re-renderizar para preservar calidad. Si no, se escala proporcionalmente
     y se centra sobre una página Oficio en blanco.
+
+    Rendimiento: páginas Oficio consecutivas se insertan en una sola llamada
+    a insert_pdf (evita el O(n²) de llamar insert_pdf una vez por página).
     """
-    for pno in range(len(src)):
-        sw = src[pno].rect.width
-        sh = src[pno].rect.height
-        if abs(sw - _OFICIO_W) <= 2 and abs(sh - _OFICIO_H) <= 2:
-            output_doc.insert_pdf(src, from_page=pno, to_page=pno)
+    n = len(src)
+
+    def _is_oficio(pno: int) -> bool:
+        r = src[pno].rect
+        return abs(r.width - _OFICIO_W) <= 2 and abs(r.height - _OFICIO_H) <= 2
+
+    # Caso rápido: todas las páginas ya son Oficio — una sola llamada insert_pdf
+    if all(_is_oficio(i) for i in range(n)):
+        output_doc.insert_pdf(src)
+        return
+
+    # Caso mixto: agrupar páginas Oficio consecutivas, show_pdf_page para el resto
+    i = 0
+    while i < n:
+        if _is_oficio(i):
+            j = i + 1
+            while j < n and _is_oficio(j):
+                j += 1
+            output_doc.insert_pdf(src, from_page=i, to_page=j - 1)
+            i = j
         else:
-            scale  = min(_OFICIO_W / sw, _OFICIO_H / sh)
-            nw, nh = sw * scale, sh * scale
+            r = src[i].rect
+            scale = min(_OFICIO_W / r.width, _OFICIO_H / r.height)
+            nw, nh = r.width * scale, r.height * scale
             x0 = (_OFICIO_W - nw) / 2
             y0 = (_OFICIO_H - nh) / 2
             page = output_doc.new_page(width=_OFICIO_W, height=_OFICIO_H)
-            page.show_pdf_page(fitz.Rect(x0, y0, x0 + nw, y0 + nh), src, pno)
+            page.show_pdf_page(fitz.Rect(x0, y0, x0 + nw, y0 + nh), src, i)
+            i += 1
 
 
 def merge_and_foliate(
