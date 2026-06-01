@@ -188,15 +188,16 @@ def merge_and_foliate(
         margin_top   = float(config.get("margin_top",   20))
         margin_right = float(config.get("margin_right", 30))
         position     = config.get("position", "top-right")
+        folio_start  = max(1, int(config.get("folio_start", 1)))
 
         for page_num in range(total_pages):
             if page_num % 25 == 0 or page_num == total_pages - 1:
                 pct = 48 + ((page_num + 1) / total_pages) * 46
-                progress_cb(f"Foliando página {page_num + 1} de {total_pages}", pct)
+                progress_cb(f"Foliando página {folio_start + page_num} de {folio_start + total_pages - 1}", pct)
             try:
                 _stamp_folio(
                     output_doc[page_num],
-                    page_num + 1,
+                    folio_start + page_num,
                     font_size,
                     margin_top,
                     margin_right,

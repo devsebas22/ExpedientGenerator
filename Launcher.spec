@@ -1,25 +1,29 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-Spec de PyInstaller — Launcher ligero de Expediente Digital
-Entry point: launcher_main.py  (solo stdlib — sin FastAPI, uvicorn, PyMuPDF, etc.)
+Spec de PyInstaller — Launcher de Expediente Digital (onedir)
+Entry point: launcher_with_splash.py  (muestra splash + delega a launcher_main)
 
-Flujo del launcher:
-  1. Si la app ya está corriendo → abre el navegador y sale
-  2. Primera vez: copia ExpedienteDigital_app.exe a AppData\Local\ExpedienteDigital\
-  3. Comprueba actualización → descarga y reemplaza app.exe (sin DLL locks)
-  4. Lanza ExpedienteDigital_app.exe desacoplado y sale
+Cambios vs. versión anterior:
+  - onedir en vez de onefile: sin descompresión en Temp → apertura instantánea
+  - tkinter incluido: para el splash screen
+  - launcher_with_splash.py como entry point
 
-Tamaño objetivo: ~7-8 MB  (Python embebido + stdlib)
+Salida: dist/launcher/   (carpeta con ExpedienteDigital.exe + dependencias)
+El instalador copia dist/launcher/* a {app}\ directamente.
+
+Tamaño objetivo: ~10-12 MB con tkinter
 """
 
 block_cipher = None
 
 a = Analysis(
-    ["launcher_main.py"],
+    ["launcher_with_splash.py"],
     pathex=["."],
     binaries=[],
     datas=[],
     hiddenimports=[
+        # launcher_main es importado por launcher_with_splash
+        "launcher_main",
         # stdlib que PyInstaller a veces no detecta automáticamente
         "ctypes",
         "ctypes.wintypes",
@@ -34,13 +38,16 @@ a = Analysis(
         "datetime",
         "traceback",
         "time",
+        # tkinter para el splash screen
+        "tkinter",
+        "tkinter.ttk",
+        "_tkinter",
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # Excluir TODO lo que no es stdlib para mantener el tamaño mínimo
-        "tkinter", "_tkinter",
+        # Excluir TODO lo que no es stdlib/tkinter para mantener el tamaño mínimo
         "fastapi", "uvicorn", "starlette", "anyio", "aiofiles",
         "pydantic", "pydantic_core",
         "PIL", "Pillow", "pymupdf", "fitz",
@@ -66,22 +73,30 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
     [],
+    exclude_binaries=True,    # binaries van al COLLECT (onedir)
     name="ExpedienteDigital",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],      # no hay DLLs nativas — UPX puede comprimir libremente
-    runtime_tmpdir=None,
-    console=False,       # sin ventana de consola (windowed)
+    upx_exclude=[],
+    console=False,            # sin ventana de consola (windowed)
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
     icon="assets/icono.ico",
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name="launcher",          # → dist/launcher/
 )

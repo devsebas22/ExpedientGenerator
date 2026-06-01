@@ -577,6 +577,17 @@ btnGenerate.addEventListener("click", generate);
 async function generate() {
   if (!files.length) return;
 
+  // Validar nombre obligatorio
+  const outputName  = document.getElementById("cfg-output-name").value.trim();
+  const nombreError = document.getElementById("nombre-error");
+  if (!outputName) {
+    if (nombreError) nombreError.style.display = "block";
+    document.getElementById("cfg-output-name").focus();
+    document.getElementById("cfg-output-name").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (nombreError) nombreError.style.display = "none";
+
   const foliar = document.getElementById("cfg-foliar").checked;
   const config = {
     font_size:    parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
@@ -584,13 +595,14 @@ async function generate() {
     margin_right: parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
     position:     document.getElementById("cfg-position").value,
     foliar,
+    folio_start:  Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1),
   };
-  const outputName = document.getElementById("cfg-output-name").value.trim();
 
   const body = {
-    file_ids:    files.map((f) => f.id),
+    file_ids:          files.map((f) => f.id),
     config,
-    output_name: outputName || null,
+    output_name:       outputName,
+    nombre_expediente: outputName,
   };
 
   setProcessing(true);
@@ -688,10 +700,20 @@ function showResult(task) {
   }
 
   resultSec.classList.add("visible");
-  toast(`¡Expediente listo! ${task.total_pages} páginas`, "success", 5000);
+
+  if (task.sin_registro) {
+    toast(
+      "Este expediente se generó sin registrar en el sistema por superar el límite diario del mismo nombre.",
+      "warn",
+      8000,
+    );
+  } else {
+    toast(`¡Expediente listo! ${task.total_pages} páginas`, "success", 5000);
+  }
+
   resultSec.scrollIntoView({ behavior: "smooth", block: "center" });
 
-  if (task.total_mes !== undefined) {
+  if (task.total_mes !== undefined && task.total_mes !== null) {
     window.dispatchEvent(new CustomEvent("expediente-registrado", { detail: { total_mes: task.total_mes } }));
   }
 }
@@ -702,6 +724,12 @@ function resetResult() {
   failedList.innerHTML = "";
   btnDownload.href = "#";
 }
+
+/* ── Limpiar error de nombre al escribir ─────────────────────────────────── */
+document.getElementById("cfg-output-name").addEventListener("input", () => {
+  const err = document.getElementById("nombre-error");
+  if (err) err.style.display = "none";
+});
 
 /* ── New expedition ───────────────────────────────────────────────────────── */
 document.getElementById("btn-new").addEventListener("click", () => {
@@ -784,18 +812,20 @@ function updateFolioPreview() {
   previewSec.style.display = foliar ? "" : "none";
   if (!foliar) return;
 
-  const position = document.getElementById("cfg-position").value;
-  const fontSize = parseFloat(document.getElementById("cfg-fontsize").value)    || 11;
-  const mTop     = parseFloat(document.getElementById("cfg-margin-top").value)  || 20;
-  const mRight   = parseFloat(document.getElementById("cfg-margin-right").value)|| 30;
+  const position   = document.getElementById("cfg-position").value;
+  const fontSize   = parseFloat(document.getElementById("cfg-fontsize").value)    || 11;
+  const mTop       = parseFloat(document.getElementById("cfg-margin-top").value)  || 20;
+  const mRight     = parseFloat(document.getElementById("cfg-margin-right").value)|| 30;
+  const folioStart = Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1);
 
-  // Scale: preview page is ~85px wide vs real A4 ~595pt → factor ~0.143
-  const scale = 85 / 595;
+  // Scale: preview page is ~85px wide vs real Oficio ~612pt
+  const scale = 85 / 612;
   numEl.style.fontSize = `${Math.max(7, Math.round(fontSize * scale * 6))}px`;
   numEl.style.top      = position.startsWith("top")    ? `${Math.round(mTop   * scale)}px` : "auto";
   numEl.style.bottom   = position.startsWith("bottom") ? `${Math.round(mTop   * scale)}px` : "auto";
   numEl.style.right    = position.endsWith("right")    ? `${Math.round(mRight * scale)}px` : "auto";
   numEl.style.left     = position.endsWith("left")     ? `${Math.round(mRight * scale)}px` : "auto";
+  numEl.textContent    = String(folioStart).padStart(3, "0");
 
   const posLabel = {
     "top-right":    "Arriba derecha",
@@ -808,10 +838,11 @@ function updateFolioPreview() {
     <div class="folio-preview-row"><span>Posición</span><strong>${posLabel}</strong></div>
     <div class="folio-preview-row"><span>Tamaño letra</span><strong>${fontSize} pt</strong></div>
     <div class="folio-preview-row"><span>Márgenes</span><strong>${mTop} pt / ${mRight} pt</strong></div>
+    <div class="folio-preview-row"><span>Primer folio</span><strong>${folioStart}</strong></div>
   `;
 }
 
-["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right"].forEach((id) => {
+["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right","cfg-folio-start"].forEach((id) => {
   const el = document.getElementById(id);
   if (el) {
     el.addEventListener("change", updateFolioPreview);

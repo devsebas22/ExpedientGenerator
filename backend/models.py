@@ -18,12 +18,14 @@ class FolioConfig(BaseModel):
     margin_right: float = 30.0
     position: str = "top-right"  # top-right | top-left | bottom-right | bottom-left
     foliar: bool = True
+    folio_start: int = 1  # primer número de folio (default 1)
 
 
 class ProcessRequest(BaseModel):
     file_ids: List[str]
     config: FolioConfig
     output_name: Optional[str] = None
+    nombre_expediente: Optional[str] = None  # para registro en servidor y panel admin
 
 
 class FolderRequest(BaseModel):

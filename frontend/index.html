@@ -176,6 +176,11 @@
         <input type="number" id="cfg-margin-right" value="30" min="5" max="150" />
       </div>
 
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>Iniciar foliación desde</label>
+        <input type="number" id="cfg-folio-start" value="1" min="1" step="1" style="max-width:120px" />
+      </div>
+
     </div>
 
     <div id="folio-preview-section">
@@ -193,9 +198,12 @@
 
     <div class="settings-grid" style="margin-top:.75rem">
       <div class="field" style="grid-column: 1 / -1;">
-        <label>Nombre del expediente (opcional)</label>
+        <label>Nombre del expediente <span style="color:#e5383b">*</span></label>
         <input type="text" id="cfg-output-name"
-               placeholder="Se genera automáticamente: expediente_2026_05_05_1530.pdf" />
+               placeholder="Ej: Expediente Juan Pérez" />
+        <div id="nombre-error" style="display:none;color:#e5383b;font-size:.82rem;margin-top:.3rem">
+          El nombre del expediente es obligatorio.
+        </div>
       </div>
     </div>
   </div>

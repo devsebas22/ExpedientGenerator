@@ -11,6 +11,7 @@ Flujo de archivos temporales:
 
 import asyncio
 import hashlib
+import json
 import logging
 import os
 import platform
@@ -64,7 +65,56 @@ def _get_hardware_id() -> str:
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
 
-def _registrar_expediente(output_path: str) -> tuple[bool, int]:
+_nombres_lock = threading.Lock()
+
+
+def _nombres_path() -> Path:
+    """Ruta al registro local de nombres usados hoy."""
+    return _BASE / "nombres_usados.json"
+
+
+def _check_and_register_nombre(nombre: str) -> tuple[int, bool]:
+    """
+    Comprueba cuántas veces se usó 'nombre' hoy y lo registra si el límite no se alcanzó.
+    Retorna (count_antes, registrado).
+    - count_antes < 2: incrementa el contador local y retorna (count_antes, True)
+    - count_antes >= 2: no modifica nada y retorna (count_antes, False)
+    """
+    if not nombre:
+        return 0, True
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    path  = _nombres_path()
+
+    with _nombres_lock:
+        try:
+            if path.exists():
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if data.get("fecha") != today:
+                    data = {"fecha": today, "nombres": {}}
+            else:
+                data = {"fecha": today, "nombres": {}}
+        except Exception:
+            data = {"fecha": today, "nombres": {}}
+
+        count = data["nombres"].get(nombre, 0)
+
+        if count < 2:
+            data["nombres"][nombre] = count + 1
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(
+                    json.dumps(data, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+            except Exception as exc:
+                logger.warning("[nombres] no se pudo guardar registro local: %s", exc)
+            return count, True
+        else:
+            return count, False
+
+
+def _registrar_expediente(output_path: str, nombre_expediente: str = "") -> tuple[bool, int]:
     """
     Registra el expediente en el servidor ANTES de entregarlo al usuario.
     Retorna (ok, total_mes). Si falla, retorna (False, 0).
@@ -72,12 +122,16 @@ def _registrar_expediente(output_path: str) -> tuple[bool, int]:
     try:
         with open(output_path, "rb") as f:
             content = f.read()
-        ts_bytes   = str(_time.time()).encode()
-        hash_exp   = hashlib.sha256(content + ts_bytes).hexdigest()
+        ts_bytes    = str(_time.time()).encode()
+        hash_exp    = hashlib.sha256(content + ts_bytes).hexdigest()
         hardware_id = _get_hardware_id()
         resp = _requests.post(
             f"{_LICENSE_SERVER}/api/expediente/registrar",
-            json={"hardware_id": hardware_id, "hash_expediente": hash_exp},
+            json={
+                "hardware_id":       hardware_id,
+                "hash_expediente":   hash_exp,
+                "nombre_expediente": nombre_expediente,
+            },
             timeout=10,
         )
         data = resp.json()
@@ -482,6 +536,8 @@ async def process_pdfs(request: ProcessRequest):
         "created_at":   _time.time(),
     }
 
+    nombre = (request.nombre_expediente or request.output_name or "").strip()
+
     loop = asyncio.get_running_loop()
     asyncio.ensure_future(
         loop.run_in_executor(
@@ -490,6 +546,7 @@ async def process_pdfs(request: ProcessRequest):
             task_id, file_paths, out_path, out_name,
             request.config.dict(), session_ids,
             list(request.file_ids),   # IDs para limpiar del dict en memoria
+            nombre,
         )
     )
 
@@ -502,13 +559,14 @@ async def process_pdfs(request: ProcessRequest):
 
 
 def _run_task(
-    task_id:     str,
-    file_paths:  list,
-    output_path: str,
-    output_name: str,
-    config:      dict,
-    session_ids: list,
-    file_ids:    list,
+    task_id:           str,
+    file_paths:        list,
+    output_path:       str,
+    output_name:       str,
+    config:            dict,
+    session_ids:       list,
+    file_ids:          list,
+    nombre_expediente: str = "",
 ) -> None:
     """
     Ejecuta en el hilo del ThreadPoolExecutor.
@@ -525,30 +583,48 @@ def _run_task(
         logger.info("[tarea %s] inicio del procesamiento", task_id)
         result = merge_and_foliate(file_paths, output_path, config, cb)
 
-        # Registrar en el servidor ANTES de marcar como listo
-        cb("Registrando expediente…", 98)
-        ok, total_mes = _registrar_expediente(output_path)
-        if not ok:
-            task.update(
-                status  = "error",
-                message = "No se pudo registrar el expediente. Verifica tu conexión a internet.",
-                error   = "registro_fallido",
+        # Verificar límite diario de nombre antes de registrar en el servidor
+        count_antes, puede_registrar = _check_and_register_nombre(nombre_expediente)
+
+        if puede_registrar:
+            cb("Registrando expediente…", 98)
+            ok, total_mes = _registrar_expediente(output_path, nombre_expediente)
+            if not ok:
+                task.update(
+                    status  = "error",
+                    message = "No se pudo registrar el expediente. Verifica tu conexión a internet.",
+                    error   = "registro_fallido",
+                )
+                logger.error("[tarea %s] registro fallido — expediente no entregado", task_id)
+                return
+            sin_registro = False
+        else:
+            # Tercer uso o más del mismo nombre hoy — generar localmente sin registrar en servidor
+            ok         = True
+            total_mes  = None
+            sin_registro = True
+            logger.info(
+                "[tarea %s] nombre '%s' usado %d veces hoy — expediente generado sin registrar",
+                task_id, nombre_expediente, count_antes,
             )
-            logger.error("[tarea %s] registro fallido — expediente no entregado", task_id)
-            return
 
         task.update(
             status       = "done",
             progress     = 100,
-            message      = f"¡Listo! {result['total_pages']} páginas · expediente #{total_mes} del mes",
+            message      = (
+                f"¡Listo! {result['total_pages']} páginas"
+                + (f" · expediente #{total_mes} del mes" if total_mes else "")
+            ),
             result_file  = output_name,
             total_pages  = result["total_pages"],
             failed_files = result["failed_files"],
             total_mes    = total_mes,
+            sin_registro = sin_registro,
         )
         logger.info(
-            "[tarea %s] completada — %d págs. | %d fallo(s) | exp. mes: %d",
-            task_id, result["total_pages"], len(result["failed_files"]), total_mes,
+            "[tarea %s] completada — %d págs. | %d fallo(s) | exp. mes: %s | sin_registro: %s",
+            task_id, result["total_pages"], len(result["failed_files"]),
+            total_mes or "—", sin_registro,
         )
 
     except Exception as exc:

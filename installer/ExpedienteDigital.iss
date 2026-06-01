@@ -79,11 +79,12 @@ Name: "desktopicon"; \
   GroupDescription: "Accesos directos:"
 
 [Files]
-; Launcher — el ejecutable principal (~7.6 MB).
-; Comprueba actualizaciones y lanza la app. Es el acceso directo del usuario.
-Source: "..\dist\ExpedienteDigital.exe"; \
+; Launcher (onedir) — todos los archivos de dist\launcher\ se copian a {app}\.
+; El exe queda en {app}\ExpedienteDigital.exe (sin subcarpeta).
+; onedir elimina la descompresión en Temp y hace que la apertura sea instantánea.
+Source: "..\dist\launcher\*"; \
   DestDir: "{app}"; \
-  Flags: ignoreversion
+  Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; App completa (~48 MB).
 ; El launcher la reemplaza silenciosamente al haber actualizaciones.
