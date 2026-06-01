@@ -10,6 +10,8 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
+import time
 import urllib.request
 import webbrowser
 from datetime import datetime
@@ -82,6 +84,28 @@ def _err(msg: str) -> None:
         ctypes.windll.user32.MessageBoxW(None, msg, "Expediente Digital", 0x10)
     except Exception:
         print(msg, file=sys.stderr)
+
+
+_DOWNLOAD_NOTICE_TITLE = "Expediente Digital — Configurando"
+
+def _download_notice_start() -> None:
+    """Show 'Descargando...' dialog in a background thread (non-blocking)."""
+    msg = (
+        "Descargando Expediente Digital…\n\n"
+        "Primera configuración. Por favor espera, puede tomar\n"
+        "1-3 minutos según tu conexión a internet.\n\n"
+        "La aplicación se abrirá automáticamente al terminar."
+    )
+    def _run():
+        ctypes.windll.user32.MessageBoxW(None, msg, _DOWNLOAD_NOTICE_TITLE, 0x40)
+    threading.Thread(target=_run, daemon=True).start()
+    time.sleep(0.35)  # give the dialog time to appear before blocking on download
+
+def _download_notice_close() -> None:
+    """Close the downloading notice dialog."""
+    hwnd = ctypes.windll.user32.FindWindowW(None, _DOWNLOAD_NOTICE_TITLE)
+    if hwnd:
+        ctypes.windll.user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
 
 
 # ── Versión ────────────────────────────────────────────────────────────────────
@@ -237,6 +261,7 @@ def _launch(app_exe: Path) -> None:
 def main() -> None:
     try:
         app_exe = _APP_DIR / _APP_EXE
+        prefetched_info: dict = {}
 
         # 1. Primera instalación: copiar app.exe desde la carpeta del launcher
         if not app_exe.exists():
@@ -254,15 +279,29 @@ def main() -> None:
                     )
                     return
             else:
-                _log("ERROR", f"Sibling no encontrado: {sibling}")
-                _err(
-                    f"No se encontró {_APP_EXE} junto al launcher.\n\n"
-                    "Descarga el paquete completo desde la página oficial."
-                )
-                return
+                # Sin sibling — descargar app.exe directamente desde el servidor
+                _log("INFO", f"Sibling no encontrado en {sibling} — descargando desde servidor")
+                prefetched_info = _fetch_latest_info()
+                url_dl = (prefetched_info.get("url_descarga") or "").strip()
+                if not url_dl:
+                    _err(
+                        f"No se encontró {_APP_EXE} y no hay conexión al servidor.\n\n"
+                        "Verifica tu conexión a internet e intenta de nuevo."
+                    )
+                    return
+                _download_notice_start()
+                ver_dl = (prefetched_info.get("version") or "0.0.0").strip()
+                ok = _do_update(app_exe, url_dl, ver_dl)
+                _download_notice_close()
+                if not ok:
+                    _err(
+                        "No se pudo descargar Expediente Digital.\n\n"
+                        "Verifica tu conexión a internet e intenta de nuevo."
+                    )
+                    return
 
-        # 2. Consultar servidor (siempre, antes de ver si la app está corriendo)
-        info        = _fetch_latest_info()
+        # 2. Consultar servidor (reutilizar info de primera instalación si está disponible)
+        info        = prefetched_info or _fetch_latest_info()
         ver_nueva   = (info.get("version") or "").strip()
         ver_local   = _read_local_version()
         obligatoria = bool(info.get("es_obligatoria", False))
