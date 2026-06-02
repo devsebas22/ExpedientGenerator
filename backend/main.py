@@ -535,6 +535,7 @@ async def process_pdfs(request: ProcessRequest):
         "total_pages":  None,
         "failed_files": [],
         "error":        None,
+        "cancelled":    False,
         "created_at":   _time.time(),
     }
 
@@ -578,6 +579,8 @@ def _run_task(
     task = tasks[task_id]
 
     def cb(msg: str, pct: float) -> None:
+        if task.get("cancelled"):
+            raise InterruptedError("cancelado")
         task["message"]  = msg
         task["progress"] = round(pct, 1)
 
@@ -629,6 +632,10 @@ def _run_task(
             total_mes or "—", sin_registro,
         )
 
+    except InterruptedError:
+        logger.info("[tarea %s] cancelada por el usuario", task_id)
+        task.update(status="cancelled", progress=0, message="Cancelado")
+
     except Exception as exc:
         logger.error("[tarea %s] falló: %s", task_id, exc)
         task.update(status="error", message=f"Error: {exc}", error=str(exc))
@@ -660,6 +667,17 @@ async def task_status(task_id: str):
     if task_id not in tasks:
         raise HTTPException(404, "Tarea no encontrada")
     return tasks[task_id]
+
+
+@app.delete("/api/task/{task_id}")
+async def cancel_task(task_id: str):
+    if task_id not in tasks:
+        raise HTTPException(404, "Tarea no encontrada")
+    task = tasks[task_id]
+    if task["status"] != "processing":
+        return {"ok": False, "reason": "not_processing"}
+    task["cancelled"] = True
+    return {"ok": True}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

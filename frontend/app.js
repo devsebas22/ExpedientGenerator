@@ -29,6 +29,7 @@ var ICO_INFO_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height
 let files          = [];
 let pollTimer      = null;
 let currentSession = null;   // session_id activo para uploads
+let activeTaskId   = null;   // task_id en curso (para cancelación)
 
 /* ── DOM refs ────────────────────────────────────────────────────────────── */
 const dropZone       = document.getElementById("drop-zone");
@@ -48,6 +49,7 @@ const resultSec      = document.getElementById("result-section");
 const resultName     = document.getElementById("result-name");
 const resultMeta     = document.getElementById("result-meta");
 const btnDownload    = document.getElementById("btn-download");
+const btnCancelGen   = document.getElementById("btn-cancel-gen");
 const failedWarn     = document.getElementById("failed-warn");
 const failedList     = document.getElementById("failed-list");
 // Counter panel
@@ -621,6 +623,7 @@ async function generate() {
       throw new Error(err.detail || "Error al iniciar proceso");
     }
     const { task_id } = await res.json();
+    activeTaskId = task_id;
     startPolling(task_id);
   } catch (e) {
     setProcessing(false);
@@ -663,13 +666,31 @@ async function pollTask(taskId) {
 
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  activeTaskId = null;
 }
+
+async function cancelGeneration() {
+  const tid = activeTaskId;
+  if (!tid) return;
+  btnCancelGen.disabled = true;
+  try {
+    await fetch(`${API}/api/task/${tid}`, { method: "DELETE" });
+  } catch (_) { /* ignore network errors — still reset UI */ }
+  stopPolling();
+  setProcessing(false);
+  showProgress(false);
+  resetSession();
+  toast("Generación cancelada", "warn", 4000);
+}
+
+btnCancelGen.addEventListener("click", cancelGeneration);
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Progress UI
    ═════════════════════════════════════════════════════════════════════════ */
 function showProgress(on) {
   progressSec.classList.toggle("visible", on);
+  btnCancelGen.disabled = !on;
 }
 
 function setProgress(pct, msg) {

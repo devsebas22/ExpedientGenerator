@@ -290,6 +290,11 @@ main {
   color: var(--text);
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) { background: #d9342a; }
 .btn-danger-ghost {
   background: transparent;
   color: var(--danger);
