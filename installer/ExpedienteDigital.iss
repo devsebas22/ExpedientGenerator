@@ -17,7 +17,7 @@
 ; =============================================================================
 
 #define AppName      "Expediente Digital"
-#define AppVersion   "1.1.7"
+#define AppVersion   "1.1.8"
 #define AppPublisher "Sebastian Mogollon"
 #define AppExeName   "ExpedienteDigital.exe"
 ; GUID único — no cambiar entre versiones del mismo producto
@@ -59,7 +59,7 @@ WizardSizePercent=120
 
 ; ── Información en Programas instalados ──────────────────────────────────────
 AppComments=Genera expedientes digitales con foliación automática
-VersionInfoVersion={#AppVersion}
+VersionInfoVersion={#AppVersion}.0
 VersionInfoDescription={#AppName}
 VersionInfoProductName={#AppName}
 AppSupportURL=https://wa.me/573164698626
@@ -79,12 +79,10 @@ Name: "desktopicon"; \
   GroupDescription: "Accesos directos:"
 
 [Files]
-; Launcher (onedir) — todos los archivos de dist\launcher\ se copian a {app}\.
-; El exe queda en {app}\ExpedienteDigital.exe (sin subcarpeta).
-; onedir elimina la descompresión en Temp y hace que la apertura sea instantánea.
-Source: "..\dist\launcher\*"; \
+; Launcher onefile — un único exe de ~11 MB, sin carpeta _internal.
+Source: "..\dist\ExpedienteDigital.exe"; \
   DestDir: "{app}"; \
-  Flags: ignoreversion recursesubdirs createallsubdirs
+  Flags: ignoreversion
 
 ; App completa (~48 MB).
 ; El launcher la reemplaza silenciosamente al haber actualizaciones.
