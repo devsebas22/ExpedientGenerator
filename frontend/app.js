@@ -705,8 +705,9 @@ function setProgress(pct, msg) {
 function showResult(task) {
   const fname = task.result_file;
   resultName.textContent = fname;
+  const secs = task.elapsed_seconds != null ? ` • generado en ${task.elapsed_seconds}s` : "";
   resultMeta.textContent =
-    `${task.total_pages} páginas foliadas • listo en expedientes_generados/`;
+    `${task.total_pages} páginas foliadas • listo en expedientes_generados/${secs}`;
 
   btnDownload.href = `${API}/api/download/${encodeURIComponent(fname)}`;
   btnDownload.download = fname;
@@ -729,7 +730,8 @@ function showResult(task) {
       8000,
     );
   } else {
-    toast(`¡Expediente listo! ${task.total_pages} páginas`, "success", 5000);
+    const secsLabel = task.elapsed_seconds != null ? ` en ${task.elapsed_seconds}s` : "";
+    toast(`¡Expediente listo! ${task.total_pages} páginas${secsLabel}`, "success", 5000);
   }
 
   resultSec.scrollIntoView({ behavior: "smooth", block: "center" });

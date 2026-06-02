@@ -577,6 +577,7 @@ def _run_task(
     tanto en caso de éxito como de error.
     """
     task = tasks[task_id]
+    t0   = _time.time()
 
     def cb(msg: str, pct: float) -> None:
         if task.get("cancelled"):
@@ -613,6 +614,7 @@ def _run_task(
                 task_id, nombre_expediente, count_antes,
             )
 
+        elapsed = round(_time.time() - t0, 1)
         task.update(
             status       = "done",
             progress     = 100,
@@ -625,11 +627,12 @@ def _run_task(
             failed_files = result["failed_files"],
             total_mes    = total_mes,
             sin_registro = sin_registro,
+            elapsed_seconds = elapsed,
         )
         logger.info(
-            "[tarea %s] completada — %d págs. | %d fallo(s) | exp. mes: %s | sin_registro: %s",
+            "[tarea %s] completada — %d págs. | %d fallo(s) | %.1fs | exp. mes: %s | sin_registro: %s",
             task_id, result["total_pages"], len(result["failed_files"]),
-            total_mes or "—", sin_registro,
+            elapsed, total_mes or "—", sin_registro,
         )
 
     except InterruptedError:

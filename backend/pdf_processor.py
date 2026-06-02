@@ -116,15 +116,51 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
         return False
 
 
+def _normalize_page_in_place(doc: fitz.Document, page_idx: int) -> None:
+    """
+    Escala y centra una página no-Oficio a tamaño Oficio modificando su
+    content stream directamente. Sin show_pdf_page → sin Form XObjects →
+    los recursos ya se importaron una sola vez al llamar insert_pdf(src).
+
+    Coordenadas PDF: origen en esquina inferior-izquierda, Y crece hacia arriba.
+    El CTM  q scale 0 0 scale tx ty cm  transforma (x,y) → (x·s+tx, y·s+ty).
+    """
+    page = doc[page_idx]
+    if page.rotation != 0:
+        # Páginas rotadas son muy raras — omitir normalización es aceptable
+        logger.warning("Página %d tiene rotación %d — omitiendo normalización Oficio",
+                       page_idx, page.rotation)
+        return
+
+    w, h = page.rect.width, page.rect.height
+    scale = min(_OFICIO_W / w, _OFICIO_H / h)
+    nw, nh = w * scale, h * scale
+    tx = (_OFICIO_W - nw) / 2
+    ty = (_OFICIO_H - nh) / 2   # margen inferior en coordenadas PDF (y hacia arriba)
+
+    try:
+        page.clean_contents()
+        xrefs = page.get_contents()
+        if xrefs:
+            xref = xrefs[0]
+            old = doc.xref_stream(xref)
+            ctm = f"q {scale:.6f} 0 0 {scale:.6f} {tx:.4f} {ty:.4f} cm\n".encode()
+            doc.update_stream(xref, ctm + old + b"\nQ")
+        page.set_mediabox(fitz.Rect(0, 0, _OFICIO_W, _OFICIO_H))
+    except Exception as exc:
+        logger.warning("No se pudo normalizar página %d in-place: %s", page_idx, exc)
+
+
 def _insert_normalized(output_doc: fitz.Document, src: fitz.Document) -> None:
     """
     Inserta todas las páginas de src en output_doc normalizadas a Oficio.
-    Si la página ya es Oficio (tolerancia 2 pt), se inserta directamente sin
-    re-renderizar para preservar calidad. Si no, se escala proporcionalmente
-    y se centra sobre una página Oficio en blanco.
 
-    Rendimiento: páginas Oficio consecutivas se insertan en una sola llamada
-    a insert_pdf (evita el O(n²) de llamar insert_pdf una vez por página).
+    Rendimiento: insert_pdf una sola vez importa los recursos del documento
+    fuente exactamente una vez. Las páginas no-Oficio se normalizan in-place
+    modificando su content stream (sin show_pdf_page, sin Form XObjects).
+
+    show_pdf_page duplicaba recursos por cada llamada; con garbage=3 al
+    guardar eso causaba O(n²) en documentos con muchas páginas no-Oficio.
     """
     n = len(src)
 
@@ -132,29 +168,12 @@ def _insert_normalized(output_doc: fitz.Document, src: fitz.Document) -> None:
         r = src[pno].rect
         return abs(r.width - _OFICIO_W) <= 2 and abs(r.height - _OFICIO_H) <= 2
 
-    # Caso rápido: todas las páginas ya son Oficio — una sola llamada insert_pdf
-    if all(_is_oficio(i) for i in range(n)):
-        output_doc.insert_pdf(src)
-        return
+    start = len(output_doc)
+    output_doc.insert_pdf(src)   # recursos importados una sola vez
 
-    # Caso mixto: agrupar páginas Oficio consecutivas, show_pdf_page para el resto
-    i = 0
-    while i < n:
-        if _is_oficio(i):
-            j = i + 1
-            while j < n and _is_oficio(j):
-                j += 1
-            output_doc.insert_pdf(src, from_page=i, to_page=j - 1)
-            i = j
-        else:
-            r = src[i].rect
-            scale = min(_OFICIO_W / r.width, _OFICIO_H / r.height)
-            nw, nh = r.width * scale, r.height * scale
-            x0 = (_OFICIO_W - nw) / 2
-            y0 = (_OFICIO_H - nh) / 2
-            page = output_doc.new_page(width=_OFICIO_W, height=_OFICIO_H)
-            page.show_pdf_page(fitz.Rect(x0, y0, x0 + nw, y0 + nh), src, i)
-            i += 1
+    for pno in range(n):
+        if not _is_oficio(pno):
+            _normalize_page_in_place(output_doc, start + pno)
 
 
 def merge_and_foliate(
@@ -233,7 +252,7 @@ def merge_and_foliate(
     try:
         output_doc.save(
             output_path,
-            garbage=3,     # remove unreferenced objects
+            garbage=2,     # compact XREF (3 = también comprime streams, lento con muchos XObjects)
             deflate=True,  # compress streams
             clean=False,   # do NOT re-parse content streams → preserves quality
         )
