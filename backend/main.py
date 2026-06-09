@@ -35,7 +35,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .models import CountRequest, FileInfo, FolderRequest, FolioConfig, ProcessRequest
+from .models import (
+    CountRequest, FileInfo, FolderRequest, FolioConfig, ProcessRequest,
+    AppConfigRequest, CreateExpedienteRequest, RenameExpedienteRequest,
+    UpdateOrdenRequest, UpdateConfigFolioRequest, GenerarExpedienteRequest,
+    ExpedienteConfigFolio,
+)
 from .pdf_processor import (
     get_page_count, analyze_pdf_file, merge_and_foliate, natural_sort_key,
     convert_image_to_pdf, convert_docx_to_pdf,
@@ -56,7 +61,7 @@ def _read_version_actual() -> str:
             return ver_file.read_text(encoding="utf-8").strip()
     except Exception:
         pass
-    return "1.1.7"  # fallback para modo dev o primera ejecución
+    return "1.1.9"  # fallback para modo dev o primera ejecución
 
 
 def _get_hardware_id() -> str:
@@ -114,7 +119,7 @@ def _check_and_register_nombre(nombre: str) -> tuple[int, bool]:
             return count, False
 
 
-def _registrar_expediente(output_path: str, nombre_expediente: str = "") -> tuple[bool, int]:
+def _registrar_expediente(output_path: str, nombre_expediente: str = "", paginas_procesadas: int = 0) -> tuple[bool, int]:
     """
     Registra el expediente en el servidor ANTES de entregarlo al usuario.
     Retorna (ok, total_mes). Si falla, retorna (False, 0).
@@ -128,9 +133,10 @@ def _registrar_expediente(output_path: str, nombre_expediente: str = "") -> tupl
         resp = _requests.post(
             f"{_LICENSE_SERVER}/api/expediente/registrar",
             json={
-                "hardware_id":       hardware_id,
-                "hash_expediente":   hash_exp,
-                "nombre_expediente": nombre_expediente,
+                "hardware_id":        hardware_id,
+                "hash_expediente":    hash_exp,
+                "nombre_expediente":  nombre_expediente,
+                "paginas_procesadas": paginas_procesadas,
             },
             timeout=10,
         )
@@ -594,7 +600,7 @@ def _run_task(
 
         if puede_registrar:
             cb("Registrando expediente…", 98)
-            ok, total_mes = _registrar_expediente(output_path, nombre_expediente)
+            ok, total_mes = _registrar_expediente(output_path, nombre_expediente, result.get("total_pages", 0))
             if not ok:
                 task.update(
                     status  = "error",
@@ -645,20 +651,30 @@ def _run_task(
 
     finally:
         # ── Limpieza garantizada ───────────────────────────────────────────────
-        # 1. Eliminar carpetas de sesión del disco
-        for sid in session_ids:
-            sessions.cleanup(sid)
+        was_cancelled = task.get("status") == "cancelled"
+        if was_cancelled:
+            # Sesiones preservadas: el usuario puede reintentar inmediatamente
+            # con los mismos archivos sin necesidad de volver a subirlos.
+            removed_from_mem = 0
+            logger.info(
+                "[tarea %s] cancelada — sesiones preservadas para reintento",
+                task_id,
+            )
+        else:
+            # 1. Eliminar carpetas de sesión del disco
+            for sid in session_ids:
+                sessions.cleanup(sid)
 
-        # 2. Eliminar registros de memoria
-        removed_from_mem = 0
-        for fid in file_ids:
-            if uploaded_files.pop(fid, None):
-                removed_from_mem += 1
+            # 2. Eliminar registros de memoria
+            removed_from_mem = 0
+            for fid in file_ids:
+                if uploaded_files.pop(fid, None):
+                    removed_from_mem += 1
 
-        logger.info(
-            "[tarea %s] limpieza — %d sesión(es) | %d registro(s) en memoria",
-            task_id, len(session_ids), removed_from_mem,
-        )
+            logger.info(
+                "[tarea %s] limpieza — %d sesión(es) | %d registro(s) en memoria",
+                task_id, len(session_ids), removed_from_mem,
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -802,6 +818,411 @@ async def health():
 # Estado de licencia (para la UI)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Configuración de la app (carpeta raíz de expedientes)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_META_FILE             = "expediente.json"
+_INVALID_FOLDER_CHARS  = r'\/:*?"<>|'
+
+
+def _config_path() -> Path:
+    return _BASE / "config.json"
+
+
+def _get_app_config() -> dict:
+    try:
+        if _config_path().exists():
+            return json.loads(_config_path().read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return {}
+
+
+def _save_app_config(data: dict) -> None:
+    _config_path().write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _default_expedientes_dir() -> Path:
+    d = _BASE / "expedientes"
+    d.mkdir(exist_ok=True)
+    return d
+
+
+def _get_carpeta_raiz() -> Path:
+    cr = _get_app_config().get("carpeta_raiz")
+    if cr:
+        p = Path(cr)
+        if p.exists() and p.is_dir():
+            return p
+    return _default_expedientes_dir()
+
+
+def _sanitize_folder_name(name: str) -> str:
+    name = name.strip()
+    for c in _INVALID_FOLDER_CHARS:
+        name = name.replace(c, "_")
+    return name[:128] or "expediente"
+
+
+def _sanitize_filename(name: str) -> str:
+    for c in _INVALID_FOLDER_CHARS:
+        name = name.replace(c, "_")
+    return name.strip(". ") or "archivo"
+
+
+def _read_meta(folder: Path) -> dict:
+    f = folder / _META_FILE
+    if f.exists():
+        try:
+            return json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"nombre": folder.name, "creado": "", "orden_archivos": [], "config_folio": {}}
+
+
+def _write_meta(folder: Path, meta: dict) -> None:
+    (folder / _META_FILE).write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _get_ordered_file_paths(folder: Path, meta: dict) -> list:
+    """Returns ordered list of Path objects for PDFs in the expedition folder."""
+    orden     = meta.get("orden_archivos", [])
+    all_pdfs  = {f.name for f in folder.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"}
+    result: list = []
+    seen: set    = set()
+    for name in orden:
+        if name in all_pdfs:
+            result.append(folder / name)
+            seen.add(name)
+    for name in sorted(all_pdfs - seen, key=lambda s: natural_sort_key(s)):
+        result.append(folder / name)
+    return result
+
+
+@app.get("/api/config")
+async def get_app_config():
+    cfg = _get_app_config()
+    return {
+        "carpeta_raiz": cfg.get("carpeta_raiz"),
+        "configurada":  bool(cfg.get("carpeta_raiz")),
+    }
+
+
+@app.post("/api/config")
+async def save_app_config_endpoint(req: AppConfigRequest):
+    p = Path(req.carpeta_raiz.strip())
+    if not p.exists():
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            raise HTTPException(400, f"No se pudo crear la carpeta: {exc}")
+    if not p.is_dir():
+        raise HTTPException(400, "La ruta no es una carpeta válida")
+    cfg = _get_app_config()
+    cfg["carpeta_raiz"] = str(p)
+    _save_app_config(cfg)
+    return {"ok": True, "carpeta_raiz": str(p)}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Gestión de expedientes (CRUD)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/expedientes")
+async def list_expedientes():
+    raiz = _get_carpeta_raiz()
+    result = []
+    try:
+        for folder in sorted(raiz.iterdir(), key=lambda p: p.name.lower()):
+            if not folder.is_dir() or folder.name.startswith("."):
+                continue
+            meta  = _read_meta(folder)
+            files = _get_ordered_file_paths(folder, meta)
+            result.append({
+                "nombre":   folder.name,
+                "archivos": len(files),
+                "creado":   meta.get("creado", ""),
+            })
+    except Exception as exc:
+        logger.error("[expedientes] error listando: %s", exc)
+    return result
+
+
+@app.post("/api/expedientes", status_code=201)
+async def create_expediente(req: CreateExpedienteRequest):
+    nombre = _sanitize_folder_name(req.nombre)
+    if not nombre:
+        raise HTTPException(400, "Nombre de expediente inválido")
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if folder.exists():
+        raise HTTPException(409, f"Ya existe un expediente llamado '{nombre}'")
+    folder.mkdir(parents=True)
+    meta = {
+        "nombre":          nombre,
+        "creado":          datetime.now().isoformat(),
+        "orden_archivos":  [],
+        "config_folio": {
+            "activo":           True,
+            "posicion":         "top-right",
+            "tamano":           11.0,
+            "margen_superior":  20.0,
+            "margen_lateral":   30.0,
+            "iniciar_desde":    1,
+        },
+    }
+    _write_meta(folder, meta)
+    logger.info("[expediente] creado: '%s'", nombre)
+    return {"nombre": nombre, "archivos": 0, "creado": meta["creado"]}
+
+
+@app.put("/api/expedientes/{nombre}/rename")
+async def rename_expediente(nombre: str, req: RenameExpedienteRequest):
+    nuevo  = _sanitize_folder_name(req.nombre_nuevo)
+    if not nuevo:
+        raise HTTPException(400, "Nombre inválido")
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    dest = raiz / nuevo
+    if dest.exists():
+        raise HTTPException(409, f"Ya existe un expediente llamado '{nuevo}'")
+    folder.rename(dest)
+    meta = _read_meta(dest)
+    meta["nombre"] = nuevo
+    _write_meta(dest, meta)
+    logger.info("[expediente] renombrado: '%s' → '%s'", nombre, nuevo)
+    return {"nombre": nuevo}
+
+
+@app.delete("/api/expedientes/{nombre}")
+async def delete_expediente(nombre: str):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    shutil.rmtree(str(folder))
+    logger.info("[expediente] eliminado: '%s'", nombre)
+    return {"ok": True}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Archivos dentro de un expediente
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/expedientes/{nombre}/archivos")
+async def list_archivos_expediente(nombre: str):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    meta        = _read_meta(folder)
+    file_paths  = _get_ordered_file_paths(folder, meta)
+    archivos    = []
+    total_pages = 0
+    for fp in file_paths:
+        pages, err = analyze_pdf_file(str(fp))
+        total_pages += max(0, pages)
+        archivos.append({
+            "nombre":   fp.name,
+            "paginas":  pages,
+            "tamanio":  fp.stat().st_size,
+            "error":    err,
+        })
+    return {
+        "archivos":     archivos,
+        "total_paginas": total_pages,
+        "config_folio": meta.get("config_folio", {}),
+    }
+
+
+@app.post("/api/expedientes/{nombre}/archivos")
+async def add_archivo_expediente(
+    nombre:  str,
+    file:    UploadFile = File(...),
+    replace: bool = Query(False),
+):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+
+    ext = Path(file.filename).suffix.lower()
+    if ext not in _ALL_EXT:
+        raise HTTPException(400, f"Tipo de archivo no compatible: {file.filename}")
+
+    safe_name = _sanitize_filename(file.filename)
+    dest_name = Path(safe_name).stem + ".pdf" if ext not in {".pdf"} else safe_name
+    dest_path = folder / dest_name
+
+    if dest_path.exists() and not replace:
+        raise HTTPException(409, f"Ya existe '{dest_name}' en el expediente")
+
+    temp_session = sessions.create()
+    file_id      = str(uuid.uuid4())
+    orig_path    = sessions.file_path(temp_session, f"{file_id}{ext}")
+    pdf_path     = sessions.file_path(temp_session, f"{file_id}.pdf")
+
+    try:
+        async with aiofiles.open(str(orig_path), "wb") as fh:
+            while chunk := await file.read(1024 * 1024):
+                await fh.write(chunk)
+
+        if ext in _IMAGE_EXT:
+            try:
+                convert_image_to_pdf(str(orig_path), str(pdf_path))
+            finally:
+                if orig_path.exists():
+                    orig_path.unlink()
+        elif ext in _WORD_EXT:
+            ok = convert_docx_to_pdf(str(orig_path), str(pdf_path))
+            if orig_path.exists():
+                orig_path.unlink()
+            if not ok:
+                raise HTTPException(400, "No se pudo convertir el archivo Word a PDF")
+        else:
+            pdf_path = orig_path
+
+        pages, err_msg = analyze_pdf_file(str(pdf_path))
+        if pages <= 0:
+            raise HTTPException(400, err_msg or "El archivo no tiene páginas válidas")
+
+        shutil.copy2(str(pdf_path), str(dest_path))
+
+        meta  = _read_meta(folder)
+        orden = meta.get("orden_archivos", [])
+        if dest_name not in orden:
+            orden.append(dest_name)
+        meta["orden_archivos"] = orden
+        _write_meta(folder, meta)
+
+        logger.info("[expediente] archivo agregado: '%s' → '%s' (%d págs.)", file.filename, nombre, pages)
+        return {"nombre": dest_name, "paginas": pages, "tamanio": dest_path.stat().st_size}
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("[expediente] error agregando '%s': %s", file.filename, exc)
+        raise HTTPException(500, str(exc))
+    finally:
+        sessions.cleanup(temp_session)
+
+
+@app.delete("/api/expedientes/{nombre}/archivos/{filename:path}")
+async def delete_archivo_expediente(nombre: str, filename: str):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    file_path = folder / filename
+    if not file_path.exists():
+        raise HTTPException(404, "Archivo no encontrado")
+    file_path.unlink()
+    meta  = _read_meta(folder)
+    orden = meta.get("orden_archivos", [])
+    if filename in orden:
+        orden.remove(filename)
+    meta["orden_archivos"] = orden
+    _write_meta(folder, meta)
+    logger.info("[expediente] archivo eliminado: '%s' de '%s'", filename, nombre)
+    return {"ok": True}
+
+
+@app.put("/api/expedientes/{nombre}/orden")
+async def update_orden_expediente(nombre: str, req: UpdateOrdenRequest):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    all_pdfs = {f.name for f in folder.iterdir() if f.is_file() and f.suffix.lower() == ".pdf"}
+    meta = _read_meta(folder)
+    meta["orden_archivos"] = [f for f in req.orden if f in all_pdfs]
+    _write_meta(folder, meta)
+    return {"ok": True, "orden": meta["orden_archivos"]}
+
+
+@app.put("/api/expedientes/{nombre}/config")
+async def update_config_expediente(nombre: str, req: UpdateConfigFolioRequest):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+    meta = _read_meta(folder)
+    meta["config_folio"] = req.config_folio.model_dump()
+    _write_meta(folder, meta)
+    return {"ok": True}
+
+
+@app.post("/api/expedientes/{nombre}/generar")
+async def generar_expediente_endpoint(nombre: str, req: GenerarExpedienteRequest):
+    raiz   = _get_carpeta_raiz()
+    folder = raiz / nombre
+    if not folder.exists():
+        raise HTTPException(404, "Expediente no encontrado")
+
+    meta       = _read_meta(folder)
+    file_paths = [str(p) for p in _get_ordered_file_paths(folder, meta)]
+    if not file_paths:
+        raise HTTPException(400, "El expediente no tiene archivos para generar")
+
+    if req.config_folio:
+        folio_cfg = req.config_folio.model_dump()
+    else:
+        folio_cfg = meta.get("config_folio", {})
+
+    gen_config = {
+        "foliar":       folio_cfg.get("activo",          True),
+        "font_size":    folio_cfg.get("tamano",           11.0),
+        "margin_top":   folio_cfg.get("margen_superior",  20.0),
+        "margin_right": folio_cfg.get("margen_lateral",   30.0),
+        "position":     folio_cfg.get("posicion",         "top-right"),
+        "folio_start":  folio_cfg.get("iniciar_desde",    1),
+    }
+
+    out_name = req.output_name.strip()
+    if not out_name.lower().endswith(".pdf"):
+        out_name += ".pdf"
+    out_path = str(OUTPUT_DIR / out_name)
+
+    task_id = str(uuid.uuid4())
+    _cutoff = _time.time() - 3600
+    stale   = [tid for tid, t in tasks.items()
+               if t["status"] in ("done", "error") and t.get("created_at", 0) < _cutoff]
+    for tid in stale:
+        tasks.pop(tid, None)
+
+    tasks[task_id] = {
+        "id":           task_id,
+        "status":       "processing",
+        "progress":     0,
+        "message":      "Iniciando…",
+        "result_file":  None,
+        "total_pages":  None,
+        "failed_files": [],
+        "error":        None,
+        "cancelled":    False,
+        "created_at":   _time.time(),
+    }
+
+    loop = asyncio.get_running_loop()
+    asyncio.ensure_future(
+        loop.run_in_executor(
+            executor,
+            _run_task,
+            task_id, file_paths, out_path, out_name,
+            gen_config,
+            [],       # no temp sessions to clean
+            [],       # no uploaded_files records to clean
+            nombre,   # nombre_expediente for license registration
+        )
+    )
+
+    logger.info("[generar] tarea %s para expediente '%s' — %d archivos", task_id, nombre, len(file_paths))
+    return {"task_id": task_id}
+
+
 @app.get("/api/licencia")
 async def licencia_status():
     hardware_id = _get_hardware_id()
@@ -813,15 +1234,21 @@ async def licencia_status():
         )
         data = resp.json()
         return {
-            "hardware_id": hardware_id,
-            "activa":      data.get("activa", False),
-            "es_prueba":   data.get("es_prueba", False),
-            "mensaje":     data.get("mensaje", ""),
+            "hardware_id":        hardware_id,
+            "activa":             data.get("activa", False),
+            "es_prueba":          data.get("es_prueba", False),
+            "mensaje":            data.get("mensaje", ""),
+            "modelo_cobro":       data.get("modelo_cobro", "por_pagina"),
+            "precio_pagina":      data.get("precio_pagina", 0),
+            "minimo_operacion":   data.get("minimo_operacion", 0),
+            "precio_expediente":  data.get("precio_expediente", 0),
+            "precio_licencia_mes":data.get("precio_licencia_mes", 0),
+            "precio_licencia_ano":data.get("precio_licencia_ano", 0),
         }
     except Exception as e:
         return {
             "hardware_id": hardware_id,
             "activa":      False,
             "es_prueba":   False,
-            "mensaje":     f"Sin conexión al servidor de licencias.",
+            "mensaje":     "Sin conexión al servidor de licencias.",
         }

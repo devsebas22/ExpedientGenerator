@@ -8,13 +8,33 @@
 </head>
 <body>
 
-<header>
-  <span class="header-dot"></span>
-  <h1>Expediente Digital</h1>
-  <span class="version" id="app-version">v…</span>
-</header>
+<!-- ── Pantalla de configuración inicial ─────────────────────────────────── -->
+<div id="setup-screen" style="display:none">
+  <div class="setup-wrap">
+    <div class="setup-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <h2 class="setup-title">Bienvenido a Expediente Digital</h2>
+    <p class="setup-sub">Elige la carpeta donde se guardarán tus expedientes.<br>
+    Esta carpeta es tuya — si desinstalan la app, tus archivos quedan intactos.</p>
+    <div class="setup-field">
+      <input type="text" id="setup-folder-path" placeholder="Ej: C:\Usuarios\Juan\Expedientes" />
+    </div>
+    <div class="setup-actions">
+      <button class="btn btn-secondary" id="btn-setup-browse">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Examinar
+      </button>
+      <button class="btn btn-primary" id="btn-setup-save">
+        Continuar
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <p id="setup-error" class="setup-error" style="display:none"></p>
+  </div>
+</div>
 
-<!-- ── Pantalla de activación (se muestra si la licencia no está activa) ─── -->
+<!-- ── Pantalla de activación ────────────────────────────────────────────── -->
 <div id="activacion-screen" style="display:none">
   <div class="activacion-wrap">
     <div class="activacion-icon">
@@ -41,16 +61,7 @@
   </div>
 </div>
 
-<!-- ── Licencia status banner (visible cuando está activa) ─────────────── -->
-<div id="lic-banner" style="display:none"></div>
-
-<!-- ── Update banner (actualizaciones opcionales) ─────────────────────── -->
-<div id="update-banner" style="display:none">
-  <span id="update-banner-text"></span>
-  <button class="btn btn-secondary btn-sm" id="update-btn-dismiss">Cerrar</button>
-</div>
-
-<!-- ── Update modal (actualizaciones obligatorias — bloquea la UI) ─────── -->
+<!-- ── Update modal (actualizaciones obligatorias) ───────────────────────── -->
 <div id="update-modal">
   <div class="update-modal-box">
     <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#e85d04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -60,338 +71,454 @@
   </div>
 </div>
 
-<main id="app-main">
+<!-- ── App principal ─────────────────────────────────────────────────────── -->
+<div id="app" style="display:none">
 
-  <!-- ── Upload ─────────────────────────────────────────────────────────── -->
-  <div class="card">
-    <div class="card-title">Cargar documentos</div>
-
-    <div id="drop-zone">
-      <div class="dz-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-      </div>
-      <div class="dz-main">Arrastra y suelta tus archivos aquí</div>
-      <div class="dz-sub">O usa los botones de abajo para seleccionar</div>
-      <div class="dz-formats">
-        Formatos aceptados: PDF, JPEG, PNG, GIF, BMP, TIFF, WEBP, DOCX, DOC<br>
-        Para mejor calidad en el resultado final, se recomienda usar PDF.
-      </div>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <span class="header-dot"></span>
+      <h1>Expediente Digital</h1>
+      <span class="version" id="app-version">v…</span>
     </div>
-
-    <div class="upload-row">
-      <button class="btn btn-primary" id="btn-files">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Seleccionar archivos
-      </button>
-      <button class="btn btn-secondary" id="btn-folder-browser">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        Seleccionar carpeta
+    <div class="header-right">
+      <div id="lic-banner-inline"></div>
+      <div id="update-banner" style="display:none">
+        <span id="update-banner-text"></span>
+        <button class="btn btn-ghost btn-sm" id="update-btn-dismiss">✕</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btn-settings" title="Configuración">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
     </div>
+  </header>
 
-    <div class="folder-row" style="margin-top:.9rem;">
-      <input type="text" id="folder-path"
-             placeholder="O escribe la ruta: C:\Users\usuario\Documentos" />
-      <button class="btn btn-secondary" id="btn-load-folder">Cargar</button>
-    </div>
-  </div>
+  <!-- Layout de dos paneles -->
+  <div class="two-panel-layout">
 
-  <!-- ── File list ──────────────────────────────────────────────────────── -->
-  <div class="card">
-    <div class="list-header">
-      <h2>Archivos cargados</h2>
-      <span class="badge blue" id="badge-files">0 archivos</span>
-      <span class="badge green" id="badge-pages">0 páginas</span>
-      <div class="list-header-actions">
-        <button class="btn btn-ghost" id="btn-sort" title="Ordenar por nombre natural">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
-          Auto-ordenar
-        </button>
-        <button class="btn btn-danger-ghost" id="btn-clear">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          Limpiar todo
+    <!-- ── Panel izquierdo: lista de expedientes ──────────────────────── -->
+    <aside class="left-panel">
+      <div class="left-panel-header">
+        <span class="left-panel-title">Expedientes</span>
+        <button class="btn-icon-green" id="btn-new-expediente" title="Nuevo expediente">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
-    </div>
-    <ul id="file-list"></ul>
-  </div>
-
-  <!-- ── Page counter ──────────────────────────────────────────────────── -->
-  <div class="card" id="counter-card" style="display:none">
-    <div class="counter-header">
-      <span class="card-title" style="margin-bottom:0">Contador de páginas</span>
-      <button class="counter-refresh" id="btn-recount" title="Verificar conteo en el servidor">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Verificar
-      </button>
-    </div>
-    <div class="counter-wrap">
-      <div class="counter-num-block">
-        <span class="counter-num" id="counter-num">0</span>
-        <span class="counter-num-label">páginas</span>
+      <div class="search-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-expedientes" placeholder="Buscar expediente…" />
       </div>
-      <div class="counter-chips" id="counter-chips"></div>
-    </div>
-    <div class="counter-warn-strip" id="counter-warn" style="display:none"></div>
-  </div>
+      <ul id="expedition-list" class="expedition-list"></ul>
+      <div id="expedition-list-empty" class="expedition-list-empty" style="display:none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <p>Sin expedientes.<br>Toca <strong>+</strong> para crear uno.</p>
+      </div>
+    </aside>
 
-  <!-- ── Settings ───────────────────────────────────────────────────────── -->
-  <div class="card" id="settings-card">
-    <div class="card-title">Configuración del foliado</div>
+    <!-- ── Panel derecho: contenido del expediente ───────────────────── -->
+    <main class="right-panel">
 
-    <div class="foliar-toggle-wrap">
-      <label class="foliar-toggle-label">
-        <input type="checkbox" id="cfg-foliar" checked />
-        <span class="foliar-toggle-track">
-          <span class="foliar-toggle-thumb"></span>
-        </span>
-        <span class="foliar-toggle-text">Agregar foliación al expediente</span>
-      </label>
-    </div>
-
-    <div class="settings-grid" id="foliar-options">
-
-      <div class="field">
-        <label>Posición del folio</label>
-        <select id="cfg-position">
-          <option value="top-right"    selected>Arriba derecha</option>
-          <option value="top-left">Arriba izquierda</option>
-          <option value="bottom-right">Abajo derecha</option>
-          <option value="bottom-left">Abajo izquierda</option>
-        </select>
+      <!-- Estado vacío (sin expediente seleccionado) -->
+      <div id="empty-state" class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <p>Selecciona un expediente<br>o crea uno nuevo con el botón <strong>+</strong></p>
       </div>
 
-      <div class="field">
-        <label>Tamaño de letra (pt)</label>
-        <input type="number" id="cfg-fontsize" value="11" min="6" max="28" step="0.5" />
-      </div>
+      <!-- Contenido del expediente seleccionado -->
+      <div id="expedition-content" style="display:none" class="expedition-content">
 
-      <div class="field">
-        <label>Margen superior (pt)</label>
-        <input type="number" id="cfg-margin-top" value="20" min="5" max="150" />
-      </div>
-
-      <div class="field">
-        <label>Margen lateral (pt)</label>
-        <input type="number" id="cfg-margin-right" value="30" min="5" max="150" />
-      </div>
-
-      <div class="field" style="grid-column: 1 / -1;">
-        <label>Iniciar foliación desde</label>
-        <input type="number" id="cfg-folio-start" value="1" min="1" step="1" style="max-width:120px" />
-      </div>
-
-    </div>
-
-    <div id="folio-preview-section">
-      <div class="folio-preview-label">Vista previa</div>
-      <div class="folio-preview-wrap">
-        <div class="folio-page" id="folio-page">
-          <div class="folio-dot-lines">
-            <div></div><div></div><div></div>
+        <!-- Zona superior: archivos -->
+        <div class="files-zone">
+          <div class="expedition-header">
+            <div>
+              <h2 class="expedition-title" id="expedition-title">—</h2>
+              <span class="expedition-stats" id="expedition-stats">0 archivos · 0 páginas</span>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btn-add-files">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Agregar archivos
+            </button>
           </div>
-          <div class="folio-num-preview" id="folio-num-preview">001</div>
+
+          <!-- Área de archivos (drag-drop + tabla) -->
+          <div id="files-drop-area" class="files-drop-area">
+            <!-- Estado vacío de archivos -->
+            <div id="files-empty" class="files-empty">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              <p>Arrastra archivos aquí<br>o toca <strong>Agregar archivos</strong></p>
+              <span class="files-empty-sub">PDF, JPEG, PNG, DOCX</span>
+            </div>
+
+            <!-- Tabla de archivos -->
+            <table id="files-table" class="files-table" style="display:none">
+              <thead>
+                <tr>
+                  <th class="col-handle"></th>
+                  <th class="col-num">#</th>
+                  <th class="col-icon"></th>
+                  <th class="col-name">Nombre</th>
+                  <th class="col-pages">Páginas</th>
+                  <th class="col-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="files-tbody"></tbody>
+            </table>
+          </div>
         </div>
-        <div class="folio-preview-info" id="folio-preview-info"></div>
+
+        <!-- Separador -->
+        <div class="zone-separator"></div>
+
+        <!-- Zona inferior: configuración y generación -->
+        <div class="generation-zone">
+
+          <!-- Toggle foliación -->
+          <div class="foliar-toggle-wrap">
+            <label class="foliar-toggle-label">
+              <input type="checkbox" id="cfg-foliar" checked />
+              <span class="foliar-toggle-track">
+                <span class="foliar-toggle-thumb"></span>
+              </span>
+              <span class="foliar-toggle-text">Agregar foliación</span>
+            </label>
+          </div>
+
+          <!-- Opciones de foliación -->
+          <div class="settings-grid" id="foliar-options">
+            <div class="field">
+              <label>Posición</label>
+              <select id="cfg-position">
+                <option value="top-right" selected>Arriba derecha</option>
+                <option value="top-left">Arriba izquierda</option>
+                <option value="bottom-right">Abajo derecha</option>
+                <option value="bottom-left">Abajo izquierda</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Tamaño (pt)</label>
+              <input type="number" id="cfg-fontsize" value="11" min="6" max="28" step="0.5" />
+            </div>
+            <div class="field">
+              <label>Margen superior</label>
+              <input type="number" id="cfg-margin-top" value="20" min="5" max="150" />
+            </div>
+            <div class="field">
+              <label>Margen lateral</label>
+              <input type="number" id="cfg-margin-right" value="30" min="5" max="150" />
+            </div>
+            <div class="field">
+              <label>Iniciar desde</label>
+              <input type="number" id="cfg-folio-start" value="1" min="1" step="1" style="max-width:100px" />
+            </div>
+          </div>
+
+          <!-- Nombre del PDF -->
+          <div class="output-name-wrap">
+            <div class="field">
+              <label>Nombre del PDF a generar <span style="color:#e5383b">*</span></label>
+              <input type="text" id="cfg-output-name" placeholder="Ej: Expediente Martha Lucia Barrios" />
+              <div id="nombre-error" style="display:none" class="field-error">El nombre del expediente es obligatorio.</div>
+            </div>
+          </div>
+
+          <!-- Botón generar -->
+          <button class="btn btn-primary btn-generate" id="btn-generate" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span id="btn-generate-text">Agrega archivos para continuar</span>
+          </button>
+
+          <!-- Progreso -->
+          <div id="progress-section" class="progress-section" style="display:none">
+            <div class="progress-header">
+              <span id="progress-msg">Iniciando…</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-cancel-gen" style="margin-top:.5rem">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Cancelar
+            </button>
+          </div>
+
+          <!-- Resultado -->
+          <div id="result-section" class="result-section" style="display:none">
+            <div class="result-box">
+              <span class="result-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </span>
+              <div class="result-info">
+                <div class="result-name" id="result-name">—</div>
+                <div class="result-meta" id="result-meta"></div>
+              </div>
+              <div class="result-actions">
+                <a class="btn btn-primary btn-sm" id="btn-download" href="#" download>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Descargar
+                </a>
+              </div>
+            </div>
+            <div id="failed-warn" class="warn-box" style="display:none">
+              <strong>Archivos con errores:</strong>
+              <ul id="failed-list"></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ── Modal: Nuevo expediente ───────────────────────────────────────────── -->
+<div id="modal-new-expedition" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Nuevo expediente</h3>
+      <button class="btn-close" id="btn-close-new-exp">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nombre del expediente</label>
+        <input type="text" id="new-exp-name" placeholder="Ej: Martha Lucia Barrios" autofocus />
+        <div id="new-exp-error" class="field-error" style="display:none"></div>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btn-cancel-new-exp">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-new-exp">Crear</button>
+    </div>
+  </div>
+</div>
 
-    <div class="settings-grid" style="margin-top:.75rem">
-      <div class="field" style="grid-column: 1 / -1;">
-        <label>Nombre del expediente <span style="color:#e5383b">*</span></label>
-        <input type="text" id="cfg-output-name"
-               placeholder="Ej: Expediente Juan Pérez" />
-        <div id="nombre-error" style="display:none;color:#e5383b;font-size:.82rem;margin-top:.3rem">
-          El nombre del expediente es obligatorio.
+<!-- ── Modal: Renombrar expediente ───────────────────────────────────────── -->
+<div id="modal-rename-expedition" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Renombrar expediente</h3>
+      <button class="btn-close" id="btn-close-rename">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nuevo nombre</label>
+        <input type="text" id="rename-exp-name" placeholder="Nombre del expediente" />
+        <div id="rename-exp-error" class="field-error" style="display:none"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btn-cancel-rename">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-rename">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Configuración ──────────────────────────────────────────────── -->
+<div id="modal-settings" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Configuración</h3>
+      <button class="btn-close" id="btn-close-settings">✕</button>
+    </div>
+    <div class="modal-body" style="gap:1.5rem">
+      <div>
+        <div style="font-weight:600;margin-bottom:.5rem;font-size:.85rem">Carpeta de expedientes</div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="settings-folder" style="flex:1" placeholder="Ruta de la carpeta" />
+          <button class="btn btn-secondary btn-sm" id="btn-settings-browse">Examinar</button>
+        </div>
+        <div class="field-hint" id="settings-folder-hint" style="margin-top:.4rem;font-size:.78rem;color:var(--text-muted)"></div>
+      </div>
+      <div style="padding-top:.75rem;border-top:1px solid var(--border)">
+        <div style="color:var(--text-muted);font-size:.82rem">
+          <span id="settings-version-text">v…</span>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- ── Action bar ─────────────────────────────────────────────────────── -->
-  <div class="card" id="action-bar">
-    <p class="summary" id="action-summary">
-      Carga al menos un PDF para continuar.
-    </p>
-    <button class="btn btn-primary btn-lg" id="btn-generate" disabled>
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Carga al menos un archivo para continuar
-    </button>
-  </div>
-
-  <!-- ── Progress ───────────────────────────────────────────────────────── -->
-  <div class="card" id="progress-section">
-    <div class="card-title">Procesando…</div>
-    <span id="progress-pct">0%</span>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="progress-fill"></div>
-    </div>
-    <p id="progress-msg">Iniciando…</p>
-    <button class="btn btn-danger" id="btn-cancel-gen" style="margin-top:1rem">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      Cancelar generación
-    </button>
-  </div>
-
-  <!-- ── Result ─────────────────────────────────────────────────────────── -->
-  <div class="card" id="result-section">
-    <div class="card-title">Expediente generado</div>
-    <div class="result-box">
-      <span class="result-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      </span>
-      <div class="result-info">
-        <div class="result-name" id="result-name">—</div>
-        <div class="result-meta" id="result-meta"></div>
-      </div>
-      <div class="result-actions">
-        <a class="btn btn-primary" id="btn-download" href="#" download>
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Descargar
-        </a>
-        <button class="btn btn-secondary" id="btn-new">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nuevo expediente
-        </button>
-      </div>
-    </div>
-    <div class="warn-box" id="failed-warn" style="display:none">
-      <strong>Archivos con errores:</strong>
-      <ul id="failed-list"></ul>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btn-cancel-settings">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-settings">Guardar</button>
     </div>
   </div>
+</div>
 
-</main>
+<!-- ── Menú contextual de expediente ─────────────────────────────────────── -->
+<div id="context-menu" class="context-menu" style="display:none">
+  <button class="ctx-item" id="ctx-rename">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Renombrar
+  </button>
+  <div class="ctx-separator"></div>
+  <button class="ctx-item ctx-danger" id="ctx-delete">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+    Eliminar
+  </button>
+</div>
 
-<!-- hidden inputs -->
+<!-- ── Inputs ocultos ─────────────────────────────────────────────────────── -->
 <input type="file" id="file-input"
-       accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc"
-       multiple hidden />
-<input type="file" id="folder-input"
-       accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc"
-       webkitdirectory multiple hidden />
+  accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc"
+  multiple hidden />
+<input type="file" id="setup-folder-input" webkitdirectory hidden />
+<input type="file" id="settings-folder-input" webkitdirectory hidden />
 
+<!-- ── Toast container ────────────────────────────────────────────────────── -->
 <div id="toast-container"></div>
 
 <script src="/static/app.js"></script>
 <script>
+/* ── Globals ──────────────────────────────────────────────────────────────── */
 const WA_NUMBER = '573164698626';
 let _licHardwareId = '';
 
-const _ICO_COPY = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`;
-const _ICO_CHECK_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const _ICO_WARN_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const _ICO_COPY      = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`;
+const _ICO_CHECK_SM  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const _ICO_WARN_SM   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
 
 function copyHwId() {
-  navigator.clipboard.writeText(_licHardwareId)
-    .then(() => {
-      const btn = document.getElementById('btn-copy-hw');
-      btn.innerHTML = _ICO_CHECK_SM + ' Copiado';
-      setTimeout(() => { btn.innerHTML = _ICO_COPY + ' Copiar'; }, 2000);
-    })
-    .catch(() => {});
+  navigator.clipboard.writeText(_licHardwareId).then(() => {
+    const btn = document.getElementById('btn-copy-hw');
+    btn.innerHTML = _ICO_CHECK_SM + ' Copiado';
+    setTimeout(() => { btn.innerHTML = _ICO_COPY + ' Copiar'; }, 2000);
+  }).catch(() => {});
 }
 
+/* ── Versión ──────────────────────────────────────────────────────────────── */
 fetch('/api/version').then(r => r.json()).then(d => {
   const v = 'v' + d.version;
   document.getElementById('app-version').textContent = v;
+  document.getElementById('settings-version-text').textContent = v;
   localStorage.setItem('app_version', v);
 }).catch(() => {
-  document.getElementById('app-version').textContent =
-    localStorage.getItem('app_version') || 'v1.1.5';
+  const v = localStorage.getItem('app_version') || 'v1.1.8';
+  document.getElementById('app-version').textContent = v;
+  document.getElementById('settings-version-text').textContent = v;
 });
 
+/* ── Inicialización: config + licencia ────────────────────────────────────── */
 (async () => {
+  const setupScreen     = document.getElementById('setup-screen');
   const activacionScreen = document.getElementById('activacion-screen');
-  const appMain          = document.getElementById('app-main');
-  const banner           = document.getElementById('lic-banner');
+  const appDiv           = document.getElementById('app');
 
-  let d = {};
+  // 1. Verificar configuración inicial
+  let cfgData = {};
+  try {
+    const r  = await fetch('/api/config');
+    cfgData  = await r.json();
+  } catch {}
+
+  if (!cfgData.configurada) {
+    setupScreen.style.display = 'flex';
+    return;
+  }
+
+  // 2. Verificar licencia
+  let licData = {};
   try {
     const r = await fetch('/api/licencia');
-    d = await r.json();
-    _licHardwareId = d.hardware_id || '';
+    licData  = await r.json();
+    _licHardwareId = licData.hardware_id || '';
+  } catch {}
 
-    if (d.activa) {
-      const prueba = d.es_prueba
-        ? ` <span class="lic-prueba-badge">PRUEBA</span>`
-        : '';
-      banner.innerHTML = `
-        <span class="lic-ok-text">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Licencia activa${prueba}
-        </span>
-        <span class="lic-hw">
-          ID: <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
-          <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar ID completo">${_ICO_COPY}</button>
-        </span>`;
-      banner.className = 'lic-banner lic-ok';
-      banner.style.display = 'flex';
-      appMain.style.display = 'block';
-    } else {
-      document.getElementById('hw-id-display').textContent = _licHardwareId;
-      document.getElementById('activacion-msg').textContent = d.mensaje || '';
-      const waMsg = encodeURIComponent(`Hola Sebastian, necesito activar mi licencia de Expediente Digital.\nMi Hardware ID es: ${_licHardwareId}`);
-      document.getElementById('wa-link').href = `https://wa.me/${WA_NUMBER}?text=${waMsg}`;
-      activacionScreen.style.display = 'flex';
-      appMain.style.display = 'none';
-    }
-  } catch {
-    banner.innerHTML = `
-      <span style="display:inline-flex;align-items:center;gap:.4rem;color:#7c5e1a">
-        ${_ICO_WARN_SM} No se pudo verificar la licencia. Sin conexión al servidor.
-      </span>`;
-    banner.className = 'lic-banner lic-warn';
-    banner.style.display = 'flex';
-    appMain.style.display = 'block';
+  if (!licData.activa) {
+    document.getElementById('hw-id-display').textContent = _licHardwareId;
+    document.getElementById('activacion-msg').textContent = licData.mensaje || '';
+    const waMsg = encodeURIComponent(`Hola Sebastian, necesito activar mi licencia de Expediente Digital.\nMi Hardware ID es: ${_licHardwareId}`);
+    document.getElementById('wa-link').href = `https://wa.me/${WA_NUMBER}?text=${waMsg}`;
+    activacionScreen.style.display = 'flex';
+    return;
   }
 
-  if (d.activa) {
-    (async () => {
-      try {
-        const ur = await fetch('/api/update/check');
-        const ud = await ur.json();
-        if (ud.disponible) _showUpdateNotice(ud);
-      } catch {}
-    })();
-  }
+  // 3. Mostrar app
+  const banner = document.getElementById('lic-banner-inline');
+  const prueba = licData.es_prueba ? ` <span class="lic-prueba-badge">PRUEBA</span>` : '';
+  banner.innerHTML = `
+    <span class="lic-ok-text">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Licencia activa${prueba}
+    </span>
+    <span class="lic-hw">
+      <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
+      <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar ID completo">${_ICO_COPY}</button>
+    </span>`;
 
+  appDiv.style.display = 'flex';
+  window.appReady = true;
+  window.dispatchEvent(new CustomEvent('app-ready', { detail: { licData, cfgData } }));
+
+  // 4. Check updates
+  try {
+    const ur = await fetch('/api/update/check');
+    const ud = await ur.json();
+    if (ud.disponible) _showUpdateNotice(ud);
+  } catch {}
+
+  // 5. Actualizar banner cuando se registre un expediente
   window.addEventListener('expediente-registrado', (e) => {
     const n = e.detail?.total_mes;
     if (n !== undefined) {
-      const prueba = banner.querySelector('.lic-prueba-badge')
-        ? ` <span class="lic-prueba-badge">PRUEBA</span>`
-        : '';
       banner.innerHTML = `
         <span class="lic-ok-text">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Licencia activa${prueba} · <strong>${n}</strong> expediente${n === 1 ? '' : 's'} este mes
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Licencia activa${prueba} · <strong>${n}</strong> exp. este mes
         </span>
         <span class="lic-hw">
-          ID: <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
+          <code title="${_licHardwareId}">${_licHardwareId.substring(0, 8)}…</code>
           <button class="lic-copy-btn" onclick="copyHwId()" title="Copiar ID completo">${_ICO_COPY}</button>
         </span>`;
     }
   });
 })();
 
-/* ── Update notice ─────────────────────────────────────────────────────── */
-function _showUpdateNotice(info) {
-  const verText   = `v${info.version_nueva} disponible`;
-  const notasText = info.notas ? ` — ${info.notas}` : '';
+/* ── Pantalla de configuración inicial ────────────────────────────────────── */
+document.getElementById('btn-setup-browse').addEventListener('click', () => {
+  document.getElementById('setup-folder-input').click();
+});
+document.getElementById('setup-folder-input').addEventListener('change', (e) => {
+  const files = e.target.files;
+  if (files && files.length > 0) {
+    const path = files[0].webkitRelativePath.split('/')[0];
+    document.getElementById('setup-folder-path').value = path;
+  }
+});
+document.getElementById('btn-setup-save').addEventListener('click', async () => {
+  const path = document.getElementById('setup-folder-path').value.trim();
+  const errEl = document.getElementById('setup-error');
+  if (!path) { errEl.textContent = 'Escribe una ruta de carpeta.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  try {
+    const r = await fetch('/api/config', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({carpeta_raiz: path}),
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      errEl.textContent = d.detail || 'Error al guardar la carpeta.';
+      errEl.style.display = 'block';
+      return;
+    }
+    location.reload();
+  } catch {
+    errEl.textContent = 'Error de conexión.';
+    errEl.style.display = 'block';
+  }
+});
 
+/* ── Update notice ────────────────────────────────────────────────────────── */
+function _showUpdateNotice(info) {
   if (info.obligatoria) {
     document.getElementById('update-modal-text').textContent =
       `Se requiere la versión ${info.version_nueva} para continuar.${info.notas ? ' ' + info.notas : ''}`;
     document.getElementById('update-modal').classList.add('visible');
-    document.getElementById('app-main').style.pointerEvents = 'none';
-    document.getElementById('app-main').style.opacity = '0.3';
+    document.getElementById('app').style.pointerEvents = 'none';
+    document.getElementById('app').style.opacity = '0.3';
   } else {
-    document.getElementById('update-banner-text').textContent = verText + notasText + ' · Cierra y vuelve a abrir para actualizar.';
+    const text = `v${info.version_nueva} disponible${info.notas ? ' — ' + info.notas : ''} · Cierra y vuelve a abrir para actualizar.`;
+    document.getElementById('update-banner-text').textContent = text;
     document.getElementById('update-banner').style.display = 'flex';
   }
 }
-
 document.getElementById('update-btn-dismiss').addEventListener('click', () => {
   document.getElementById('update-banner').style.display = 'none';
 });

@@ -1,640 +1,637 @@
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
-   Expediente Digital – frontend logic
+   Expediente Digital — App logic (two-panel layout)
    ═════════════════════════════════════════════════════════════════════════ */
 
-const API = "";          // same origin
-const POLL_MS = 700;     // progress poll interval
+const API      = "";
+const POLL_MS  = 700;
 
-/* ── SVG icon strings ────────────────────────────────────────────────────── */
-var ICO_FILE   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-var ICO_IMAGE  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
-var ICO_WORD   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`;
-var ICO_GRIP   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
-var ICO_ZAP    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
-var ICO_UPLOAD = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
-var ICO_REFRESH= `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
-var ICO_FOLDER_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-var ICO_CLOCK  = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-var ICO_WARN   = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-var ICO_WARN_MD= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-var ICO_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>`;
-var ICO_OK_TOAST    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-var ICO_ERR_TOAST   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-var ICO_WARN_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-var ICO_INFO_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+/* ── SVG icons ───────────────────────────────────────────────────────────── */
+const ICO_FILE  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+const ICO_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+const ICO_WORD  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
+const ICO_GRIP  = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
+const ICO_ZAP   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+const ICO_OK_T  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const ICO_ERR_T = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+const ICO_WARN_T= `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const ICO_INFO_T= `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
-/* ── State ──────────────────────────────────────────────────────────────── */
-// [{id, name, size, pages, session_id, error}]  — ordered as the user sees them
-let files          = [];
-let pollTimer      = null;
-let currentSession = null;   // session_id activo para uploads
-let activeTaskId   = null;   // task_id en curso (para cancelación)
+/* ── State ───────────────────────────────────────────────────────────────── */
+let expediciones    = [];   // [{nombre, archivos, creado}]
+let selectedNombre  = null; // nombre del expediente activo
+let archivos        = [];   // [{nombre, paginas, tamanio, error}] del expediente activo
+let pollTimer       = null;
+let activeTaskId    = null;
+let ctxNombre       = null; // expedition in context menu
 
-/* ── DOM refs ────────────────────────────────────────────────────────────── */
-const dropZone       = document.getElementById("drop-zone");
-const fileInput      = document.getElementById("file-input");
-const folderInput    = document.getElementById("folder-input");
-const folderPath     = document.getElementById("folder-path");
-const fileList       = document.getElementById("file-list");
-const badgeFiles     = document.getElementById("badge-files");
-const badgePages     = document.getElementById("badge-pages");
-const btnGenerate    = document.getElementById("btn-generate");
-const actionSummary  = document.getElementById("action-summary");
-const progressSec    = document.getElementById("progress-section");
-const progressFill   = document.getElementById("progress-fill");
-const progressMsg    = document.getElementById("progress-msg");
-const progressPct    = document.getElementById("progress-pct");
-const resultSec      = document.getElementById("result-section");
-const resultName     = document.getElementById("result-name");
-const resultMeta     = document.getElementById("result-meta");
-const btnDownload    = document.getElementById("btn-download");
-const btnCancelGen   = document.getElementById("btn-cancel-gen");
-const failedWarn     = document.getElementById("failed-warn");
-const failedList     = document.getElementById("failed-list");
-// Counter panel
-const counterCard    = document.getElementById("counter-card");
-const counterNumEl   = document.getElementById("counter-num");
-const counterChips   = document.getElementById("counter-chips");
-const counterWarn    = document.getElementById("counter-warn");
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Counter helpers
-   ═════════════════════════════════════════════════════════════════════════ */
-function estimateTime(pages, fileCount) {
-  if (pages === 0) return null;
-  // ~150 pages/s for stamp pass + ~0.5 s/file for I/O overhead
-  const secs = Math.max(2, Math.ceil(pages / 150) + Math.ceil(fileCount * 0.5));
-  return secs < 60 ? `~${secs}s` : `~${Math.ceil(secs / 60)} min`;
-}
-
-function sizeCategory(pages) {
-  if (pages === 0)   return null;
-  if (pages < 100)   return { cls: "ok",  label: "Pequeño"    };
-  if (pages < 500)   return { cls: "",    label: "Mediano"    };
-  if (pages < 1000)  return { cls: "big", label: "Grande"     };
-  if (pages < 2000)  return { cls: "big", label: "Muy grande" };
-  return               { cls: "huge", label: "Masivo"      };
-}
-
-function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-
-function animateCounter(el, from, to, ms = 400) {
-  const start = performance.now();
-  el.classList.add("bump");
-  const step = (now) => {
-    const p = Math.min((now - start) / ms, 1);
-    el.textContent = Math.round(from + (to - from) * easeOut(p)).toLocaleString("es");
-    if (p < 1) requestAnimationFrame(step);
-    else        el.classList.remove("bump");
-  };
-  requestAnimationFrame(step);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Gestión de sesiones temporales
-   ═════════════════════════════════════════════════════════════════════════ */
-
-/**
- * Devuelve el session_id activo, creando uno nuevo en el backend si hace falta.
- * Si el backend reportó que la sesión expiró durante un upload previo, la
- * respuesta del upload incluirá el nuevo session_id y _syncSession lo actualizará.
- */
-async function ensureSession() {
-  if (currentSession) return currentSession;
-  const res = await fetch(`${API}/api/session`, { method: "POST" });
-  if (!res.ok) throw new Error("No se pudo crear sesión temporal en el servidor");
-  const { session_id } = await res.json();
-  currentSession = session_id;
-  return session_id;
-}
-
-/**
- * Sincroniza el session_id local con el que devuelve el backend.
- * Si el backend creó una sesión nueva (porque la anterior expiró), la adoptamos.
- */
-function _syncSession(fileInfo) {
-  if (fileInfo.session_id && fileInfo.session_id !== currentSession) {
-    currentSession = fileInfo.session_id;
-  }
-}
-
-/** Descarta la sesión local. La limpieza en disco ya ocurrió en el backend. */
-function resetSession() {
-  currentSession = null;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Natural sort
-   ═════════════════════════════════════════════════════════════════════════ */
-function naturalSortKey(s) {
-  return s.replace(/(\d+)/g, (n) => n.padStart(12, "0")).toLowerCase();
-}
-function naturalSort(arr) {
-  return [...arr].sort((a, b) =>
-    naturalSortKey(a.name).localeCompare(naturalSortKey(b.name))
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   UI helpers
-   ═════════════════════════════════════════════════════════════════════════ */
-function fmtSize(bytes) {
-  if (bytes < 1024)       return bytes + " B";
-  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / 1048576).toFixed(1) + " MB";
-}
-
-function toast(msg, type = "info", dur = 3500) {
-  const icons = { success: ICO_OK_TOAST, error: ICO_ERR_TOAST, warn: ICO_WARN_TOAST, info: ICO_INFO_TOAST };
-  const t = document.createElement("div");
-  t.className = `toast ${type}`;
-  t.innerHTML = `<span class="toast-icon">${icons[type] || ICO_INFO_TOAST}</span><span class="toast-msg">${msg}</span>`;
-  document.getElementById("toast-container").append(t);
-  setTimeout(() => t.remove(), dur);
-}
-
-function setGenerateBtn() {
-  const ready = files.filter((f) => !f.uploading).length;
-  btnGenerate.disabled = ready === 0;
-  btnGenerate.innerHTML = ready === 0
-    ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
-    : `${ICO_ZAP} Generar expediente`;
-}
-
-function setProcessing(on) {
-  btnGenerate.disabled = on || files.filter((f) => !f.uploading).length === 0;
-  btnGenerate.innerHTML = on
-    ? `<span class="spinner"></span> Procesando…`
-    : files.filter((f) => !f.uploading).length === 0
-      ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
-      : `${ICO_ZAP} Generar expediente`;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   File type helpers
-   ═════════════════════════════════════════════════════════════════════════ */
+/* ── File types ──────────────────────────────────────────────────────────── */
 const _IMG_EXT  = new Set(["jpg","jpeg","png","gif","bmp","tiff","webp"]);
 const _WORD_EXT = new Set(["docx","doc"]);
 const _ALL_EXT  = new Set([..._IMG_EXT, ..._WORD_EXT, "pdf"]);
 
 function fileIcon(name) {
-  const ext = name.split(".").pop().toLowerCase();
+  const ext = (name.split(".").pop() || "").toLowerCase();
   if (_IMG_EXT.has(ext))  return ICO_IMAGE;
   if (_WORD_EXT.has(ext)) return ICO_WORD;
   return ICO_FILE;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Render file list
-   ═════════════════════════════════════════════════════════════════════════ */
-function renderList() {
-  fileList.innerHTML = "";
-
-  files.forEach((f, i) => {
-    const li = document.createElement("li");
-    const isUploading = !!f.uploading;
-    const hasError    = !isUploading && f.pages <= 0;
-
-    li.className  = isUploading ? "file-item uploading-item"
-                  : hasError    ? "file-item error-item"
-                  : "file-item";
-    li.draggable  = !isUploading;
-    li.dataset.id = f.id;
-
-    const pagesHtml = isUploading
-      ? `<span class="pages-loading"><span class="spinner-sm"></span> subiendo…</span>`
-      : f.pages > 0
-        ? `<span class="pages-badge">${f.pages} págs.</span>`
-        : `<span class="err" title="${esc(f.error || '')}">⚠ ${esc(f.error || "Error leyendo")}</span>`;
-
-    const removeBtn = isUploading
-      ? `<span style="width:26px"></span>`
-      : `<button class="btn-remove" title="Eliminar" data-id="${f.id}">✕</button>`;
-
-    li.innerHTML = `
-      <span class="handle" style="${isUploading ? "opacity:.15;pointer-events:none" : ""}">${ICO_GRIP}</span>
-      <span class="file-num">${i + 1}</span>
-      <span class="file-icon">${fileIcon(f.name)}</span>
-      <div class="file-info">
-        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
-        <div class="file-meta">${pagesHtml}${esc(fmtSize(f.size))}</div>
-      </div>
-      ${removeBtn}
-    `;
-
-    fileList.append(li);
-  });
-
-  initDragSort();
-  updateSummary();
-}
-
 function esc(s) {
   return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function updateSummary() {
-  const uploading = files.filter((f) => f.uploading);
-  const ready     = files.filter((f) => !f.uploading);
-  const errored   = ready.filter((f) => f.pages <= 0);
-  const total     = ready.reduce((s, f) => s + (f.pages > 0 ? f.pages : 0), 0);
+function enc(s) { return encodeURIComponent(s); }
 
-  // ── Small header badges ──────────────────────────────────────────────────
-  badgeFiles.textContent = `${files.length} archivo${files.length !== 1 ? "s" : ""}`;
-  if (uploading.length > 0) {
-    badgePages.innerHTML =
-      `<span class="spinner-sm"></span> ${uploading.length} subiendo…`;
-  } else {
-    badgePages.textContent = `${total.toLocaleString("es")} página${total !== 1 ? "s" : ""}`;
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+function toast(msg, type = "info", dur = 3500) {
+  const icons = { success: ICO_OK_T, error: ICO_ERR_T, warn: ICO_WARN_T, info: ICO_INFO_T };
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type] || ICO_INFO_T}</span><span class="toast-msg">${esc(msg)}</span>`;
+  document.getElementById("toast-container").append(t);
+  setTimeout(() => t.remove(), dur);
+}
+
+/* ── Wait for app ready ──────────────────────────────────────────────────── */
+function whenReady(fn) {
+  if (window.appReady) { fn(); }
+  else { window.addEventListener("app-ready", fn, { once: true }); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Expedition list (left panel)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+async function loadExpediciones() {
+  try {
+    const r  = await fetch(`${API}/api/expedientes`);
+    expediciones = await r.json();
+    renderExpedicionList();
+  } catch {
+    toast("Error al cargar expedientes", "error");
   }
+}
 
-  // ── Generate button ──────────────────────────────────────────────────────
-  setGenerateBtn();
+function renderExpedicionList() {
+  const listEl   = document.getElementById("expedition-list");
+  const emptyEl  = document.getElementById("expedition-list-empty");
+  const search   = (document.getElementById("search-expedientes").value || "").toLowerCase();
 
-  // ── Action summary text ──────────────────────────────────────────────────
-  if (files.length === 0) {
-    actionSummary.innerHTML = "Arrastra archivos aquí o usa los botones de arriba.";
-  } else if (uploading.length > 0) {
-    actionSummary.innerHTML =
-      `Subiendo <strong>${uploading.length}</strong> archivo(s)… espera para continuar.`;
-  } else {
-    const t = estimateTime(total, ready.length);
-    actionSummary.innerHTML =
-      `<strong>${ready.length}</strong> archivo${ready.length !== 1 ? "s" : ""} · ` +
-      `<strong>${total.toLocaleString("es")}</strong> páginas en total` +
-      (t ? ` · tiempo estimado: <strong>${t}</strong>` : "") +
-      ` · puedes reordenar arrastrando las filas.`;
-  }
+  const filtered = expediciones.filter(e => e.nombre.toLowerCase().includes(search));
 
-  // ── Counter card ─────────────────────────────────────────────────────────
-  if (files.length === 0) {
-    counterCard.style.display = "none";
+  if (!filtered.length) {
+    listEl.innerHTML = "";
+    emptyEl.style.display = "";
     return;
   }
-  counterCard.style.display = "";
+  emptyEl.style.display = "none";
 
-  // Animated number
-  const prev = parseInt(counterNumEl.textContent.replace(/\D/g, "")) || 0;
-  if (prev !== total) animateCounter(counterNumEl, prev, total);
+  listEl.innerHTML = filtered.map(e => `
+    <li class="exp-item${e.nombre === selectedNombre ? " active" : ""}"
+        data-nombre="${esc(e.nombre)}" tabindex="0">
+      <div class="exp-item-info">
+        <span class="exp-item-name" title="${esc(e.nombre)}">${esc(e.nombre)}</span>
+        <span class="exp-item-count">${e.archivos} archivo${e.archivos !== 1 ? "s" : ""}</span>
+      </div>
+      <span class="exp-item-dot"></span>
+    </li>
+  `).join("");
 
-  // Chips
-  const time = estimateTime(total, ready.length);
-  const cat  = sizeCategory(total);
-  const chipsHtml = [
-    `<span class="chip">${ICO_FOLDER_SM} ${ready.length} archivo${ready.length !== 1 ? "s" : ""}</span>`,
-    uploading.length
-      ? `<span class="chip"><span class="spinner-sm"></span> ${uploading.length} subiendo</span>`
-      : "",
-    time
-      ? `<span class="chip time">${ICO_CLOCK} ${time}</span>`
-      : "",
-    errored.length
-      ? `<span class="chip err">${ICO_WARN} ${errored.length} con error</span>`
-      : "",
-    cat
-      ? `<span class="chip ${cat.cls}">${cat.label}</span>`
-      : "",
-  ].filter(Boolean).join("");
-  counterChips.innerHTML = chipsHtml;
+  listEl.querySelectorAll(".exp-item").forEach(item => {
+    item.addEventListener("click", () => selectExpedicion(item.dataset.nombre));
+    item.addEventListener("contextmenu", (e) => openContextMenu(e, item.dataset.nombre));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") selectExpedicion(item.dataset.nombre);
+    });
+  });
+}
 
-  // Warning strip
-  if (total > 2000) {
-    counterWarn.style.display = "";
-    counterWarn.className = "counter-warn-strip danger";
-    counterWarn.innerHTML =
-      `${ICO_WARN_MD} <span>Expediente masivo: <strong>${total.toLocaleString("es")} páginas</strong>. ` +
-      `El procesamiento puede tardar varios minutos.</span>`;
-  } else if (total > 1000) {
-    counterWarn.style.display = "";
-    counterWarn.className = "counter-warn-strip warn";
-    counterWarn.innerHTML =
-      `${ICO_WARN_MD} <span>Este expediente supera <strong>1.000 páginas</strong>. ` +
-      `El procesamiento puede tardar algunos segundos adicionales.</span>`;
-  } else {
-    counterWarn.style.display = "none";
+async function selectExpedicion(nombre) {
+  selectedNombre = nombre;
+  localStorage.setItem("last_expedicion", nombre);
+  renderExpedicionList();
+  document.getElementById("empty-state").style.display   = "none";
+  document.getElementById("expedition-content").style.display = "flex";
+  document.getElementById("expedition-title").textContent = nombre;
+  document.getElementById("cfg-output-name").value = nombre;
+
+  resetGenerationUI();
+  archivos = [];
+  renderFilesTable();
+  document.getElementById("expedition-stats").textContent = "Cargando…";
+
+  try {
+    const r = await fetch(`${API}/api/expedientes/${enc(nombre)}/archivos`);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    archivos = data.archivos || [];
+    loadFolioConfig(data.config_folio || {});
+    renderFilesTable();
+    updateStats();
+  } catch {
+    toast("Error al cargar archivos del expediente", "error");
   }
 }
 
+function updateStats() {
+  const total = archivos.filter(f => f.paginas > 0).reduce((s, f) => s + f.paginas, 0);
+  document.getElementById("expedition-stats").textContent =
+    `${archivos.length} archivo${archivos.length !== 1 ? "s" : ""} · ${total.toLocaleString("es")} páginas en total`;
+  updateGenerateBtn();
+}
+
+/* ── Folio config loading ────────────────────────────────────────────────── */
+function loadFolioConfig(cfg) {
+  if (cfg.activo          !== undefined) document.getElementById("cfg-foliar").checked    = cfg.activo;
+  if (cfg.posicion)                      document.getElementById("cfg-position").value    = cfg.posicion;
+  if (cfg.tamano          !== undefined) document.getElementById("cfg-fontsize").value    = cfg.tamano;
+  if (cfg.margen_superior !== undefined) document.getElementById("cfg-margin-top").value  = cfg.margen_superior;
+  if (cfg.margen_lateral  !== undefined) document.getElementById("cfg-margin-right").value= cfg.margen_lateral;
+  if (cfg.iniciar_desde   !== undefined) document.getElementById("cfg-folio-start").value = cfg.iniciar_desde;
+  updateFolioOptionsVisibility();
+}
+
+function getFolioConfig() {
+  return {
+    activo:          document.getElementById("cfg-foliar").checked,
+    posicion:        document.getElementById("cfg-position").value,
+    tamano:          parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
+    margen_superior: parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
+    margen_lateral:  parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
+    iniciar_desde:   Math.max(1, parseInt(document.getElementById("cfg-folio-start").value) || 1),
+  };
+}
+
+async function saveFolioConfig() {
+  if (!selectedNombre) return;
+  try {
+    await fetch(`${API}/api/expedientes/${enc(selectedNombre)}/config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ config_folio: getFolioConfig() }),
+    });
+  } catch { /* silent */ }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   Drag-and-drop reorder
+   Files table (right panel)
    ═════════════════════════════════════════════════════════════════════════ */
-function initDragSort() {
+
+function renderFilesTable() {
+  const emptyEl  = document.getElementById("files-empty");
+  const tableEl  = document.getElementById("files-table");
+  const tbodyEl  = document.getElementById("files-tbody");
+
+  if (!archivos.length) {
+    emptyEl.style.display  = "";
+    tableEl.style.display  = "none";
+    return;
+  }
+  emptyEl.style.display  = "none";
+  tableEl.style.display  = "";
+
+  tbodyEl.innerHTML = archivos.map((f, i) => {
+    const pagesHtml = f.uploading
+      ? `<span class="spinner-sm"></span>`
+      : f.paginas > 0
+        ? `<span class="pages-badge">${f.paginas} págs.</span>`
+        : `<span class="pages-err" title="${esc(f.error || '')}">⚠ error</span>`;
+
+    return `
+      <tr class="file-row" draggable="true" data-nombre="${esc(f.nombre)}">
+        <td class="col-handle handle-cell">${ICO_GRIP}</td>
+        <td class="col-num">${i + 1}</td>
+        <td class="col-icon">${fileIcon(f.nombre)}</td>
+        <td class="col-name"><span class="file-name-text" title="${esc(f.nombre)}">${esc(f.nombre)}</span></td>
+        <td class="col-pages">${pagesHtml}</td>
+        <td class="col-actions">
+          ${f.uploading ? "" : `<button class="btn-remove-file" title="Eliminar" data-nombre="${esc(f.nombre)}">✕</button>`}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  initFileDragSort();
+
+  tbodyEl.querySelectorAll(".btn-remove-file").forEach(btn => {
+    btn.addEventListener("click", () => removeArchivo(btn.dataset.nombre));
+  });
+}
+
+/* ── Drag-sort rows ──────────────────────────────────────────────────────── */
+function initFileDragSort() {
+  const tbody = document.getElementById("files-tbody");
   let dragged = null;
 
-  fileList.querySelectorAll(".file-item").forEach((item) => {
-    item.addEventListener("dragstart", (e) => {
-      dragged = item;
-      item.classList.add("dragging");
+  tbody.querySelectorAll(".file-row").forEach(row => {
+    row.addEventListener("dragstart", e => {
+      dragged = row;
+      row.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
     });
-
-    item.addEventListener("dragend", () => {
-      item.classList.remove("dragging");
-      fileList.querySelectorAll(".file-item").forEach((el) => {
-        el.classList.remove("drag-over-top", "drag-over-bottom");
-      });
-      // Sync state from DOM order
-      files = [...fileList.querySelectorAll(".file-item")].map((el) =>
-        files.find((f) => f.id === el.dataset.id)
-      ).filter(Boolean);
-      renderList();
+    row.addEventListener("dragend", () => {
+      row.classList.remove("dragging");
+      tbody.querySelectorAll(".file-row").forEach(r => r.classList.remove("drag-over-top", "drag-over-bottom"));
+      const nuevoOrden = [...tbody.querySelectorAll(".file-row")].map(r => r.dataset.nombre);
+      archivos = nuevoOrden.map(n => archivos.find(f => f.nombre === n)).filter(Boolean);
+      renderFilesTable();
+      saveOrden(nuevoOrden);
     });
-
-    item.addEventListener("dragover", (e) => {
+    row.addEventListener("dragover", e => {
       e.preventDefault();
-      if (!dragged || dragged === item) return;
-      item.classList.remove("drag-over-top", "drag-over-bottom");
-      const mid = item.getBoundingClientRect().top + item.offsetHeight / 2;
-      if (e.clientY < mid) {
-        item.classList.add("drag-over-top");
-      } else {
-        item.classList.add("drag-over-bottom");
-      }
+      if (!dragged || dragged === row) return;
+      row.classList.remove("drag-over-top", "drag-over-bottom");
+      const mid = row.getBoundingClientRect().top + row.offsetHeight / 2;
+      row.classList.add(e.clientY < mid ? "drag-over-top" : "drag-over-bottom");
     });
-
-    item.addEventListener("dragleave", () => {
-      item.classList.remove("drag-over-top", "drag-over-bottom");
+    row.addEventListener("dragleave", () => {
+      row.classList.remove("drag-over-top", "drag-over-bottom");
     });
-
-    item.addEventListener("drop", (e) => {
+    row.addEventListener("drop", e => {
       e.preventDefault();
-      if (!dragged || dragged === item) return;
-      item.classList.remove("drag-over-top", "drag-over-bottom");
-      const mid = item.getBoundingClientRect().top + item.offsetHeight / 2;
-      if (e.clientY < mid) {
-        fileList.insertBefore(dragged, item);
-      } else {
-        fileList.insertBefore(dragged, item.nextSibling);
-      }
+      if (!dragged || dragged === row) return;
+      row.classList.remove("drag-over-top", "drag-over-bottom");
+      const mid = row.getBoundingClientRect().top + row.offsetHeight / 2;
+      if (e.clientY < mid) tbody.insertBefore(dragged, row);
+      else tbody.insertBefore(dragged, row.nextSibling);
     });
   });
+}
 
-  // Remove buttons
-  fileList.querySelectorAll(".btn-remove").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
-      files = files.filter((f) => f.id !== id);
-      // fire-and-forget: tell backend to release temp file
-      fetch(`${API}/api/files/${id}`, { method: "DELETE" }).catch(() => {});
-      renderList();
+async function saveOrden(orden) {
+  if (!selectedNombre) return;
+  try {
+    await fetch(`${API}/api/expedientes/${enc(selectedNombre)}/orden`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orden }),
     });
-  });
+  } catch { /* silent */ }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Upload helpers
+   Adding files
    ═════════════════════════════════════════════════════════════════════════ */
-async function uploadFile(file) {
-  // Garantizar sesión activa antes de subir
-  const sid = await ensureSession();
 
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(
-    `${API}/api/upload?session_id=${encodeURIComponent(sid)}`,
-    { method: "POST", body: form }
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || res.statusText);
-  }
-  const data = await res.json();
-  _syncSession(data);   // adoptar sesión si el backend creó una nueva
-  return data;
-}
+document.getElementById("btn-add-files").addEventListener("click", () => {
+  document.getElementById("file-input").click();
+});
+
+document.getElementById("file-input").addEventListener("change", (e) => {
+  handleFileObjects([...e.target.files]);
+  e.target.value = "";
+});
+
+/* Drag-drop onto files-drop-area */
+const dropArea = document.getElementById("files-drop-area");
+dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.classList.add("drag-over"); });
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag-over"));
+dropArea.addEventListener("drop", e => {
+  e.preventDefault();
+  dropArea.classList.remove("drag-over");
+  handleFileObjects([...e.dataTransfer.files]);
+});
 
 async function handleFileObjects(fileArray) {
-  if (!fileArray.length) return;
+  if (!selectedNombre) { toast("Selecciona un expediente primero", "warn"); return; }
 
-  const supported = fileArray.filter((f) => {
-    const ext = f.name.split(".").pop().toLowerCase();
+  const supported = fileArray.filter(f => {
+    const ext = (f.name.split(".").pop() || "").toLowerCase();
     return _ALL_EXT.has(ext);
   });
   const skipped = fileArray.length - supported.length;
   if (skipped > 0) toast(`${skipped} archivo(s) ignorados (tipo no compatible)`, "warn");
   if (!supported.length) return;
 
-  const existing = new Set(files.map((f) => f.name));
-  const toUpload = supported.filter((f) => !existing.has(f.name));
-  const dups = supported.length - toUpload.length;
-  if (dups > 0) toast(`${dups} ya cargados, omitidos`, "warn");
-  if (!toUpload.length) return;
-
-  // 1. Add uploading placeholders immediately so the list updates right away
-  const placeholders = toUpload.map((file) => ({
-    id:       `_up_${Math.random().toString(36).slice(2)}`,
-    name:     file.name,
-    size:     file.size,
-    pages:    0,
-    error:    null,
-    uploading: true,
-    _ref:     file,           // keep reference to the original File object
-  }));
-  files.push(...placeholders);
-  files = naturalSort(files);
-  renderList();               // shows spinners in the list immediately
-
-  // 2. Upload in chunks of 4
-  let ok = 0;
-  const chunks = chunkArray(placeholders, 4);
-
-  for (const chunk of chunks) {
-    const results = await Promise.allSettled(chunk.map((p) => uploadFile(p._ref)));
-
-    results.forEach((r, ci) => {
-      const ph  = chunk[ci];
-      const idx = files.findIndex((f) => f.id === ph.id);
-      if (idx === -1) return;
-
-      if (r.status === "fulfilled") {
-        files[idx] = r.value;   // replace placeholder with real server data
-        ok++;
-      } else {
-        files.splice(idx, 1);   // remove failed placeholder
-        toast(`Error subiendo "${ph.name}": ${r.reason.message}`, "error", 5000);
-      }
-    });
-
-    // Re-render after each chunk so page counts appear progressively
-    files = naturalSort(files);
-    renderList();
+  for (const file of supported) {
+    await uploadArchivoToExpedicion(file);
   }
-
-  if (ok > 0) toast(`${ok} archivo(s) cargado(s) correctamente`, "success");
+  updateStats();
 }
 
-function chunkArray(arr, size) {
-  const out = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
+async function uploadArchivoToExpedicion(file, replace = false) {
+  const nombre = selectedNombre;
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Event listeners – upload
-   ═════════════════════════════════════════════════════════════════════════ */
+  // Optimistic: add uploading placeholder
+  const placeholder = { nombre: file.name, paginas: 0, tamanio: file.size, uploading: true };
+  archivos.push(placeholder);
+  renderFilesTable();
 
-// Drag-and-drop onto the drop zone
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropZone.classList.add("drag-over");
-});
-dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("drag-over");
-  handleFileObjects([...e.dataTransfer.files]);
-});
-dropZone.addEventListener("click", () => fileInput.click());
-
-// File picker
-document.getElementById("btn-files").addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", () => {
-  handleFileObjects([...fileInput.files]);
-  fileInput.value = "";
-});
-
-// Folder picker (browser)
-document.getElementById("btn-folder-browser").addEventListener("click", () =>
-  folderInput.click()
-);
-folderInput.addEventListener("change", () => {
-  handleFileObjects([...folderInput.files]);
-  folderInput.value = "";
-});
-
-// Folder via text path (backend reads from disk)
-document.getElementById("btn-load-folder").addEventListener("click", loadFolderByPath);
-folderPath.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") loadFolderByPath();
-});
-
-async function loadFolderByPath() {
-  const p = folderPath.value.trim();
-  if (!p) { toast("Escribe la ruta de la carpeta primero", "warn"); return; }
+  const form = new FormData();
+  form.append("file", file);
 
   try {
-    const res = await fetch(`${API}/api/load-folder`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: p }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      toast(err.detail || "Error cargando carpeta", "error");
+    const url = `${API}/api/expedientes/${enc(nombre)}/archivos${replace ? "?replace=true" : ""}`;
+    const r   = await fetch(url, { method: "POST", body: form });
+
+    // Remove placeholder
+    archivos = archivos.filter(f => !(f.uploading && f.nombre === file.name));
+
+    if (r.status === 409 && !replace) {
+      const d = await r.json().catch(() => ({}));
+      if (confirm(`${d.detail || "Ya existe ese archivo"}. ¿Reemplazar?`)) {
+        await uploadArchivoToExpedicion(file, true);
+        return;
+      }
+      renderFilesTable();
       return;
     }
-    // El backend devuelve {session_id, files}
-    const { session_id: folderSession, files: loaded } = await res.json();
 
-    // Adoptar la sesión creada por la carga de carpeta
-    if (folderSession) currentSession = folderSession;
-
-    // Deduplicar
-    const existing = new Set(files.map((f) => f.name));
-    let added = 0;
-    loaded.forEach((f) => {
-      if (!existing.has(f.name)) { files.push(f); added++; }
-    });
-    if (added === 0) {
-      toast("No se agregaron archivos nuevos (ya estaban cargados)", "warn");
-    } else {
-      files = naturalSort(files);
-      renderList();
-      toast(`${added} archivo(s) cargados desde la carpeta`, "success");
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      toast(`Error subiendo "${file.name}": ${d.detail || r.statusText}`, "error", 5000);
+      renderFilesTable();
+      return;
     }
-  } catch (e) {
-    toast("Error de red al cargar carpeta", "error");
+
+    const data = await r.json();
+    archivos.push({ nombre: data.nombre, paginas: data.paginas, tamanio: data.tamanio });
+
+    // Reload expedition list count
+    loadExpediciones();
+    renderFilesTable();
+    toast(`"${data.nombre}" agregado (${data.paginas} págs.)`, "success", 3000);
+
+  } catch (err) {
+    archivos = archivos.filter(f => !(f.uploading && f.nombre === file.name));
+    renderFilesTable();
+    toast(`Error subiendo "${file.name}": ${err.message}`, "error", 5000);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Sort & Clear
-   ═════════════════════════════════════════════════════════════════════════ */
-document.getElementById("btn-sort").addEventListener("click", () => {
-  files = naturalSort(files);
-  renderList();
-  toast("Archivos ordenados por nombre natural", "success");
-});
-
-document.getElementById("btn-clear").addEventListener("click", () => {
-  if (!files.length) return;
-  if (!confirm("¿Eliminar todos los archivos cargados?")) return;
-  fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
-  files = [];
-  resetSession();
-  renderList();
-  resetResult();
-});
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Generate
-   ═════════════════════════════════════════════════════════════════════════ */
-btnGenerate.addEventListener("click", generate);
-
-async function generate() {
-  if (!files.length) return;
-
-  // Validar nombre obligatorio
-  const outputName  = document.getElementById("cfg-output-name").value.trim();
-  const nombreError = document.getElementById("nombre-error");
-  if (!outputName) {
-    if (nombreError) nombreError.style.display = "block";
-    document.getElementById("cfg-output-name").focus();
-    document.getElementById("cfg-output-name").scrollIntoView({ behavior: "smooth", block: "center" });
-    return;
-  }
-  if (nombreError) nombreError.style.display = "none";
-
-  const foliar = document.getElementById("cfg-foliar").checked;
-  const config = {
-    font_size:    parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
-    margin_top:   parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
-    margin_right: parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
-    position:     document.getElementById("cfg-position").value,
-    foliar,
-    folio_start:  Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1),
-  };
-
-  const body = {
-    file_ids:          files.map((f) => f.id),
-    config,
-    output_name:       outputName,
-    nombre_expediente: outputName,
-  };
-
-  setProcessing(true);
-  resetResult();
-  showProgress(true);
-  setProgress(0, "Iniciando…");
+async function removeArchivo(filename) {
+  if (!selectedNombre) return;
+  if (!confirm(`¿Eliminar "${filename}" del expediente? El archivo se borrará del disco.`)) return;
 
   try {
-    const res = await fetch(`${API}/api/process`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    const r = await fetch(`${API}/api/expedientes/${enc(selectedNombre)}/archivos/${enc(filename)}`, {
+      method: "DELETE",
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || "Error al iniciar proceso");
-    }
-    const { task_id } = await res.json();
-    activeTaskId = task_id;
-    startPolling(task_id);
-  } catch (e) {
-    setProcessing(false);
-    showProgress(false);
-    toast(`Error: ${e.message}`, "error", 6000);
+    if (!r.ok) throw new Error();
+    archivos = archivos.filter(f => f.nombre !== filename);
+    renderFilesTable();
+    updateStats();
+    loadExpediciones();
+    toast(`"${filename}" eliminado`, "success", 2500);
+  } catch {
+    toast("Error al eliminar el archivo", "error");
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Polling
+   Expedition CRUD
    ═════════════════════════════════════════════════════════════════════════ */
+
+/* New expedition */
+document.getElementById("btn-new-expediente").addEventListener("click", openNewExpeditionModal);
+
+function openNewExpeditionModal() {
+  document.getElementById("new-exp-name").value   = "";
+  document.getElementById("new-exp-error").style.display = "none";
+  document.getElementById("modal-new-expedition").style.display = "flex";
+  setTimeout(() => document.getElementById("new-exp-name").focus(), 50);
+}
+
+function closeNewExpeditionModal() {
+  document.getElementById("modal-new-expedition").style.display = "none";
+}
+
+document.getElementById("btn-close-new-exp").addEventListener("click", closeNewExpeditionModal);
+document.getElementById("btn-cancel-new-exp").addEventListener("click", closeNewExpeditionModal);
+document.getElementById("modal-new-expedition").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal-new-expedition")) closeNewExpeditionModal();
+});
+document.getElementById("new-exp-name").addEventListener("keydown", e => {
+  if (e.key === "Enter") confirmCreateExpedition();
+});
+
+document.getElementById("btn-confirm-new-exp").addEventListener("click", confirmCreateExpedition);
+
+async function confirmCreateExpedition() {
+  const nombre = document.getElementById("new-exp-name").value.trim();
+  const errEl  = document.getElementById("new-exp-error");
+  if (!nombre) { errEl.textContent = "El nombre es obligatorio."; errEl.style.display = ""; return; }
+  errEl.style.display = "none";
+
+  const btn = document.getElementById("btn-confirm-new-exp");
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/expedientes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre }),
+    });
+    if (r.status === 409) { errEl.textContent = "Ya existe un expediente con ese nombre."; errEl.style.display = ""; return; }
+    if (!r.ok) { const d = await r.json().catch(() => ({})); errEl.textContent = d.detail || "Error al crear."; errEl.style.display = ""; return; }
+    closeNewExpeditionModal();
+    await loadExpediciones();
+    selectExpedicion(nombre);
+    toast(`Expediente "${nombre}" creado`, "success");
+  } catch {
+    errEl.textContent = "Error de conexión.";
+    errEl.style.display = "";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* Rename */
+let renamingNombre = null;
+
+function openRenameModal(nombre) {
+  renamingNombre = nombre;
+  document.getElementById("rename-exp-name").value = nombre;
+  document.getElementById("rename-exp-error").style.display = "none";
+  document.getElementById("modal-rename-expedition").style.display = "flex";
+  setTimeout(() => {
+    const inp = document.getElementById("rename-exp-name");
+    inp.focus();
+    inp.select();
+  }, 50);
+}
+
+function closeRenameModal() {
+  document.getElementById("modal-rename-expedition").style.display = "none";
+  renamingNombre = null;
+}
+
+document.getElementById("btn-close-rename").addEventListener("click", closeRenameModal);
+document.getElementById("btn-cancel-rename").addEventListener("click", closeRenameModal);
+document.getElementById("modal-rename-expedition").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal-rename-expedition")) closeRenameModal();
+});
+document.getElementById("rename-exp-name").addEventListener("keydown", e => {
+  if (e.key === "Enter") confirmRename();
+});
+document.getElementById("btn-confirm-rename").addEventListener("click", confirmRename);
+
+async function confirmRename() {
+  const nuevoNombre = document.getElementById("rename-exp-name").value.trim();
+  const errEl       = document.getElementById("rename-exp-error");
+  if (!nuevoNombre) { errEl.textContent = "El nombre es obligatorio."; errEl.style.display = ""; return; }
+  errEl.style.display = "none";
+
+  const btn = document.getElementById("btn-confirm-rename");
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/expedientes/${enc(renamingNombre)}/rename`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre_nuevo: nuevoNombre }),
+    });
+    if (r.status === 409) { errEl.textContent = "Ya existe un expediente con ese nombre."; errEl.style.display = ""; return; }
+    if (!r.ok) { const d = await r.json().catch(() => ({})); errEl.textContent = d.detail || "Error."; errEl.style.display = ""; return; }
+    const wasSelected = (renamingNombre === selectedNombre);
+    closeRenameModal();
+    await loadExpediciones();
+    if (wasSelected) selectExpedicion(nuevoNombre);
+    toast(`Renombrado a "${nuevoNombre}"`, "success");
+  } catch {
+    errEl.textContent = "Error de conexión.";
+    errEl.style.display = "";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* Delete */
+async function deleteExpedicion(nombre) {
+  if (!confirm(`¿Eliminar el expediente "${nombre}" y todos sus archivos? Esta acción no se puede deshacer.`)) return;
+  try {
+    const r = await fetch(`${API}/api/expedientes/${enc(nombre)}`, { method: "DELETE" });
+    if (!r.ok) throw new Error();
+    if (selectedNombre === nombre) {
+      selectedNombre = null;
+      archivos = [];
+      document.getElementById("expedition-content").style.display = "none";
+      document.getElementById("empty-state").style.display = "";
+    }
+    await loadExpediciones();
+    toast(`Expediente "${nombre}" eliminado`, "success");
+  } catch {
+    toast("Error al eliminar el expediente", "error");
+  }
+}
+
+/* ── Search ──────────────────────────────────────────────────────────────── */
+document.getElementById("search-expedientes").addEventListener("input", renderExpedicionList);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Context menu
+   ═════════════════════════════════════════════════════════════════════════ */
+const ctxMenu = document.getElementById("context-menu");
+
+function openContextMenu(e, nombre) {
+  e.preventDefault();
+  ctxNombre = nombre;
+  ctxMenu.style.display = "";
+  const x = Math.min(e.clientX, window.innerWidth  - ctxMenu.offsetWidth  - 8);
+  const y = Math.min(e.clientY, window.innerHeight - ctxMenu.offsetHeight - 8);
+  ctxMenu.style.left = x + "px";
+  ctxMenu.style.top  = y + "px";
+}
+
+function closeContextMenu() {
+  ctxMenu.style.display = "none";
+  ctxNombre = null;
+}
+
+document.addEventListener("click",       closeContextMenu);
+document.addEventListener("contextmenu", e => { if (!e.target.closest(".exp-item")) closeContextMenu(); });
+
+document.getElementById("ctx-rename").addEventListener("click", () => {
+  if (ctxNombre) openRenameModal(ctxNombre);
+  closeContextMenu();
+});
+document.getElementById("ctx-delete").addEventListener("click", () => {
+  if (ctxNombre) deleteExpedicion(ctxNombre);
+  closeContextMenu();
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Folio config changes → auto-save
+   ═════════════════════════════════════════════════════════════════════════ */
+let _folioSaveTimer = null;
+
+function scheduleFolioSave() {
+  clearTimeout(_folioSaveTimer);
+  _folioSaveTimer = setTimeout(saveFolioConfig, 800);
+  updateFolioOptionsVisibility();
+}
+
+function updateFolioOptionsVisibility() {
+  const on = document.getElementById("cfg-foliar").checked;
+  document.getElementById("foliar-options").style.display = on ? "" : "none";
+}
+
+["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right","cfg-folio-start"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("change", scheduleFolioSave);
+    el.addEventListener("input",  scheduleFolioSave);
+  }
+});
+updateFolioOptionsVisibility();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Generation
+   ═════════════════════════════════════════════════════════════════════════ */
+
+function updateGenerateBtn() {
+  const hasFiles  = archivos.filter(f => !f.uploading && f.paginas > 0).length > 0;
+  const btn       = document.getElementById("btn-generate");
+  const btnText   = document.getElementById("btn-generate-text");
+  btn.disabled    = !hasFiles;
+  btnText.textContent = hasFiles ? "⚡ Generar expediente" : "Agrega archivos para continuar";
+}
+
+document.getElementById("btn-generate").addEventListener("click", generate);
+
+async function generate() {
+  if (!selectedNombre) return;
+  if (archivos.filter(f => !f.uploading && f.paginas > 0).length === 0) return;
+
+  const outputName = document.getElementById("cfg-output-name").value.trim();
+  const errEl      = document.getElementById("nombre-error");
+  if (!outputName) {
+    errEl.style.display = "";
+    document.getElementById("cfg-output-name").focus();
+    return;
+  }
+  errEl.style.display = "none";
+
+  document.getElementById("btn-generate").disabled = true;
+  document.getElementById("btn-generate-text").innerHTML = `<span class="spinner"></span> Procesando…`;
+  resetGenerationProgress();
+  document.getElementById("result-section").style.display = "none";
+  document.getElementById("progress-section").style.display = "";
+
+  try {
+    const r = await fetch(`${API}/api/expedientes/${enc(selectedNombre)}/generar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        output_name: outputName,
+        config_folio: getFolioConfig(),
+      }),
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.detail || "Error al iniciar generación");
+    }
+    const { task_id } = await r.json();
+    activeTaskId = task_id;
+    startPolling(task_id);
+  } catch (err) {
+    resetGenerationUI();
+    toast(`Error: ${err.message}`, "error", 6000);
+  }
+}
+
+/* ── Polling ──────────────────────────────────────────────────────────────── */
 function startPolling(taskId) {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(() => pollTask(taskId), POLL_MS);
@@ -642,26 +639,31 @@ function startPolling(taskId) {
 
 async function pollTask(taskId) {
   try {
-    const res = await fetch(`${API}/api/task/${taskId}`);
-    if (!res.ok) return;
-    const task = await res.json();
+    const r    = await fetch(`${API}/api/task/${taskId}`);
+    if (!r.ok) return;
+    const task = await r.json();
 
-    setProgress(task.progress, task.message);
+    document.getElementById("progress-fill").style.width = `${task.progress}%`;
+    document.getElementById("progress-msg").textContent  = task.message || "";
+    document.getElementById("progress-pct").style.display = "none";
 
     if (task.status === "done") {
       stopPolling();
-      setProcessing(false);
-      showProgress(false);
-      resetSession();     // el backend ya limpió temp/; descartamos la referencia
+      resetGenerationBtn();
+      document.getElementById("progress-section").style.display = "none";
       showResult(task);
     } else if (task.status === "error") {
       stopPolling();
-      setProcessing(false);
-      showProgress(false);
-      resetSession();     // el backend también limpia en caso de error
+      resetGenerationBtn();
+      document.getElementById("progress-section").style.display = "none";
       toast(`Error: ${task.error || task.message}`, "error", 8000);
+    } else if (task.status === "cancelled") {
+      stopPolling();
+      resetGenerationBtn();
+      document.getElementById("progress-section").style.display = "none";
+      toast("Generación cancelada", "warn", 3000);
     }
-  } catch (_) { /* network hiccup – keep polling */ }
+  } catch { /* network hiccup */ }
 }
 
 function stopPolling() {
@@ -672,207 +674,151 @@ function stopPolling() {
 async function cancelGeneration() {
   const tid = activeTaskId;
   if (!tid) return;
-  btnCancelGen.disabled = true;
-  try {
-    await fetch(`${API}/api/task/${tid}`, { method: "DELETE" });
-  } catch (_) { /* ignore network errors — still reset UI */ }
+  document.getElementById("btn-cancel-gen").disabled = true;
+  try { await fetch(`${API}/api/task/${tid}`, { method: "DELETE" }); } catch {}
   stopPolling();
-  setProcessing(false);
-  showProgress(false);
-  resetSession();
-  toast("Generación cancelada", "warn", 4000);
+  resetGenerationBtn();
+  document.getElementById("progress-section").style.display = "none";
 }
 
-btnCancelGen.addEventListener("click", cancelGeneration);
+document.getElementById("btn-cancel-gen").addEventListener("click", cancelGeneration);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Progress UI
-   ═════════════════════════════════════════════════════════════════════════ */
-function showProgress(on) {
-  progressSec.classList.toggle("visible", on);
-  btnCancelGen.disabled = !on;
-}
-
-function setProgress(pct, msg) {
-  progressFill.style.width = `${pct}%`;
-  progressPct.textContent  = `${Math.round(pct)}%`;
-  progressMsg.textContent  = msg || "";
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Result UI
-   ═════════════════════════════════════════════════════════════════════════ */
+/* ── Result ───────────────────────────────────────────────────────────────── */
 function showResult(task) {
   const fname = task.result_file;
-  resultName.textContent = fname;
-  const secs = task.elapsed_seconds != null ? ` • generado en ${task.elapsed_seconds}s` : "";
-  resultMeta.textContent =
-    `${task.total_pages} páginas foliadas • listo en expedientes_generados/${secs}`;
+  document.getElementById("result-name").textContent = fname;
+  const secs = task.elapsed_seconds != null ? ` · ${task.elapsed_seconds}s` : "";
+  document.getElementById("result-meta").textContent =
+    `${task.total_pages} páginas foliadas${secs}`;
 
-  btnDownload.href = `${API}/api/download/${encodeURIComponent(fname)}`;
-  btnDownload.download = fname;
+  const dlBtn = document.getElementById("btn-download");
+  dlBtn.href     = `${API}/api/download/${enc(fname)}`;
+  dlBtn.download = fname;
 
+  const failedWarn = document.getElementById("failed-warn");
+  const failedList = document.getElementById("failed-list");
   if (task.failed_files && task.failed_files.length) {
     failedWarn.style.display = "";
-    failedList.innerHTML = task.failed_files
-      .map((f) => `<li>${esc(f)}</li>`)
-      .join("");
+    failedList.innerHTML = task.failed_files.map(f => `<li>${esc(f)}</li>`).join("");
   } else {
     failedWarn.style.display = "none";
   }
 
-  resultSec.classList.add("visible");
+  document.getElementById("result-section").style.display = "";
 
   if (task.sin_registro) {
-    toast(
-      "Este expediente se generó sin registrar en el sistema por superar el límite diario del mismo nombre.",
-      "warn",
-      8000,
-    );
+    toast("Expediente generado sin registrar (límite diario de mismo nombre)", "warn", 8000);
   } else {
-    const secsLabel = task.elapsed_seconds != null ? ` en ${task.elapsed_seconds}s` : "";
-    toast(`¡Expediente listo! ${task.total_pages} páginas${secsLabel}`, "success", 5000);
+    toast(`¡Listo! ${task.total_pages} páginas`, "success", 5000);
   }
-
-  resultSec.scrollIntoView({ behavior: "smooth", block: "center" });
 
   if (task.total_mes !== undefined && task.total_mes !== null) {
     window.dispatchEvent(new CustomEvent("expediente-registrado", { detail: { total_mes: task.total_mes } }));
   }
 }
 
-function resetResult() {
-  resultSec.classList.remove("visible");
-  failedWarn.style.display = "none";
-  failedList.innerHTML = "";
-  btnDownload.href = "#";
+/* ── Reset helpers ────────────────────────────────────────────────────────── */
+function resetGenerationBtn() {
+  const hasFiles = archivos.filter(f => !f.uploading && f.paginas > 0).length > 0;
+  const btn      = document.getElementById("btn-generate");
+  const btnText  = document.getElementById("btn-generate-text");
+  btn.disabled   = !hasFiles;
+  btnText.textContent = hasFiles ? "⚡ Generar expediente" : "Agrega archivos para continuar";
 }
 
-/* ── Limpiar error de nombre al escribir ─────────────────────────────────── */
-document.getElementById("cfg-output-name").addEventListener("input", () => {
-  const err = document.getElementById("nombre-error");
-  if (err) err.style.display = "none";
-});
+function resetGenerationProgress() {
+  document.getElementById("progress-fill").style.width = "0";
+  document.getElementById("progress-msg").textContent  = "Iniciando…";
+  document.getElementById("btn-cancel-gen").disabled   = false;
+}
 
-/* ── New expedition ───────────────────────────────────────────────────────── */
-document.getElementById("btn-new").addEventListener("click", () => {
-  fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
-  files = [];
-  resetSession();
-  renderList();
-  resetResult();
-  showProgress(false);
-  document.getElementById("cfg-output-name").value = "";
-  window.scrollTo({ top: 0, behavior: "smooth" });
+function resetGenerationUI() {
+  resetGenerationBtn();
+  document.getElementById("progress-section").style.display = "none";
+  document.getElementById("result-section").style.display   = "none";
+}
+
+/* ── Output name error clear ─────────────────────────────────────────────── */
+document.getElementById("cfg-output-name").addEventListener("input", () => {
+  document.getElementById("nombre-error").style.display = "none";
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   /api/count-pages  — server-side verification
+   Settings modal
    ═════════════════════════════════════════════════════════════════════════ */
-async function callCountPages() {
-  const readyIds = files.filter((f) => !f.uploading && f.id && !f.id.startsWith("_")).map((f) => f.id);
-  if (!readyIds.length) {
-    toast("No hay archivos listos para verificar", "warn");
-    return;
-  }
+document.getElementById("btn-settings").addEventListener("click", openSettingsModal);
 
-  const btn = document.getElementById("btn-recount");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner-sm"></span> Verificando…`;
-
+async function openSettingsModal() {
+  document.getElementById("modal-settings").style.display = "flex";
   try {
-    const res = await fetch(`${API}/api/count-pages`, {
+    const r = await fetch(`${API}/api/config`);
+    const d = await r.json();
+    document.getElementById("settings-folder").value = d.carpeta_raiz || "";
+    document.getElementById("settings-folder-hint").textContent =
+      d.carpeta_raiz ? `Carpeta actual: ${d.carpeta_raiz}` : "No configurada";
+  } catch {}
+}
+
+function closeSettingsModal() {
+  document.getElementById("modal-settings").style.display = "none";
+}
+
+document.getElementById("btn-close-settings").addEventListener("click", closeSettingsModal);
+document.getElementById("btn-cancel-settings").addEventListener("click", closeSettingsModal);
+document.getElementById("modal-settings").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal-settings")) closeSettingsModal();
+});
+
+document.getElementById("btn-settings-browse").addEventListener("click", () => {
+  document.getElementById("settings-folder-input").click();
+});
+document.getElementById("settings-folder-input").addEventListener("change", e => {
+  const files = e.target.files;
+  if (files && files.length > 0) {
+    const path = files[0].webkitRelativePath.split("/")[0];
+    document.getElementById("settings-folder").value = path;
+  }
+});
+
+document.getElementById("btn-save-settings").addEventListener("click", async () => {
+  const path = document.getElementById("settings-folder").value.trim();
+  if (!path) { toast("Escribe una ruta válida", "warn"); return; }
+  const btn = document.getElementById("btn-save-settings");
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/config`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_ids: readyIds }),
+      body: JSON.stringify({ carpeta_raiz: path }),
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || res.statusText);
-    }
-    const data = await res.json();
-
-    // Sync any server-corrected page counts back into local state
-    let corrected = 0;
-    data.files.forEach((sf) => {
-      const local = files.find((f) => f.id === sf.id);
-      if (local && sf.pages > 0 && sf.pages !== local.pages) {
-        local.pages = sf.pages;
-        corrected++;
-      }
-    });
-
-    if (corrected > 0) {
-      renderList();
-      toast(`Conteo actualizado: ${corrected} archivo(s) corregido(s)`, "info");
-    }
-    toast(
-      `Verificado: ${data.total_pages.toLocaleString("es")} páginas en ${readyIds.length} archivo(s)`,
-      "success",
-      4500
-    );
-  } catch (e) {
-    toast(`Error al verificar: ${e.message}`, "error", 5000);
+    if (!r.ok) { const d = await r.json().catch(() => ({})); toast(d.detail || "Error al guardar", "error"); return; }
+    closeSettingsModal();
+    toast("Configuración guardada", "success");
+    selectedNombre = null;
+    archivos = [];
+    document.getElementById("expedition-content").style.display = "none";
+    document.getElementById("empty-state").style.display = "";
+    loadExpediciones();
+  } catch {
+    toast("Error de conexión", "error");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `${ICO_REFRESH} Verificar`;
-  }
-}
-
-document.getElementById("btn-recount").addEventListener("click", callCountPages);
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Folio toggle + preview
-   ═════════════════════════════════════════════════════════════════════════ */
-function updateFolioPreview() {
-  const foliar     = document.getElementById("cfg-foliar").checked;
-  const options    = document.getElementById("foliar-options");
-  const previewSec = document.getElementById("folio-preview-section");
-  const numEl      = document.getElementById("folio-num-preview");
-  const infoEl     = document.getElementById("folio-preview-info");
-
-  options.style.display    = foliar ? "" : "none";
-  previewSec.style.display = foliar ? "" : "none";
-  if (!foliar) return;
-
-  const position   = document.getElementById("cfg-position").value;
-  const fontSize   = parseFloat(document.getElementById("cfg-fontsize").value)    || 11;
-  const mTop       = parseFloat(document.getElementById("cfg-margin-top").value)  || 20;
-  const mRight     = parseFloat(document.getElementById("cfg-margin-right").value)|| 30;
-  const folioStart = Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1);
-
-  // Scale: preview page is ~85px wide vs real Oficio ~612pt
-  const scale = 85 / 612;
-  numEl.style.fontSize = `${Math.max(7, Math.round(fontSize * scale * 6))}px`;
-  numEl.style.top      = position.startsWith("top")    ? `${Math.round(mTop   * scale)}px` : "auto";
-  numEl.style.bottom   = position.startsWith("bottom") ? `${Math.round(mTop   * scale)}px` : "auto";
-  numEl.style.right    = position.endsWith("right")    ? `${Math.round(mRight * scale)}px` : "auto";
-  numEl.style.left     = position.endsWith("left")     ? `${Math.round(mRight * scale)}px` : "auto";
-  numEl.textContent    = String(folioStart).padStart(3, "0");
-
-  const posLabel = {
-    "top-right":    "Arriba derecha",
-    "top-left":     "Arriba izquierda",
-    "bottom-right": "Abajo derecha",
-    "bottom-left":  "Abajo izquierda",
-  }[position] || position;
-
-  infoEl.innerHTML = `
-    <div class="folio-preview-row"><span>Posición</span><strong>${posLabel}</strong></div>
-    <div class="folio-preview-row"><span>Tamaño letra</span><strong>${fontSize} pt</strong></div>
-    <div class="folio-preview-row"><span>Márgenes</span><strong>${mTop} pt / ${mRight} pt</strong></div>
-    <div class="folio-preview-row"><span>Primer folio</span><strong>${folioStart}</strong></div>
-  `;
-}
-
-["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right","cfg-folio-start"].forEach((id) => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener("change", updateFolioPreview);
-    el.addEventListener("input",  updateFolioPreview);
   }
 });
-updateFolioPreview();
 
-/* ── Init ─────────────────────────────────────────────────────────────────── */
-renderList();
+/* ═══════════════════════════════════════════════════════════════════════════
+   Init on app-ready
+   ═════════════════════════════════════════════════════════════════════════ */
+whenReady(() => {
+  loadExpediciones();
+
+  // Restore last selected expedition from localStorage
+  const last = localStorage.getItem("last_expedicion");
+  if (last) {
+    setTimeout(() => {
+      const found = expediciones.find(e => e.nombre === last);
+      if (found) selectExpedicion(last);
+    }, 400);
+  }
+});
+

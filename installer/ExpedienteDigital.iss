@@ -17,7 +17,7 @@
 ; =============================================================================
 
 #define AppName      "Expediente Digital"
-#define AppVersion   "1.1.8"
+#define AppVersion   "1.1.9"
 #define AppPublisher "Sebastian Mogollon"
 #define AppExeName   "ExpedienteDigital.exe"
 ; GUID único — no cambiar entre versiones del mismo producto
