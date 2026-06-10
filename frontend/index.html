@@ -62,7 +62,7 @@
 <div id="layout-wrap">
 
   <!-- ── Panel izquierdo: lista de expedientes ─────────────────────────── -->
-  <aside id="sidebar" style="display:none">
+  <div id="sidebar" style="display:none">
     <div class="sb-header">
       <span class="sb-title">Expedientes</span>
       <button class="btn btn-primary btn-sm" id="btn-new-exp">+ Nuevo</button>
@@ -80,10 +80,10 @@
 
     <input type="text" id="exp-search" class="exp-search-input" placeholder="Buscar…" />
     <ul id="exp-list"></ul>
-  </aside>
+  </div>
 
   <!-- ── Panel derecho: contenido principal ────────────────────────────── -->
-  <main id="app-main" style="display:none">
+  <div id="app-main" style="display:none">
 
     <!-- Modo expediente: cabecera + archivos (Paso C, oculto en modo normal) -->
     <div class="card" id="exp-mode-card" style="display:none">
@@ -284,7 +284,7 @@
       </div>
     </div>
 
-  </main>
+  </div>
 </div><!-- #layout-wrap -->
 
 <!-- hidden inputs -->
