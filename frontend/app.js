@@ -994,13 +994,6 @@ function deselectExpedicion() {
 }
 
 function _setExpedicionMode(on) {
-  const uploadCard   = document.getElementById("upload-card");
-  const filelistCard = document.getElementById("filelist-card");
-  const cCard        = document.getElementById("counter-card");
-  if (uploadCard)   uploadCard.style.display   = on ? "none" : "";
-  if (filelistCard) filelistCard.style.display  = on ? "none" : "";
-  if (cCard && cCard.style.display !== "none")
-    cCard.style.display = on ? "none" : "";
   expModeCard.style.display = on ? "" : "none";
 }
 
@@ -1214,26 +1207,6 @@ async function _generateFromExpedicion() {
     showProgress(false);
     toast(`Error: ${e.message}`, "error", 6000);
   }
-}
-
-// ── Botón Examinar carpeta → diálogo nativo de Windows ───────────────────
-// Se reemplaza el listener existente (que abría webkitdirectory) por la API
-{
-  const oldBtn = document.getElementById("btn-folder-browser");
-  const newBtn = oldBtn.cloneNode(true); // quita listeners anteriores
-  oldBtn.replaceWith(newBtn);
-  newBtn.addEventListener("click", async () => {
-    try {
-      const r = await fetch(`${API}/api/browse-folder`);
-      const d = await r.json();
-      if (d.ok && d.path) {
-        document.getElementById("folder-path").value = d.path;
-        loadFolderByPath();
-      }
-    } catch (err) {
-      toast("No se pudo abrir el explorador: " + err.message, "error");
-    }
-  });
 }
 
 // ── Init: cargar expedientes al arrancar ──────────────────────────────────

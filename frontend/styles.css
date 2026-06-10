@@ -1193,8 +1193,10 @@ body {
 main {
   flex: 1;
   overflow-y: auto;
-  align-content: start; /* evita que grid estire las filas */
+  align-content: start;
   min-width: 0;
+  max-width: none;
+  margin: 0;
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────── */
