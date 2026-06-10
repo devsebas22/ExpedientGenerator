@@ -900,6 +900,24 @@ def _get_ordered_file_paths(folder: Path, meta: dict) -> list:
     return result
 
 
+@app.get("/api/browse-folder")
+async def browse_folder():
+    """Abre el diálogo nativo de Windows para seleccionar carpeta."""
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        path = filedialog.askdirectory(title="Seleccionar carpeta de expedientes")
+        root.destroy()
+        if path:
+            return {"ok": True, "path": path.replace("/", "\\")}
+        return {"ok": False, "path": ""}
+    except Exception as e:
+        return {"ok": False, "path": "", "error": str(e)}
+
+
 @app.get("/api/config")
 async def get_app_config():
     cfg = _get_app_config()

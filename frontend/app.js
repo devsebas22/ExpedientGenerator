@@ -876,3 +876,365 @@ updateFolioPreview();
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 renderList();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PANEL DE EXPEDIENTES — Pasos A-D
+   Toda la lógica del sidebar y modo expediente se agrega aquí,
+   SIN modificar ninguna función existente.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+// ── Estado ────────────────────────────────────────────────────────────────
+let selectedExpedicion = null;
+let _expediciones      = [];
+let expFiles           = [];
+
+// ── DOM refs sidebar ──────────────────────────────────────────────────────
+const sbExpList       = document.getElementById("exp-list");
+const expSearchInput  = document.getElementById("exp-search");
+const expModeCard     = document.getElementById("exp-mode-card");
+const expFileListEl   = document.getElementById("exp-file-list");
+const expFileEmptyEl  = document.getElementById("exp-file-empty");
+
+// ─────────────────────────────────────────────────────────────────────────
+// Paso B: Cargar y renderizar lista de expedientes
+// ─────────────────────────────────────────────────────────────────────────
+
+async function loadExpediciones() {
+  try {
+    const r = await fetch(`${API}/api/expedientes`);
+    if (r.ok) _expediciones = await r.json();
+  } catch { _expediciones = []; }
+  renderExpList();
+}
+
+function renderExpList() {
+  const q = (expSearchInput?.value || "").toLowerCase();
+  const filtrados = _expediciones.filter(e =>
+    e.nombre.toLowerCase().includes(q)
+  );
+  sbExpList.innerHTML = "";
+  if (!filtrados.length) {
+    const li = document.createElement("li");
+    li.className = "exp-list-empty";
+    li.textContent = _expediciones.length ? "Sin resultados" : "Sin expedientes aún";
+    sbExpList.append(li);
+    return;
+  }
+  filtrados.forEach(exp => {
+    const li = document.createElement("li");
+    li.className = "exp-item" + (selectedExpedicion === exp.nombre ? " active" : "");
+    li.innerHTML = `<span class="exp-item-dot"></span><span class="exp-item-name" title="${esc(exp.nombre)}">${esc(exp.nombre)}</span>`;
+    li.addEventListener("click", () => selectExpedicion(exp.nombre));
+    sbExpList.append(li);
+  });
+}
+
+expSearchInput?.addEventListener("input", renderExpList);
+
+// ── Crear expediente ──────────────────────────────────────────────────────
+const btnNewExp          = document.getElementById("btn-new-exp");
+const expCreateForm      = document.getElementById("exp-create-form");
+const expCreateInput     = document.getElementById("exp-new-name");
+const btnExpCreateOk     = document.getElementById("btn-exp-create-ok");
+const btnExpCreateCancel = document.getElementById("btn-exp-create-cancel");
+
+btnNewExp.addEventListener("click", () => {
+  expCreateForm.style.display = "flex";
+  expCreateInput.value = "";
+  expCreateInput.focus();
+});
+btnExpCreateCancel.addEventListener("click", () => {
+  expCreateForm.style.display = "none";
+});
+expCreateInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter")  _doCreateExpedicion();
+  if (e.key === "Escape") expCreateForm.style.display = "none";
+});
+btnExpCreateOk.addEventListener("click", _doCreateExpedicion);
+
+async function _doCreateExpedicion() {
+  const nombre = expCreateInput.value.trim();
+  if (!nombre) { expCreateInput.focus(); return; }
+  try {
+    const r = await fetch(`${API}/api/expedientes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre }),
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      toast(e.detail || "Error al crear expediente", "error"); return;
+    }
+    expCreateForm.style.display = "none";
+    await loadExpediciones();
+    toast(`Expediente "${nombre}" creado`, "success", 2500);
+    selectExpedicion(nombre);
+  } catch (err) { toast("Error: " + err.message, "error"); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Paso C: Seleccionar expediente → mostrar archivos
+// ─────────────────────────────────────────────────────────────────────────
+
+async function selectExpedicion(nombre) {
+  selectedExpedicion = nombre;
+  renderExpList();
+  _setExpedicionMode(true);
+  document.getElementById("exp-mode-name").textContent = nombre;
+  document.getElementById("cfg-output-name").value = nombre;
+  await _reloadExpFiles();
+}
+
+function deselectExpedicion() {
+  selectedExpedicion = null;
+  expFiles = [];
+  _setExpedicionMode(false);
+  renderExpList();
+  setGenerateBtn(); // restaura estado del botón normal
+}
+
+function _setExpedicionMode(on) {
+  const uploadCard   = document.getElementById("upload-card");
+  const filelistCard = document.getElementById("filelist-card");
+  const cCard        = document.getElementById("counter-card");
+  if (uploadCard)   uploadCard.style.display   = on ? "none" : "";
+  if (filelistCard) filelistCard.style.display  = on ? "none" : "";
+  if (cCard && cCard.style.display !== "none")
+    cCard.style.display = on ? "none" : "";
+  expModeCard.style.display = on ? "" : "none";
+}
+
+async function _reloadExpFiles() {
+  if (!selectedExpedicion) return;
+  try {
+    const r = await fetch(
+      `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/archivos`
+    );
+    expFiles = r.ok ? await r.json() : [];
+  } catch { expFiles = []; }
+  _renderExpFileList();
+  _updateExpGenerateBtn();
+}
+
+function _renderExpFileList() {
+  expFileListEl.innerHTML = "";
+  if (!expFiles.length) {
+    expFileEmptyEl.style.display = "";
+    return;
+  }
+  expFileEmptyEl.style.display = "none";
+  expFiles.forEach((f, i) => {
+    const li = document.createElement("li");
+    li.className = "exp-file-item";
+    li.dataset.nombre = f.nombre;
+    li.draggable = true;
+    li.innerHTML = `
+      <span class="exp-file-handle">${ICO_GRIP}</span>
+      <span class="exp-file-num">${i + 1}</span>
+      <span class="file-icon">${fileIcon(f.nombre)}</span>
+      <span class="exp-file-name" title="${esc(f.nombre)}">${esc(f.nombre)}</span>
+      <button class="exp-file-remove" title="Quitar" data-nombre="${esc(f.nombre)}">✕</button>
+    `;
+    expFileListEl.append(li);
+  });
+  _initExpDragSort();
+  // Botones eliminar
+  expFileListEl.querySelectorAll(".exp-file-remove").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const nombre = btn.dataset.nombre;
+      if (!confirm(`¿Quitar "${nombre}" del expediente?`)) return;
+      try {
+        await fetch(
+          `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/archivos/${encodeURIComponent(nombre)}`,
+          { method: "DELETE" }
+        );
+        await _reloadExpFiles();
+      } catch (err) { toast("Error al eliminar: " + err.message, "error"); }
+    });
+  });
+}
+
+function _updateExpGenerateBtn() {
+  btnGenerate.disabled = expFiles.length === 0;
+  btnGenerate.innerHTML = expFiles.length === 0
+    ? `${ICO_UPLOAD} Agrega archivos al expediente`
+    : `${ICO_ZAP} Generar expediente`;
+}
+
+// Drag-sort para los archivos del expediente
+function _initExpDragSort() {
+  let dragged = null;
+  expFileListEl.querySelectorAll(".exp-file-item").forEach(item => {
+    item.addEventListener("dragstart", () => {
+      dragged = item;
+      setTimeout(() => item.style.opacity = ".35", 0);
+    });
+    item.addEventListener("dragend", () => {
+      item.style.opacity = "";
+      dragged = null;
+      _renumberExpFiles();
+      _saveExpOrden();
+    });
+    item.addEventListener("dragover", e => e.preventDefault());
+    item.addEventListener("drop", () => {
+      if (!dragged || dragged === item) return;
+      const allItems = [...expFileListEl.children];
+      const di = allItems.indexOf(dragged);
+      const ti = allItems.indexOf(item);
+      if (di < ti) expFileListEl.insertBefore(dragged, item.nextSibling);
+      else         expFileListEl.insertBefore(dragged, item);
+    });
+  });
+}
+
+function _renumberExpFiles() {
+  expFileListEl.querySelectorAll(".exp-file-num").forEach((el, i) => {
+    el.textContent = i + 1;
+  });
+}
+
+async function _saveExpOrden() {
+  if (!selectedExpedicion) return;
+  const orden = [...expFileListEl.querySelectorAll(".exp-file-item")]
+    .map(li => li.dataset.nombre);
+  try {
+    await fetch(
+      `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/orden`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orden }),
+      }
+    );
+  } catch {}
+}
+
+// ── Cerrar expediente ─────────────────────────────────────────────────────
+document.getElementById("btn-deselect-exp").addEventListener("click", deselectExpedicion);
+
+// ── Agregar archivos al expediente ────────────────────────────────────────
+const _expFileInput = document.createElement("input");
+_expFileInput.type = "file";
+_expFileInput.accept = ".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.docx,.doc";
+_expFileInput.multiple = true;
+_expFileInput.style.display = "none";
+document.body.append(_expFileInput);
+
+document.getElementById("btn-add-to-exp").addEventListener("click", () =>
+  _expFileInput.click()
+);
+
+_expFileInput.addEventListener("change", async () => {
+  const toUpload = [..._expFileInput.files];
+  _expFileInput.value = "";
+  if (!toUpload.length || !selectedExpedicion) return;
+  toast(`Agregando ${toUpload.length} archivo(s)…`, "info", 2000);
+  for (const file of toUpload) {
+    await _uploadToExpedicion(file, false);
+  }
+  await _reloadExpFiles();
+});
+
+async function _uploadToExpedicion(file, replace = false) {
+  const fd = new FormData();
+  fd.append("file", file);
+  const url = `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/archivos`
+    + (replace ? "?replace=true" : "");
+  try {
+    const r = await fetch(url, { method: "POST", body: fd });
+    if (r.status === 409) {
+      if (confirm(`"${file.name}" ya existe. ¿Reemplazar?`)) {
+        await _uploadToExpedicion(file, true);
+      }
+    } else if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      toast(`Error con "${file.name}": ${e.detail || r.status}`, "error");
+    }
+  } catch (err) { toast(`Error: ${err.message}`, "error"); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Paso D: Generar desde expediente + intercepción del botón
+// ─────────────────────────────────────────────────────────────────────────
+
+// Reemplaza el listener del botón generar para soportar ambos modos
+btnGenerate.removeEventListener("click", generate);
+btnGenerate.addEventListener("click", async () => {
+  if (selectedExpedicion) {
+    await _generateFromExpedicion();
+  } else {
+    await generate();
+  }
+});
+
+async function _generateFromExpedicion() {
+  const outputName  = document.getElementById("cfg-output-name").value.trim();
+  const nombreError = document.getElementById("nombre-error");
+  if (!outputName) {
+    if (nombreError) nombreError.style.display = "block";
+    document.getElementById("cfg-output-name").focus();
+    document.getElementById("cfg-output-name").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (nombreError) nombreError.style.display = "none";
+
+  const foliar = document.getElementById("cfg-foliar").checked;
+  const config_folio = {
+    activo:          foliar,
+    posicion:        document.getElementById("cfg-position").value,
+    tamano:          parseFloat(document.getElementById("cfg-fontsize").value)     || 11,
+    margen_superior: parseFloat(document.getElementById("cfg-margin-top").value)   || 20,
+    margen_lateral:  parseFloat(document.getElementById("cfg-margin-right").value) || 30,
+    iniciar_desde:   Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1),
+  };
+
+  setProcessing(true);
+  resetResult();
+  showProgress(true);
+  setProgress(0, "Iniciando…");
+
+  try {
+    const r = await fetch(
+      `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/generar`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ output_name: outputName, config_folio }),
+      }
+    );
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ detail: r.statusText }));
+      throw new Error(err.detail || "Error al generar");
+    }
+    const { task_id } = await r.json();
+    activeTaskId = task_id;
+    startPolling(task_id);
+  } catch (e) {
+    setProcessing(false);
+    showProgress(false);
+    toast(`Error: ${e.message}`, "error", 6000);
+  }
+}
+
+// ── Botón Examinar carpeta → diálogo nativo de Windows ───────────────────
+// Se reemplaza el listener existente (que abría webkitdirectory) por la API
+{
+  const oldBtn = document.getElementById("btn-folder-browser");
+  const newBtn = oldBtn.cloneNode(true); // quita listeners anteriores
+  oldBtn.replaceWith(newBtn);
+  newBtn.addEventListener("click", async () => {
+    try {
+      const r = await fetch(`${API}/api/browse-folder`);
+      const d = await r.json();
+      if (d.ok && d.path) {
+        document.getElementById("folder-path").value = d.path;
+        loadFolderByPath();
+      }
+    } catch (err) {
+      toast("No se pudo abrir el explorador: " + err.message, "error");
+    }
+  });
+}
+
+// ── Init: cargar expedientes al arrancar ──────────────────────────────────
+loadExpediciones();
