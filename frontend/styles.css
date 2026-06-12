@@ -1278,6 +1278,21 @@ body {
 }
 .exp-item.active .exp-item-dot { background: var(--accent); }
 
+.exp-item-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: .76rem;
+  padding: 0 2px;
+  opacity: 0;
+  transition: opacity var(--trans), color var(--trans);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.exp-item:hover .exp-item-del { opacity: 1; }
+.exp-item-del:hover { color: var(--danger); }
+
 .exp-item-name {
   flex: 1;
   overflow: hidden;

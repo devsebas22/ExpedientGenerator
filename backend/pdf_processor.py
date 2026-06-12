@@ -139,8 +139,11 @@ def _normalize_page_in_place(doc: fitz.Document, page_idx: int) -> None:
     ty = (_OFICIO_H - nh) / 2   # margen inferior en coordenadas PDF (y hacia arriba)
 
     try:
-        page.clean_contents()
         xrefs = page.get_contents()
+        if len(xrefs) > 1:
+            # Multiple streams are rare; merge them so we have exactly one to wrap.
+            page.clean_contents()
+            xrefs = page.get_contents()
         if xrefs:
             xref = xrefs[0]
             old = doc.xref_stream(xref)

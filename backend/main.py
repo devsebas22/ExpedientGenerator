@@ -956,6 +956,8 @@ async def list_expedientes():
             if not folder.is_dir() or folder.name.startswith("."):
                 continue
             meta  = _read_meta(folder)
+            if meta.get("archivado"):
+                continue
             files = _get_ordered_file_paths(folder, meta)
             result.append({
                 "nombre":   folder.name,
@@ -1021,8 +1023,11 @@ async def delete_expediente(nombre: str):
     folder = raiz / nombre
     if not folder.exists():
         raise HTTPException(404, "Expediente no encontrado")
-    shutil.rmtree(str(folder))
-    logger.info("[expediente] eliminado: '%s'", nombre)
+    # Archive — never delete files from disk; user can access via Windows Explorer.
+    meta = _read_meta(folder)
+    meta["archivado"] = True
+    _write_meta(folder, meta)
+    logger.info("[expediente] archivado (oculto): '%s'", nombre)
     return {"ok": True}
 
 
@@ -1187,6 +1192,8 @@ async def generar_expediente_endpoint(nombre: str, req: GenerarExpedienteRequest
 
     if req.config_folio:
         folio_cfg = req.config_folio.model_dump()
+        meta["config_folio"] = folio_cfg
+        _write_meta(folder, meta)
     else:
         folio_cfg = meta.get("config_folio", {})
 

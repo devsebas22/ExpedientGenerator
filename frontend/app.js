@@ -923,8 +923,24 @@ function renderExpList() {
   filtrados.forEach(exp => {
     const li = document.createElement("li");
     li.className = "exp-item" + (selectedExpedicion === exp.nombre ? " active" : "");
-    li.innerHTML = `<span class="exp-item-dot"></span><span class="exp-item-name" title="${esc(exp.nombre)}">${esc(exp.nombre)}</span>`;
-    li.addEventListener("click", () => selectExpedicion(exp.nombre));
+    li.innerHTML = `
+      <span class="exp-item-dot"></span>
+      <span class="exp-item-name" title="${esc(exp.nombre)}">${esc(exp.nombre)}</span>
+      <button class="exp-item-del" title="Ocultar expediente" data-nombre="${esc(exp.nombre)}">✕</button>
+    `;
+    li.querySelector(".exp-item-name, .exp-item-dot").addEventListener?.("click", () => selectExpedicion(exp.nombre));
+    li.addEventListener("click", e => {
+      if (!e.target.closest(".exp-item-del")) selectExpedicion(exp.nombre);
+    });
+    li.querySelector(".exp-item-del").addEventListener("click", async e => {
+      e.stopPropagation();
+      if (!confirm(`¿Ocultar "${exp.nombre}" de la lista?\nLos archivos se conservan en disco.`)) return;
+      if (selectedExpedicion === exp.nombre) deselectExpedicion();
+      try {
+        await fetch(`${API}/api/expedientes/${encodeURIComponent(exp.nombre)}`, { method: "DELETE" });
+        await loadExpediciones();
+      } catch (err) { toast("Error al ocultar: " + err.message, "error"); }
+    });
     sbExpList.append(li);
   });
 }
@@ -1003,10 +1019,27 @@ async function _reloadExpFiles() {
     const r = await fetch(
       `${API}/api/expedientes/${encodeURIComponent(selectedExpedicion)}/archivos`
     );
-    expFiles = r.ok ? await r.json() : [];
+    if (r.ok) {
+      const data = await r.json();
+      expFiles = data.archivos ?? [];
+      _applyConfigFolio(data.config_folio ?? {});
+    } else {
+      expFiles = [];
+    }
   } catch { expFiles = []; }
   _renderExpFileList();
   _updateExpGenerateBtn();
+}
+
+function _applyConfigFolio(cfg) {
+  const safe = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+  const safeChk = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.checked = !!val; };
+  safeChk("cfg-foliar",       cfg.activo);
+  safe("cfg-position",        cfg.posicion);
+  safe("cfg-fontsize",        cfg.tamano);
+  safe("cfg-margin-top",      cfg.margen_superior);
+  safe("cfg-margin-right",    cfg.margen_lateral);
+  safe("cfg-folio-start",     cfg.iniciar_desde);
 }
 
 function _renderExpFileList() {
