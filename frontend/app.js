@@ -66,6 +66,13 @@ function fileIcon(name) {
    Init — punto de entrada llamado desde el inline script de index.html
    ═════════════════════════════════════════════════════════════════════════ */
 async function initApp() {
+  // Conectar listeners del setup-screen aquí, garantizando que el DOM esté listo
+  document.getElementById("btn-browse-folder").addEventListener("click", browseFolder);
+  document.getElementById("btn-save-config").addEventListener("click", saveConfig);
+  document.getElementById("setup-path-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") saveConfig();
+  });
+
   try {
     const r = await fetch(`${API}/api/config`);
     if (!r.ok) { _showSetupScreen(); return; }
@@ -96,18 +103,32 @@ function _showMainLayout() {
    Setup screen — configuración inicial de carpeta raíz
    ═════════════════════════════════════════════════════════════════════════ */
 async function browseFolder() {
+  const btn = document.getElementById("btn-browse-folder");
+  btn.disabled = true;
   try {
     const r = await fetch(`${API}/api/browse-folder`);
-    if (r.ok) {
-      const d = await r.json();
-      if (d.path) document.getElementById("setup-path-input").value = d.path;
+    if (!r.ok) { toast("Error al abrir el selector de carpetas", "error"); return; }
+    const d = await r.json();
+    if (d.path) {
+      document.getElementById("setup-path-input").value = d.path;
+    } else {
+      toast("No se seleccionó ninguna carpeta", "warn", 2500);
     }
-  } catch {}
+  } catch {
+    toast("Error de conexión con el backend", "error");
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function saveConfig() {
   const path = document.getElementById("setup-path-input").value.trim();
   if (!path) { toast("Escribe o selecciona una carpeta primero", "warn"); return; }
+
+  const btn = document.getElementById("btn-save-config");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+
   try {
     const r = await fetch(`${API}/api/config`, {
       method: "POST",
@@ -116,14 +137,17 @@ async function saveConfig() {
     });
     if (!r.ok) {
       const e = await r.json().catch(() => ({}));
-      toast(e.detail || "Error al guardar configuración", "error");
+      toast(e.detail || "No se pudo guardar. Verifica que la carpeta existe.", "error");
       return;
     }
     _showMainLayout();
     await loadExpediciones();
     toast("Carpeta configurada correctamente", "success");
   } catch (err) {
-    toast("Error: " + err.message, "error");
+    toast("Error de conexión: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Continuar";
   }
 }
 
@@ -644,13 +668,6 @@ function resetResult() {
 /* ═══════════════════════════════════════════════════════════════════════════
    Event listeners
    ═════════════════════════════════════════════════════════════════════════ */
-
-// Setup screen
-document.getElementById("btn-browse-folder").addEventListener("click", browseFolder);
-document.getElementById("btn-save-config").addEventListener("click", saveConfig);
-document.getElementById("setup-path-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") saveConfig();
-});
 
 // Sidebar
 document.getElementById("btn-new-exp").addEventListener("click", _showCreateForm);
