@@ -44,7 +44,6 @@ def analyze_pdf_file(file_path: str) -> tuple[int, str | None]:
         return -1, "Este archivo está dañado y no puede leerse."
 
 
-# Oficio colombiano: 216 × 330 mm = 612 × 935 pt
 _OFICIO_W = 612.0
 _OFICIO_H = 935.0
 
@@ -52,7 +51,6 @@ _OFICIO_H = 935.0
 def convert_image_to_pdf(src_path: str, dst_path: str) -> None:
     """
     Convierte imagen a PDF de una página en tamaño Oficio (612×935 pt).
-    Escalado por píxeles; DPI ignorado. Imagen centrada con ~40 pt de margen.
     """
     import io
     from PIL import Image
@@ -92,7 +90,7 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.lib.units import inch
 
-        _oficio_rl = (_OFICIO_W, _OFICIO_H)   # reportlab usa (ancho, alto) en pt
+        _oficio_rl = (_OFICIO_W, _OFICIO_H)
         doc = Document(src_path)
         pdf = SimpleDocTemplate(
             str(dst_path), pagesize=_oficio_rl,
@@ -116,69 +114,6 @@ def convert_docx_to_pdf(src_path: str, dst_path: str) -> bool:
         return False
 
 
-def _normalize_page_in_place(doc: fitz.Document, page_idx: int) -> None:
-    """
-    Escala y centra una página no-Oficio a tamaño Oficio modificando su
-    content stream directamente. Sin show_pdf_page → sin Form XObjects →
-    los recursos ya se importaron una sola vez al llamar insert_pdf(src).
-
-    Coordenadas PDF: origen en esquina inferior-izquierda, Y crece hacia arriba.
-    El CTM  q scale 0 0 scale tx ty cm  transforma (x,y) → (x·s+tx, y·s+ty).
-    """
-    page = doc[page_idx]
-    if page.rotation != 0:
-        # Páginas rotadas son muy raras — omitir normalización es aceptable
-        logger.warning("Página %d tiene rotación %d — omitiendo normalización Oficio",
-                       page_idx, page.rotation)
-        return
-
-    w, h = page.rect.width, page.rect.height
-    scale = min(_OFICIO_W / w, _OFICIO_H / h)
-    nw, nh = w * scale, h * scale
-    tx = (_OFICIO_W - nw) / 2
-    ty = (_OFICIO_H - nh) / 2   # margen inferior en coordenadas PDF (y hacia arriba)
-
-    try:
-        xrefs = page.get_contents()
-        if len(xrefs) > 1:
-            # Multiple streams are rare; merge them so we have exactly one to wrap.
-            page.clean_contents()
-            xrefs = page.get_contents()
-        if xrefs:
-            xref = xrefs[0]
-            old = doc.xref_stream(xref)
-            ctm = f"q {scale:.6f} 0 0 {scale:.6f} {tx:.4f} {ty:.4f} cm\n".encode()
-            doc.update_stream(xref, ctm + old + b"\nQ")
-        page.set_mediabox(fitz.Rect(0, 0, _OFICIO_W, _OFICIO_H))
-    except Exception as exc:
-        logger.warning("No se pudo normalizar página %d in-place: %s", page_idx, exc)
-
-
-def _insert_normalized(output_doc: fitz.Document, src: fitz.Document) -> None:
-    """
-    Inserta todas las páginas de src en output_doc normalizadas a Oficio.
-
-    Rendimiento: insert_pdf una sola vez importa los recursos del documento
-    fuente exactamente una vez. Las páginas no-Oficio se normalizan in-place
-    modificando su content stream (sin show_pdf_page, sin Form XObjects).
-
-    show_pdf_page duplicaba recursos por cada llamada; con garbage=3 al
-    guardar eso causaba O(n²) en documentos con muchas páginas no-Oficio.
-    """
-    n = len(src)
-
-    def _is_oficio(pno: int) -> bool:
-        r = src[pno].rect
-        return abs(r.width - _OFICIO_W) <= 2 and abs(r.height - _OFICIO_H) <= 2
-
-    start = len(output_doc)
-    output_doc.insert_pdf(src)   # recursos importados una sola vez
-
-    for pno in range(n):
-        if not _is_oficio(pno):
-            _normalize_page_in_place(output_doc, start + pno)
-
-
 def merge_and_foliate(
     file_paths: list[str],
     output_path: str,
@@ -189,6 +124,9 @@ def merge_and_foliate(
     Merge ordered PDFs and stamp a folio number on every page.
     Returns {'total_pages': int, 'failed_files': list[str]}.
     Raises ValueError if no file could be processed.
+
+    Sin normalización de tamaño — cada página se conserva en su tamaño original.
+    El folio se estampa sobre el tamaño real de cada página.
     """
     failed_files: list[str] = []
     output_doc = fitz.open()
@@ -207,7 +145,7 @@ def merge_and_foliate(
                     failed_files.append(f"{fname} (encriptado, sin contraseña)")
                     src.close()
                     continue
-            _insert_normalized(output_doc, src)
+            output_doc.insert_pdf(src)
             page_count = len(src)
             src.close()
             logger.info("Fusionado '%s'  %d págs.", fname, page_count)
@@ -235,7 +173,10 @@ def merge_and_foliate(
         for page_num in range(total_pages):
             if page_num % 25 == 0 or page_num == total_pages - 1:
                 pct = 48 + ((page_num + 1) / total_pages) * 46
-                progress_cb(f"Foliando página {folio_start + page_num} de {folio_start + total_pages - 1}", pct)
+                progress_cb(
+                    f"Foliando página {folio_start + page_num} de {folio_start + total_pages - 1}",
+                    pct,
+                )
             try:
                 _stamp_folio(
                     output_doc[page_num],
@@ -255,9 +196,9 @@ def merge_and_foliate(
     try:
         output_doc.save(
             output_path,
-            garbage=2,     # compact XREF (3 = también comprime streams, lento con muchos XObjects)
-            deflate=True,  # compress streams
-            clean=False,   # do NOT re-parse content streams → preserves quality
+            garbage=2,
+            deflate=True,
+            clean=False,
         )
     finally:
         output_doc.close()
@@ -276,7 +217,7 @@ def _stamp_folio(
     margin_right: float,
     position: str,
 ) -> None:
-    """Insert folio number text on a page."""
+    """Insert folio number text on a page. Uses page's actual dimensions."""
     rect = page.rect
     text = str(number)
     box_w = max(70.0, len(text) * font_size * 0.85)
@@ -316,7 +257,6 @@ def _stamp_folio(
         align=align,
     )
     if rc < 0:
-        # Fallback: insert_text with manual positioning
         x = x1 - 4 if align == 2 else x0
         page.insert_text(
             (x, y0 + font_size),
