@@ -145,9 +145,18 @@ def merge_and_foliate(
                     failed_files.append(f"{fname} (encriptado, sin contraseña)")
                     src.close()
                     continue
+            start_idx  = len(output_doc)
             output_doc.insert_pdf(src)
             page_count = len(src)
             src.close()
+
+            # Normalizar páginas rotadas para que _stamp_folio opere en el
+            # espacio visual correcto (rotation=0 → page.rect == visible rect).
+            for pno in range(page_count):
+                page = output_doc[start_idx + pno]
+                if page.rotation != 0:
+                    _normalize_rotation(output_doc, start_idx + pno)
+
             logger.info("Fusionado '%s'  %d págs.", fname, page_count)
         except Exception as exc:
             logger.error("Error en '%s': %s", fname, exc)
@@ -209,6 +218,65 @@ def merge_and_foliate(
     return {"total_pages": total_pages, "failed_files": failed_files}
 
 
+def _normalize_rotation(doc: fitz.Document, page_idx: int) -> None:
+    """
+    Bake the page's /Rotate into the content stream so rotation=0 afterwards.
+    Uses page.remove_rotation() (PyMuPDF >= 1.22).  Falls back to a manual
+    CTM rewrite for older builds — keeps the same visual appearance.
+    """
+    page = doc[page_idx]
+    rotation = page.rotation
+    if rotation == 0:
+        return
+
+    # Primary path — available in PyMuPDF >= 1.22
+    if hasattr(page, "remove_rotation"):
+        try:
+            page.remove_rotation()
+            return
+        except Exception as exc:
+            logger.warning("remove_rotation() falló en página %d: %s — usando fallback", page_idx, exc)
+
+    # Fallback: rewrite content stream manually
+    # CTM matrices that undo the PDF /Rotate display rotation.
+    # For Rotate=N the viewer rotates content N° CCW; we prepend the inverse.
+    mb = page.mediabox
+    w, h = mb.width, mb.height
+
+    if rotation == 90:
+        # Inverse of 90° CCW display  →  apply 90° CW to content
+        # (x,y) → (y, w−x)   new size: (h, w)
+        ctm_str = f"0 -1 1 0 0 {w:.4f} cm\n"
+        new_mb  = fitz.Rect(0, 0, h, w)
+    elif rotation == 180:
+        # Inverse of 180° display  →  apply 180° to content
+        # (x,y) → (w−x, h−y)   new size: (w, h)
+        ctm_str = f"-1 0 0 -1 {w:.4f} {h:.4f} cm\n"
+        new_mb  = fitz.Rect(0, 0, w, h)
+    elif rotation == 270:
+        # Inverse of 270° CCW display  →  apply 90° CCW to content
+        # (x,y) → (h−y, x)   new size: (h, w)
+        ctm_str = f"0 1 -1 0 {h:.4f} 0 cm\n"
+        new_mb  = fitz.Rect(0, 0, h, w)
+    else:
+        logger.warning("Rotación inesperada %d° en página %d — omitiendo normalización", rotation, page_idx)
+        return
+
+    try:
+        xrefs = page.get_contents()
+        if len(xrefs) > 1:
+            page.clean_contents()
+            xrefs = page.get_contents()
+        if xrefs:
+            old = doc.xref_stream(xrefs[0])
+            doc.update_stream(xrefs[0], b"q\n" + ctm_str.encode() + old + b"\nQ")
+        page.set_mediabox(new_mb)
+        page.set_rotation(0)
+        logger.debug("Rotación %d° normalizada manualmente en página %d", rotation, page_idx)
+    except Exception as exc:
+        logger.warning("Fallback _normalize_rotation falló en página %d: %s", page_idx, exc)
+
+
 def _stamp_folio(
     page: fitz.Page,
     number: int,
@@ -218,7 +286,7 @@ def _stamp_folio(
     position: str,
 ) -> None:
     """Insert folio number text on a page. Uses page's actual dimensions."""
-    rect = page.rect
+    rect = page.bound()
     text = str(number)
     box_w = max(70.0, len(text) * font_size * 0.85)
     box_h = font_size + 6.0
