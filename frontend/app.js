@@ -1,7 +1,4 @@
 "use strict";
-/* ═══════════════════════════════════════════════════════════════════════════
-   Expediente Digital – frontend logic v1.2.0
-   ═════════════════════════════════════════════════════════════════════════ */
 
 const API     = "";
 const POLL_MS = 700;
@@ -21,10 +18,10 @@ var ICO_INFO_TOAST = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height=
 /* ── Estado global ───────────────────────────────────────────────────────── */
 let selectedExp    = null;   // nombre del expediente activo
 let expFiles       = [];     // archivos del expediente activo (desde API)
-let _expediciones  = [];     // lista completa de expedientes
+let allExpedientes = [];     // lista completa para búsqueda local
 let pollTimer      = null;
 let activeTaskId   = null;
-let _folioCfgTimer = null;   // debounce para auto-guardar config folio
+let _autoSaveTimer = null;   // debounce para auto-guardar config folio
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Helpers
@@ -87,14 +84,12 @@ async function initApp() {
 /* ── Navegación entre pantallas ──────────────────────────────────────────── */
 function _showSetupScreen() {
   document.getElementById("setup-screen").style.display = "flex";
-  document.getElementById("sidebar").style.display      = "none";
-  document.getElementById("app-main").style.display     = "none";
+  document.getElementById("layout-wrap").style.display  = "none";
 }
 
 function _showMainLayout() {
   document.getElementById("setup-screen").style.display = "none";
-  document.getElementById("sidebar").style.display      = "flex";
-  document.getElementById("app-main").style.display     = "";
+  document.getElementById("layout-wrap").style.display  = "flex";
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -138,22 +133,22 @@ async function saveConfig() {
 async function loadExpediciones() {
   try {
     const r = await fetch(`${API}/api/expedientes`);
-    if (r.ok) _expediciones = await r.json();
-    else      _expediciones = [];
-  } catch { _expediciones = []; }
+    if (r.ok) allExpedientes = await r.json();
+    else      allExpedientes = [];
+  } catch { allExpedientes = []; }
   renderExpList();
 }
 
 function renderExpList() {
   const q = (document.getElementById("exp-search").value || "").toLowerCase();
-  const filtrados = _expediciones.filter(e => e.nombre.toLowerCase().includes(q));
+  const filtrados = allExpedientes.filter(e => e.nombre.toLowerCase().includes(q));
   const ul = document.getElementById("exp-list");
   ul.innerHTML = "";
 
   if (!filtrados.length) {
     const li = document.createElement("li");
     li.className = "exp-list-empty";
-    li.textContent = _expediciones.length ? "Sin resultados" : "Sin expedientes aún";
+    li.textContent = allExpedientes.length ? "Sin resultados" : "Sin expedientes aún";
     ul.append(li);
     return;
   }
@@ -234,15 +229,15 @@ function deselectExpediente() {
 }
 
 function _showExpEmpty() {
-  document.getElementById("exp-empty-state").style.display = "";
-  document.getElementById("exp-detail").style.display      = "none";
+  document.getElementById("empty-state").style.display  = "";
+  document.getElementById("exp-detail").style.display   = "none";
 }
 
 function _showExpDetail(nombre) {
-  document.getElementById("exp-empty-state").style.display = "none";
-  document.getElementById("exp-detail").style.display      = "grid";
-  document.getElementById("exp-detail-name").textContent   = nombre;
-  document.getElementById("cfg-output-name").value         = nombre;
+  document.getElementById("empty-state").style.display  = "none";
+  document.getElementById("exp-detail").style.display   = "grid";
+  document.getElementById("exp-nombre").textContent     = nombre;
+  document.getElementById("cfg-output-name").value      = nombre;
   resetResult();
   showProgress(false);
 }
@@ -268,7 +263,7 @@ function updateExpHeader() {
   const count = expFiles.length;
   const pages = expFiles.reduce((s, f) => s + (f.paginas || 0), 0);
 
-  document.getElementById("exp-detail-meta").textContent =
+  document.getElementById("exp-meta").textContent =
     `${count} archivo${count !== 1 ? "s" : ""} · ${pages} página${pages !== 1 ? "s" : ""}`;
 
   const t = estimateTime(pages, count);
@@ -299,9 +294,9 @@ function renderExpFiles() {
 
   expFiles.forEach((f, i) => {
     const li = document.createElement("li");
-    li.className   = "exp-file-item";
+    li.className      = "exp-file-item";
     li.dataset.nombre = f.nombre;
-    li.draggable   = true;
+    li.draggable      = true;
     li.innerHTML = `
       <span class="exp-file-handle">${ICO_GRIP}</span>
       <span class="exp-file-num">${i + 1}</span>
@@ -424,8 +419,8 @@ function applyFolioConfig(cfg) {
 }
 
 function _scheduleSaveFolioCfg() {
-  clearTimeout(_folioCfgTimer);
-  _folioCfgTimer = setTimeout(_saveFolioConfig, 500);
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(_saveFolioConfig, 500);
 }
 
 async function _saveFolioConfig() {
@@ -668,8 +663,8 @@ document.getElementById("exp-new-name").addEventListener("keydown", e => {
 document.getElementById("exp-search").addEventListener("input", renderExpList);
 
 // Panel derecho
-document.getElementById("btn-deselect-exp").addEventListener("click", deselectExpediente);
-document.getElementById("btn-add-to-exp").addEventListener("click", () => {
+document.getElementById("btn-close-exp").addEventListener("click", deselectExpediente);
+document.getElementById("btn-add-files").addEventListener("click", () => {
   document.getElementById("exp-file-input").click();
 });
 document.getElementById("exp-file-input").addEventListener("change", async e => {
@@ -697,7 +692,7 @@ document.getElementById("btn-generate").addEventListener("click", generate);
 // Cancelar
 document.getElementById("btn-cancel-gen").addEventListener("click", cancelGeneration);
 
-// Generar de nuevo (limpia resultado pero mantiene el expediente abierto)
+// Generar de nuevo — oculta resultado, mantiene expediente abierto
 document.getElementById("btn-new").addEventListener("click", () => {
   resetResult();
   showProgress(false);

@@ -58,33 +58,32 @@
   </div>
 </div>
 
+<!-- ── Setup screen (primera vez, si no hay carpeta_raiz) ─────────────────── -->
+<div id="setup-screen" style="display:none;min-height:calc(100vh - 52px)">
+  <div class="setup-wrap">
+    <h2>Bienvenido a Expediente Digital</h2>
+    <p>Antes de comenzar, selecciona la carpeta donde se guardarán tus expedientes. Esta configuración se guarda y no necesitas repetirla.</p>
+    <div class="setup-path-row">
+      <input type="text" id="setup-path-input"
+             placeholder="Ej: C:\Users\usuario\Expedientes" />
+      <button class="btn btn-secondary" id="btn-browse-folder">Examinar…</button>
+    </div>
+    <button class="btn btn-primary" id="btn-save-config" style="align-self:flex-start">
+      Continuar
+    </button>
+  </div>
+</div>
+
 <!-- ── Layout principal ───────────────────────────────────────────────────── -->
 <div id="layout-wrap" style="display:none">
 
-  <!-- Pantalla de configuración inicial (primera vez) -->
-  <div id="setup-screen" style="display:none">
-    <div class="setup-wrap">
-      <h2>Bienvenido a Expediente Digital</h2>
-      <p>Antes de comenzar, selecciona la carpeta donde se guardarán tus expedientes. Esta configuración se guarda y no necesitas repetirla.</p>
-      <div class="setup-path-row">
-        <input type="text" id="setup-path-input"
-               placeholder="Ej: C:\Users\usuario\Expedientes" />
-        <button class="btn btn-secondary" id="btn-browse-folder">Examinar…</button>
-      </div>
-      <button class="btn btn-primary" id="btn-save-config" style="align-self:flex-start">
-        Continuar
-      </button>
-    </div>
-  </div>
-
-  <!-- ── Panel izquierdo: lista de expedientes ──────────────────────────── -->
-  <div id="sidebar" style="display:none">
+  <!-- Panel izquierdo: lista de expedientes -->
+  <div id="sidebar">
     <div class="sb-header">
       <span class="sb-title">Expedientes</span>
       <button class="btn btn-primary btn-sm" id="btn-new-exp">+ Nuevo</button>
     </div>
 
-    <!-- Formulario inline para crear expediente -->
     <div id="exp-create-form" style="display:none">
       <input type="text" id="exp-new-name" class="exp-create-input"
              placeholder="Nombre del expediente" autocomplete="off" />
@@ -98,11 +97,11 @@
     <ul id="exp-list"></ul>
   </div>
 
-  <!-- ── Panel derecho: contenido ──────────────────────────────────────── -->
-  <div id="app-main" style="display:none">
+  <!-- Panel derecho: contenido -->
+  <div id="app-main">
 
     <!-- Estado vacío (ningún expediente seleccionado) -->
-    <div class="card exp-empty-card" id="exp-empty-state">
+    <div class="card exp-empty-card" id="empty-state">
       <div class="exp-empty-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       </div>
@@ -113,18 +112,18 @@
     <div id="exp-detail" style="display:none">
 
       <!-- Cabecera + lista de archivos -->
-      <div class="card" id="exp-header-card">
+      <div class="card">
         <div class="exp-mode-header">
           <div>
-            <div class="card-title" id="exp-detail-name" style="margin-bottom:.2rem"></div>
-            <div class="exp-detail-meta" id="exp-detail-meta">0 archivos · 0 páginas</div>
+            <div class="card-title" id="exp-nombre" style="margin-bottom:.2rem"></div>
+            <div class="exp-detail-meta" id="exp-meta">0 archivos · 0 páginas</div>
           </div>
           <div style="display:flex;gap:.5rem;flex-shrink:0;align-items:center">
-            <button class="btn btn-primary btn-sm" id="btn-add-to-exp">
+            <button class="btn btn-primary btn-sm" id="btn-add-files">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Agregar archivos
             </button>
-            <button class="btn btn-ghost btn-sm" id="btn-deselect-exp" title="Cerrar expediente">
+            <button class="btn btn-ghost btn-sm" id="btn-close-exp" title="Cerrar expediente">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -285,15 +284,14 @@ fetch('/api/version').then(r => r.json()).then(d => {
 
 (async () => {
   const activacionScreen = document.getElementById('activacion-screen');
-  const layoutWrap       = document.getElementById('layout-wrap');
   const banner           = document.getElementById('lic-banner');
 
   function showApp() {
-    layoutWrap.style.display = 'flex';
     if (typeof initApp === 'function') initApp();
   }
   function hideApp() {
-    layoutWrap.style.display = 'none';
+    document.getElementById('layout-wrap').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'none';
   }
 
   let d = {};
