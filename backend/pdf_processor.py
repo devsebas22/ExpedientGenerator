@@ -145,18 +145,9 @@ def merge_and_foliate(
                     failed_files.append(f"{fname} (encriptado, sin contraseña)")
                     src.close()
                     continue
-            start_idx  = len(output_doc)
             output_doc.insert_pdf(src)
             page_count = len(src)
             src.close()
-
-            # Normalizar páginas rotadas para que _stamp_folio opere en el
-            # espacio visual correcto (rotation=0 → page.rect == visible rect).
-            for pno in range(page_count):
-                page = output_doc[start_idx + pno]
-                if page.rotation != 0:
-                    _normalize_rotation(output_doc, start_idx + pno)
-
             logger.info("Fusionado '%s'  %d págs.", fname, page_count)
         except Exception as exc:
             logger.error("Error en '%s': %s", fname, exc)
@@ -170,6 +161,13 @@ def merge_and_foliate(
         )
 
     total_pages = len(output_doc)
+
+    # ── Phase 1.5: normalizar rotaciones ─────────────────────────────────────
+    progress_cb("Normalizando orientación de páginas…", 49)
+    for page_idx in range(len(output_doc)):
+        page = output_doc[page_idx]
+        if page.rotation != 0:
+            _normalize_rotation(output_doc, page_idx)
 
     # ── Phase 2: foliate (optional) ───────────────────────────────────────────
     if config.get("foliar", True):
