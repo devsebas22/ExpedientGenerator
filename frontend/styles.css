@@ -1406,66 +1406,6 @@ body {
 }
 
 /* ── Setup screen (primera vez) ───────────────────────────────────────────── */
-#setup-screen {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background: var(--bg-section);
-  overflow-y: auto;
-}
-
-.setup-wrap {
-  width: 100%;
-  max-width: 440px;
-  background: var(--bg);
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  padding: 2.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.setup-wrap h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -.2px;
-}
-
-.setup-wrap > p {
-  font-size: .88rem;
-  color: var(--text-sub);
-  line-height: 1.6;
-}
-
-.setup-path-row {
-  display: flex;
-  gap: .5rem;
-}
-
-.setup-path-row input {
-  flex: 1;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: .5rem .85rem;
-  font-size: .88rem;
-  font-family: inherit;
-  color: var(--text);
-  background: var(--bg);
-  outline: none;
-  transition: border-color var(--trans), box-shadow var(--trans);
-}
-
-.setup-path-row input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(34,197,94,.1);
-}
-
-.setup-path-row input::placeholder { color: var(--text-muted); }
 
 /* ── Empty state (ningún expediente seleccionado) ─────────────────────────── */
 .exp-empty-card {

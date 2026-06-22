@@ -58,22 +58,6 @@
   </div>
 </div>
 
-<!-- ── Setup screen (primera vez, si no hay carpeta_raiz) ─────────────────── -->
-<div id="setup-screen" style="display:none;min-height:calc(100vh - 52px)">
-  <div class="setup-wrap">
-    <h2>Bienvenido a Expediente Digital</h2>
-    <p>Antes de comenzar, selecciona la carpeta donde se guardarán tus expedientes. Esta configuración se guarda y no necesitas repetirla.</p>
-    <div class="setup-path-row">
-      <input type="text" id="setup-path-input"
-             placeholder="Ej: C:\Users\usuario\Expedientes" />
-      <button class="btn btn-secondary" id="btn-browse-folder">Examinar…</button>
-    </div>
-    <button class="btn btn-primary" id="btn-save-config" style="align-self:flex-start">
-      Continuar
-    </button>
-  </div>
-</div>
-
 <!-- ── Layout principal ───────────────────────────────────────────────────── -->
 <div id="layout-wrap" style="display:none">
 
@@ -291,7 +275,6 @@ fetch('/api/version').then(r => r.json()).then(d => {
   }
   function hideApp() {
     document.getElementById('layout-wrap').style.display = 'none';
-    document.getElementById('setup-screen').style.display = 'none';
   }
 
   let d = {};

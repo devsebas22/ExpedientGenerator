@@ -22,7 +22,6 @@ let allExpedientes = [];     // lista completa para búsqueda local
 let pollTimer      = null;
 let activeTaskId   = null;
 let _autoSaveTimer = null;   // debounce para auto-guardar config folio
-let _initDone      = false;  // guard para evitar doble llamada a initApp
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Helpers
@@ -67,95 +66,21 @@ function fileIcon(name) {
    Init — punto de entrada llamado desde el inline script de index.html
    ═════════════════════════════════════════════════════════════════════════ */
 async function initApp() {
-  if (_initDone) return;
-  _initDone = true;
-
-  document.getElementById("btn-browse-folder").addEventListener("click", browseFolder);
-  document.getElementById("btn-save-config").addEventListener("click", saveConfig);
-  document.getElementById("setup-path-input").addEventListener("keydown", e => {
-    if (e.key === "Enter") saveConfig();
-  });
-
+  document.getElementById("layout-wrap").style.display = "flex";
   try {
     const r = await fetch(`${API}/api/config`);
-    if (!r.ok) { _showSetupScreen(); return; }
-    const cfg = await r.json();
-    if (cfg.carpeta_raiz) {
-      _showMainLayout();
-      await loadExpediciones();
-    } else {
-      _showSetupScreen();
+    if (r.ok) {
+      const cfg = await r.json();
+      if (!cfg.configurada && cfg.carpeta_raiz) {
+        fetch(`${API}/api/config`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ carpeta_raiz: cfg.carpeta_raiz }),
+        }).catch(() => {});
+      }
     }
-  } catch {
-    _showSetupScreen();
-  }
-}
-
-/* ── Navegación entre pantallas ──────────────────────────────────────────── */
-function _showSetupScreen() {
-  document.getElementById("setup-screen").style.display = "flex";
-  document.getElementById("layout-wrap").style.display  = "none";
-}
-
-function _showMainLayout() {
-  document.getElementById("setup-screen").style.display = "none";
-  document.getElementById("layout-wrap").style.display  = "flex";
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Setup screen — configuración inicial de carpeta raíz
-   ═════════════════════════════════════════════════════════════════════════ */
-async function browseFolder() {
-  const btn = document.getElementById("btn-browse-folder");
-  btn.disabled = true;
-  try {
-    const r = await fetch(`${API}/api/browse-folder`);
-    if (!r.ok) { toast("Error al abrir el selector de carpetas", "error"); return; }
-    const d = await r.json();
-    if (d.path) {
-      document.getElementById("setup-path-input").value = d.path;
-    }
-    // si d.path vacío el usuario canceló el diálogo — sin toast
-  } catch {
-    toast("Error de conexión con el backend", "error");
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function saveConfig() {
-  const path = document.getElementById("setup-path-input").value.trim();
-  if (!path) { toast("Escribe o selecciona una carpeta primero", "warn"); return; }
-
-  const btn = document.getElementById("btn-save-config");
-  btn.disabled = true;
-  btn.textContent = "Guardando…";
-
-  let saved = false;
-  try {
-    const r = await fetch(`${API}/api/config`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ carpeta_raiz: path }),
-    });
-    if (!r.ok) {
-      const e = await r.json().catch(() => ({}));
-      toast(e.detail || "No se pudo guardar. Verifica que la carpeta existe.", "error");
-    } else {
-      saved = true;
-    }
-  } catch (err) {
-    toast("Error de conexión: " + err.message, "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Continuar";
-  }
-
-  if (saved) {
-    _showMainLayout();
-    await loadExpediciones();
-    toast("Carpeta configurada correctamente", "success");
-  }
+  } catch {}
+  await loadExpediciones();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

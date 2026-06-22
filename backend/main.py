@@ -844,8 +844,12 @@ def _save_app_config(data: dict) -> None:
 
 
 def _default_expedientes_dir() -> Path:
-    d = _BASE / "expedientes"
-    d.mkdir(exist_ok=True)
+    userprofile = os.environ.get("USERPROFILE") or os.environ.get("HOME") or ""
+    if userprofile:
+        d = Path(userprofile) / "Documents" / "Expedientes"
+    else:
+        d = _BASE / "expedientes"
+    d.mkdir(parents=True, exist_ok=True)
     return d
 
 
@@ -921,9 +925,13 @@ async def browse_folder():
 @app.get("/api/config")
 async def get_app_config():
     cfg = _get_app_config()
+    carpeta = cfg.get("carpeta_raiz")
+    configurada = bool(carpeta)
+    if not configurada:
+        carpeta = str(_default_expedientes_dir())
     return {
-        "carpeta_raiz": cfg.get("carpeta_raiz"),
-        "configurada":  bool(cfg.get("carpeta_raiz")),
+        "carpeta_raiz": carpeta,
+        "configurada":  configurada,
     }
 
 
