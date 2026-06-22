@@ -1,49 +1,148 @@
 "use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   Expediente Digital – frontend logic
+   ═════════════════════════════════════════════════════════════════════════ */
 
-const API     = "";
-const POLL_MS = 700;
+const API = "";          // same origin
+const POLL_MS = 700;     // progress poll interval
 
-/* ── SVG icons ───────────────────────────────────────────────────────────── */
-var ICO_FILE  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-var ICO_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
-var ICO_WORD  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`;
-var ICO_GRIP  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
-var ICO_ZAP   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
-var ICO_UPLOAD= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
-var ICO_OK_TOAST   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-var ICO_ERR_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-var ICO_WARN_TOAST = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-var ICO_INFO_TOAST = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+/* ── SVG icon strings ────────────────────────────────────────────────────── */
+var ICO_FILE   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+var ICO_IMAGE  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+var ICO_WORD   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`;
+var ICO_GRIP   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
+var ICO_ZAP    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+var ICO_UPLOAD = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+var ICO_REFRESH= `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+var ICO_FOLDER_SM = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+var ICO_CLOCK  = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+var ICO_WARN   = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_WARN_MD= `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_CIRCLE = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>`;
+var ICO_OK_TOAST    = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+var ICO_ERR_TOAST   = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+var ICO_WARN_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+var ICO_INFO_TOAST  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
 
-/* ── Estado global ───────────────────────────────────────────────────────── */
-let selectedExp    = null;   // nombre del expediente activo
-let expFiles       = [];     // archivos del expediente activo (desde API)
-let allExpedientes = [];     // lista completa para búsqueda local
+/* ── State ──────────────────────────────────────────────────────────────── */
+// [{id, name, size, pages, session_id, error}]  — ordered as the user sees them
+let files          = [];
 let pollTimer      = null;
-let activeTaskId   = null;
-let _autoSaveTimer = null;   // debounce para auto-guardar config folio
+let currentSession = null;   // session_id activo para uploads
+let activeTaskId   = null;   // task_id en curso (para cancelación)
+
+/* ── DOM refs ────────────────────────────────────────────────────────────── */
+const dropZone       = document.getElementById("drop-zone");
+const fileInput      = document.getElementById("file-input");
+const folderInput    = document.getElementById("folder-input");
+const folderPath     = document.getElementById("folder-path");
+const fileList       = document.getElementById("file-list");
+const badgeFiles     = document.getElementById("badge-files");
+const badgePages     = document.getElementById("badge-pages");
+const btnGenerate    = document.getElementById("btn-generate");
+const actionSummary  = document.getElementById("action-summary");
+const progressSec    = document.getElementById("progress-section");
+const progressFill   = document.getElementById("progress-fill");
+const progressMsg    = document.getElementById("progress-msg");
+const progressPct    = document.getElementById("progress-pct");
+const resultSec      = document.getElementById("result-section");
+const resultName     = document.getElementById("result-name");
+const resultMeta     = document.getElementById("result-meta");
+const btnDownload    = document.getElementById("btn-download");
+const btnCancelGen   = document.getElementById("btn-cancel-gen");
+const failedWarn     = document.getElementById("failed-warn");
+const failedList     = document.getElementById("failed-list");
+// Counter panel
+const counterCard    = document.getElementById("counter-card");
+const counterNumEl   = document.getElementById("counter-num");
+const counterChips   = document.getElementById("counter-chips");
+const counterWarn    = document.getElementById("counter-warn");
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Helpers
+   Counter helpers
    ═════════════════════════════════════════════════════════════════════════ */
-function esc(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function fmtSize(bytes) {
-  if (bytes < 1024)    return bytes + " B";
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / 1048576).toFixed(1) + " MB";
-}
-
 function estimateTime(pages, fileCount) {
   if (pages === 0) return null;
+  // ~150 pages/s for stamp pass + ~0.5 s/file for I/O overhead
   const secs = Math.max(2, Math.ceil(pages / 150) + Math.ceil(fileCount * 0.5));
   return secs < 60 ? `~${secs}s` : `~${Math.ceil(secs / 60)} min`;
+}
+
+function sizeCategory(pages) {
+  if (pages === 0)   return null;
+  if (pages < 100)   return { cls: "ok",  label: "Pequeño"    };
+  if (pages < 500)   return { cls: "",    label: "Mediano"    };
+  if (pages < 1000)  return { cls: "big", label: "Grande"     };
+  if (pages < 2000)  return { cls: "big", label: "Muy grande" };
+  return               { cls: "huge", label: "Masivo"      };
+}
+
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+function animateCounter(el, from, to, ms = 400) {
+  const start = performance.now();
+  el.classList.add("bump");
+  const step = (now) => {
+    const p = Math.min((now - start) / ms, 1);
+    el.textContent = Math.round(from + (to - from) * easeOut(p)).toLocaleString("es");
+    if (p < 1) requestAnimationFrame(step);
+    else        el.classList.remove("bump");
+  };
+  requestAnimationFrame(step);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Gestión de sesiones temporales
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Devuelve el session_id activo, creando uno nuevo en el backend si hace falta.
+ * Si el backend reportó que la sesión expiró durante un upload previo, la
+ * respuesta del upload incluirá el nuevo session_id y _syncSession lo actualizará.
+ */
+async function ensureSession() {
+  if (currentSession) return currentSession;
+  const res = await fetch(`${API}/api/session`, { method: "POST" });
+  if (!res.ok) throw new Error("No se pudo crear sesión temporal en el servidor");
+  const { session_id } = await res.json();
+  currentSession = session_id;
+  return session_id;
+}
+
+/**
+ * Sincroniza el session_id local con el que devuelve el backend.
+ * Si el backend creó una sesión nueva (porque la anterior expiró), la adoptamos.
+ */
+function _syncSession(fileInfo) {
+  if (fileInfo.session_id && fileInfo.session_id !== currentSession) {
+    currentSession = fileInfo.session_id;
+  }
+}
+
+/** Descarta la sesión local. La limpieza en disco ya ocurrió en el backend. */
+function resetSession() {
+  currentSession = null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Natural sort
+   ═════════════════════════════════════════════════════════════════════════ */
+function naturalSortKey(s) {
+  return s.replace(/(\d+)/g, (n) => n.padStart(12, "0")).toLowerCase();
+}
+function naturalSort(arr) {
+  return [...arr].sort((a, b) =>
+    naturalSortKey(a.name).localeCompare(naturalSortKey(b.name))
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UI helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+function fmtSize(bytes) {
+  if (bytes < 1024)       return bytes + " B";
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(1) + " MB";
 }
 
 function toast(msg, type = "info", dur = 3500) {
@@ -55,347 +154,676 @@ function toast(msg, type = "info", dur = 3500) {
   setTimeout(() => t.remove(), dur);
 }
 
+function setGenerateBtn() {
+  const ready = files.filter((f) => !f.uploading).length;
+  btnGenerate.disabled = ready === 0;
+  btnGenerate.innerHTML = ready === 0
+    ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
+    : `${ICO_ZAP} Generar expediente`;
+}
+
+function setProcessing(on) {
+  btnGenerate.disabled = on || files.filter((f) => !f.uploading).length === 0;
+  btnGenerate.innerHTML = on
+    ? `<span class="spinner"></span> Procesando…`
+    : files.filter((f) => !f.uploading).length === 0
+      ? `${ICO_UPLOAD} Carga al menos un archivo para continuar`
+      : `${ICO_ZAP} Generar expediente`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   File type helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+const _IMG_EXT  = new Set(["jpg","jpeg","png","gif","bmp","tiff","webp"]);
+const _WORD_EXT = new Set(["docx","doc"]);
+const _ALL_EXT  = new Set([..._IMG_EXT, ..._WORD_EXT, "pdf"]);
+
 function fileIcon(name) {
   const ext = name.split(".").pop().toLowerCase();
-  if (["jpg","jpeg","png","gif","bmp","tiff","webp"].includes(ext)) return ICO_IMAGE;
-  if (["docx","doc"].includes(ext)) return ICO_WORD;
+  if (_IMG_EXT.has(ext))  return ICO_IMAGE;
+  if (_WORD_EXT.has(ext)) return ICO_WORD;
   return ICO_FILE;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Init — punto de entrada llamado desde el inline script de index.html
+   Render file list
    ═════════════════════════════════════════════════════════════════════════ */
-async function initApp() {
-  document.getElementById("layout-wrap").style.display = "flex";
-  try {
-    const r = await fetch(`${API}/api/config`);
-    if (r.ok) {
-      const cfg = await r.json();
-      if (!cfg.configurada && cfg.carpeta_raiz) {
-        fetch(`${API}/api/config`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ carpeta_raiz: cfg.carpeta_raiz }),
-        }).catch(() => {});
-      }
-    }
-  } catch {}
-  await loadExpediciones();
-}
+function renderList() {
+  fileList.innerHTML = "";
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Sidebar — lista de expedientes
-   ═════════════════════════════════════════════════════════════════════════ */
-async function loadExpediciones() {
-  try {
-    const r = await fetch(`${API}/api/expedientes`);
-    if (r.ok) allExpedientes = await r.json();
-    else      allExpedientes = [];
-  } catch { allExpedientes = []; }
-  renderExpList();
-}
-
-function renderExpList() {
-  const q = (document.getElementById("exp-search").value || "").toLowerCase();
-  const filtrados = allExpedientes.filter(e => e.nombre.toLowerCase().includes(q));
-  const ul = document.getElementById("exp-list");
-  ul.innerHTML = "";
-
-  if (!filtrados.length) {
+  files.forEach((f, i) => {
     const li = document.createElement("li");
-    li.className = "exp-list-empty";
-    li.textContent = allExpedientes.length ? "Sin resultados" : "Sin expedientes aún";
-    ul.append(li);
-    return;
+    const isUploading = !!f.uploading;
+    const hasError    = !isUploading && f.pages <= 0;
+
+    li.className  = isUploading ? "file-item uploading-item"
+                  : hasError    ? "file-item error-item"
+                  : "file-item";
+    li.draggable  = !isUploading;
+    li.dataset.id = f.id;
+
+    const pagesHtml = isUploading
+      ? `<span class="pages-loading"><span class="spinner-sm"></span> subiendo…</span>`
+      : f.pages > 0
+        ? `<span class="pages-badge">${f.pages} págs.</span>`
+        : `<span class="err" title="${esc(f.error || '')}">⚠ ${esc(f.error || "Error leyendo")}</span>`;
+
+    const removeBtn = isUploading
+      ? `<span style="width:26px"></span>`
+      : `<button class="btn-remove" title="Eliminar" data-id="${f.id}">✕</button>`;
+
+    li.innerHTML = `
+      <span class="handle" style="${isUploading ? "opacity:.15;pointer-events:none" : ""}">${ICO_GRIP}</span>
+      <span class="file-num">${i + 1}</span>
+      <span class="file-icon">${fileIcon(f.name)}</span>
+      <div class="file-info">
+        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
+        <div class="file-meta">${pagesHtml}${esc(fmtSize(f.size))}</div>
+      </div>
+      ${removeBtn}
+    `;
+
+    fileList.append(li);
+  });
+
+  initDragSort();
+  updateSummary();
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function updateSummary() {
+  const uploading = files.filter((f) => f.uploading);
+  const ready     = files.filter((f) => !f.uploading);
+  const errored   = ready.filter((f) => f.pages <= 0);
+  const total     = ready.reduce((s, f) => s + (f.pages > 0 ? f.pages : 0), 0);
+
+  // ── Small header badges ──────────────────────────────────────────────────
+  badgeFiles.textContent = `${files.length} archivo${files.length !== 1 ? "s" : ""}`;
+  if (uploading.length > 0) {
+    badgePages.innerHTML =
+      `<span class="spinner-sm"></span> ${uploading.length} subiendo…`;
+  } else {
+    badgePages.textContent = `${total.toLocaleString("es")} página${total !== 1 ? "s" : ""}`;
   }
 
-  filtrados.forEach(exp => {
-    const li = document.createElement("li");
-    li.className = "exp-item" + (selectedExp === exp.nombre ? " active" : "");
-    li.innerHTML = `
-      <span class="exp-item-dot"></span>
-      <span class="exp-item-name" title="${esc(exp.nombre)}">${esc(exp.nombre)}</span>
-      <button class="exp-item-del" title="Ocultar expediente" data-nombre="${esc(exp.nombre)}">✕</button>
-    `;
-    li.addEventListener("click", e => {
-      if (!e.target.closest(".exp-item-del")) selectExpediente(exp.nombre);
-    });
-    li.querySelector(".exp-item-del").addEventListener("click", async e => {
-      e.stopPropagation();
-      if (!confirm(`¿Ocultar "${exp.nombre}" de la lista?\nLos archivos se conservan en disco.`)) return;
-      if (selectedExp === exp.nombre) deselectExpediente();
-      try {
-        await fetch(`${API}/api/expedientes/${encodeURIComponent(exp.nombre)}`, { method: "DELETE" });
-        await loadExpediciones();
-      } catch (err) { toast("Error al ocultar: " + err.message, "error"); }
-    });
-    ul.append(li);
-  });
-}
+  // ── Generate button ──────────────────────────────────────────────────────
+  setGenerateBtn();
 
-/* ── Crear expediente ─────────────────────────────────────────────────────── */
-function _showCreateForm() {
-  document.getElementById("exp-create-form").style.display = "flex";
-  document.getElementById("exp-new-name").value = "";
-  document.getElementById("exp-new-name").focus();
-}
-
-function _hideCreateForm() {
-  document.getElementById("exp-create-form").style.display = "none";
-}
-
-async function _doCreateExpediente() {
-  const nombre = document.getElementById("exp-new-name").value.trim();
-  if (!nombre) { document.getElementById("exp-new-name").focus(); return; }
-  try {
-    const r = await fetch(`${API}/api/expedientes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre }),
-    });
-    if (!r.ok) {
-      const e = await r.json().catch(() => ({}));
-      toast(e.detail || "Error al crear expediente", "error");
-      return;
-    }
-    _hideCreateForm();
-    await loadExpediciones();
-    await selectExpediente(nombre);
-    toast(`Expediente "${nombre}" creado`, "success", 2500);
-  } catch (err) { toast("Error: " + err.message, "error"); }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Panel derecho — selección y detalle de expediente
-   ═════════════════════════════════════════════════════════════════════════ */
-async function selectExpediente(nombre) {
-  selectedExp = nombre;
-  renderExpList();
-  _showExpDetail(nombre);
-  await loadExpFiles();
-}
-
-function deselectExpediente() {
-  selectedExp = null;
-  expFiles    = [];
-  renderExpList();
-  _showExpEmpty();
-  stopPolling();
-  resetResult();
-}
-
-function _showExpEmpty() {
-  document.getElementById("empty-state").style.display  = "";
-  document.getElementById("exp-detail").style.display   = "none";
-}
-
-function _showExpDetail(nombre) {
-  document.getElementById("empty-state").style.display  = "none";
-  document.getElementById("exp-detail").style.display   = "grid";
-  document.getElementById("exp-nombre").textContent     = nombre;
-  document.getElementById("cfg-output-name").value      = nombre;
-  resetResult();
-  showProgress(false);
-}
-
-/* ── Cargar archivos del expediente ──────────────────────────────────────── */
-async function loadExpFiles() {
-  if (!selectedExp) return;
-  try {
-    const r = await fetch(`${API}/api/expedientes/${encodeURIComponent(selectedExp)}/archivos`);
-    if (r.ok) {
-      const d = await r.json();
-      expFiles = d.archivos ?? [];
-      applyFolioConfig(d.config_folio ?? {});
-    } else {
-      expFiles = [];
-    }
-  } catch { expFiles = []; }
-  renderExpFiles();
-  updateExpHeader();
-}
-
-function updateExpHeader() {
-  const count = expFiles.length;
-  const pages = expFiles.reduce((s, f) => s + (f.paginas || 0), 0);
-
-  document.getElementById("exp-meta").textContent =
-    `${count} archivo${count !== 1 ? "s" : ""} · ${pages} página${pages !== 1 ? "s" : ""}`;
-
-  const t = estimateTime(pages, count);
-  document.getElementById("exp-summary").innerHTML = count === 0
-    ? "Agrega archivos al expediente para continuar."
-    : `<strong>${count}</strong> archivo${count !== 1 ? "s" : ""} · ` +
-      `<strong>${pages}</strong> página${pages !== 1 ? "s" : ""}` +
+  // ── Action summary text ──────────────────────────────────────────────────
+  if (files.length === 0) {
+    actionSummary.innerHTML = "Arrastra archivos aquí o usa los botones de arriba.";
+  } else if (uploading.length > 0) {
+    actionSummary.innerHTML =
+      `Subiendo <strong>${uploading.length}</strong> archivo(s)… espera para continuar.`;
+  } else {
+    const t = estimateTime(total, ready.length);
+    actionSummary.innerHTML =
+      `<strong>${ready.length}</strong> archivo${ready.length !== 1 ? "s" : ""} · ` +
+      `<strong>${total.toLocaleString("es")}</strong> páginas en total` +
       (t ? ` · tiempo estimado: <strong>${t}</strong>` : "") +
       ` · puedes reordenar arrastrando las filas.`;
+  }
 
-  const btn = document.getElementById("btn-generate");
-  btn.disabled = count === 0;
-  btn.innerHTML = count === 0
-    ? `${ICO_UPLOAD} Agrega archivos para continuar`
-    : `${ICO_ZAP} Generar expediente`;
-}
-
-function renderExpFiles() {
-  const ul    = document.getElementById("exp-file-list");
-  const empty = document.getElementById("exp-file-empty");
-  ul.innerHTML = "";
-
-  if (!expFiles.length) {
-    empty.style.display = "";
+  // ── Counter card ─────────────────────────────────────────────────────────
+  if (files.length === 0) {
+    counterCard.style.display = "none";
     return;
   }
-  empty.style.display = "none";
+  counterCard.style.display = "";
 
-  expFiles.forEach((f, i) => {
-    const li = document.createElement("li");
-    li.className      = "exp-file-item";
-    li.dataset.nombre = f.nombre;
-    li.draggable      = true;
-    li.innerHTML = `
-      <span class="exp-file-handle">${ICO_GRIP}</span>
-      <span class="exp-file-num">${i + 1}</span>
-      <span class="file-icon">${fileIcon(f.nombre)}</span>
-      <div class="exp-file-info">
-        <div class="exp-file-name" title="${esc(f.nombre)}">${esc(f.nombre)}</div>
-        ${f.paginas ? `<div class="exp-file-meta"><span class="pages-badge">${f.paginas} págs.</span></div>` : ""}
-      </div>
-      <button class="exp-file-remove" title="Eliminar" data-nombre="${esc(f.nombre)}">✕</button>
-    `;
-    ul.append(li);
-  });
+  // Animated number
+  const prev = parseInt(counterNumEl.textContent.replace(/\D/g, "")) || 0;
+  if (prev !== total) animateCounter(counterNumEl, prev, total);
 
-  _initExpDragSort();
+  // Chips
+  const time = estimateTime(total, ready.length);
+  const cat  = sizeCategory(total);
+  const chipsHtml = [
+    `<span class="chip">${ICO_FOLDER_SM} ${ready.length} archivo${ready.length !== 1 ? "s" : ""}</span>`,
+    uploading.length
+      ? `<span class="chip"><span class="spinner-sm"></span> ${uploading.length} subiendo</span>`
+      : "",
+    time
+      ? `<span class="chip time">${ICO_CLOCK} ${time}</span>`
+      : "",
+    errored.length
+      ? `<span class="chip err">${ICO_WARN} ${errored.length} con error</span>`
+      : "",
+    cat
+      ? `<span class="chip ${cat.cls}">${cat.label}</span>`
+      : "",
+  ].filter(Boolean).join("");
+  counterChips.innerHTML = chipsHtml;
 
-  ul.querySelectorAll(".exp-file-remove").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const nombre = btn.dataset.nombre;
-      if (!confirm(`¿Eliminar "${nombre}" del expediente?\nEl archivo se borrará del disco.`)) return;
-      try {
-        await fetch(
-          `${API}/api/expedientes/${encodeURIComponent(selectedExp)}/archivos/${encodeURIComponent(nombre)}`,
-          { method: "DELETE" }
-        );
-        await loadExpFiles();
-      } catch (err) { toast("Error al eliminar: " + err.message, "error"); }
-    });
-  });
-}
-
-/* ── Drag-sort de archivos ───────────────────────────────────────────────── */
-function _initExpDragSort() {
-  const ul = document.getElementById("exp-file-list");
-  let dragged = null;
-
-  ul.querySelectorAll(".exp-file-item").forEach(item => {
-    item.addEventListener("dragstart", () => {
-      dragged = item;
-      setTimeout(() => { item.style.opacity = ".35"; }, 0);
-    });
-    item.addEventListener("dragend", () => {
-      item.style.opacity = "";
-      dragged = null;
-      _renumberExpFiles();
-      _saveOrden();
-    });
-    item.addEventListener("dragover", e => e.preventDefault());
-    item.addEventListener("drop", () => {
-      if (!dragged || dragged === item) return;
-      const all = [...ul.children];
-      if (all.indexOf(dragged) < all.indexOf(item)) {
-        ul.insertBefore(dragged, item.nextSibling);
-      } else {
-        ul.insertBefore(dragged, item);
-      }
-    });
-  });
-}
-
-function _renumberExpFiles() {
-  document.querySelectorAll("#exp-file-list .exp-file-num").forEach((el, i) => {
-    el.textContent = i + 1;
-  });
-}
-
-async function _saveOrden() {
-  if (!selectedExp) return;
-  const orden = [...document.querySelectorAll("#exp-file-list .exp-file-item")]
-    .map(li => li.dataset.nombre);
-  await fetch(`${API}/api/expedientes/${encodeURIComponent(selectedExp)}/orden`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orden }),
-  }).catch(() => {});
-}
-
-/* ── Agregar archivos al expediente ──────────────────────────────────────── */
-async function addFilesToExp(fileList) {
-  if (!selectedExp || !fileList.length) return;
-  toast(`Agregando ${fileList.length} archivo(s)…`, "info", 2000);
-  for (const file of fileList) {
-    await _uploadToExp(file, false);
-  }
-  await loadExpFiles();
-}
-
-async function _uploadToExp(file, replace = false) {
-  const fd  = new FormData();
-  fd.append("file", file);
-  const url = `${API}/api/expedientes/${encodeURIComponent(selectedExp)}/archivos`
-    + (replace ? "?replace=true" : "");
-  try {
-    const r = await fetch(url, { method: "POST", body: fd });
-    if (r.status === 409) {
-      if (confirm(`"${file.name}" ya existe. ¿Reemplazar?`)) {
-        await _uploadToExp(file, true);
-      }
-    } else if (!r.ok) {
-      const e = await r.json().catch(() => ({}));
-      toast(`Error con "${file.name}": ${e.detail || r.status}`, "error");
-    }
-  } catch (err) {
-    toast("Error: " + err.message, "error");
+  // Warning strip
+  if (total > 2000) {
+    counterWarn.style.display = "";
+    counterWarn.className = "counter-warn-strip danger";
+    counterWarn.innerHTML =
+      `${ICO_WARN_MD} <span>Expediente masivo: <strong>${total.toLocaleString("es")} páginas</strong>. ` +
+      `El procesamiento puede tardar varios minutos.</span>`;
+  } else if (total > 1000) {
+    counterWarn.style.display = "";
+    counterWarn.className = "counter-warn-strip warn";
+    counterWarn.innerHTML =
+      `${ICO_WARN_MD} <span>Este expediente supera <strong>1.000 páginas</strong>. ` +
+      `El procesamiento puede tardar algunos segundos adicionales.</span>`;
+  } else {
+    counterWarn.style.display = "none";
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Config folio — apply + auto-save con debounce
+   Drag-and-drop reorder
    ═════════════════════════════════════════════════════════════════════════ */
-function applyFolioConfig(cfg) {
-  const s = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
-  const c = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.checked = !!val; };
-  c("cfg-foliar",       cfg.activo);
-  s("cfg-position",     cfg.posicion);
-  s("cfg-fontsize",     cfg.tamano);
-  s("cfg-margin-top",   cfg.margen_superior);
-  s("cfg-margin-right", cfg.margen_lateral);
-  s("cfg-folio-start",  cfg.iniciar_desde);
-  updateFolioPreview();
+function initDragSort() {
+  let dragged = null;
+
+  fileList.querySelectorAll(".file-item").forEach((item) => {
+    item.addEventListener("dragstart", (e) => {
+      dragged = item;
+      item.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+      fileList.querySelectorAll(".file-item").forEach((el) => {
+        el.classList.remove("drag-over-top", "drag-over-bottom");
+      });
+      // Sync state from DOM order
+      files = [...fileList.querySelectorAll(".file-item")].map((el) =>
+        files.find((f) => f.id === el.dataset.id)
+      ).filter(Boolean);
+      renderList();
+    });
+
+    item.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (!dragged || dragged === item) return;
+      item.classList.remove("drag-over-top", "drag-over-bottom");
+      const mid = item.getBoundingClientRect().top + item.offsetHeight / 2;
+      if (e.clientY < mid) {
+        item.classList.add("drag-over-top");
+      } else {
+        item.classList.add("drag-over-bottom");
+      }
+    });
+
+    item.addEventListener("dragleave", () => {
+      item.classList.remove("drag-over-top", "drag-over-bottom");
+    });
+
+    item.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (!dragged || dragged === item) return;
+      item.classList.remove("drag-over-top", "drag-over-bottom");
+      const mid = item.getBoundingClientRect().top + item.offsetHeight / 2;
+      if (e.clientY < mid) {
+        fileList.insertBefore(dragged, item);
+      } else {
+        fileList.insertBefore(dragged, item.nextSibling);
+      }
+    });
+  });
+
+  // Remove buttons
+  fileList.querySelectorAll(".btn-remove").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      files = files.filter((f) => f.id !== id);
+      // fire-and-forget: tell backend to release temp file
+      fetch(`${API}/api/files/${id}`, { method: "DELETE" }).catch(() => {});
+      renderList();
+    });
+  });
 }
 
-function _scheduleSaveFolioCfg() {
-  clearTimeout(_autoSaveTimer);
-  _autoSaveTimer = setTimeout(_saveFolioConfig, 500);
+/* ═══════════════════════════════════════════════════════════════════════════
+   Upload helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+async function uploadFile(file) {
+  // Garantizar sesión activa antes de subir
+  const sid = await ensureSession();
+
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(
+    `${API}/api/upload?session_id=${encodeURIComponent(sid)}`,
+    { method: "POST", body: form }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || res.statusText);
+  }
+  const data = await res.json();
+  _syncSession(data);   // adoptar sesión si el backend creó una nueva
+  return data;
 }
 
-async function _saveFolioConfig() {
-  if (!selectedExp) return;
-  const cfg = {
-    activo:          document.getElementById("cfg-foliar").checked,
-    posicion:        document.getElementById("cfg-position").value,
-    tamano:          parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
-    margen_superior: parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
-    margen_lateral:  parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
-    iniciar_desde:   Math.max(1, parseInt(document.getElementById("cfg-folio-start").value) || 1),
+async function handleFileObjects(fileArray) {
+  if (!fileArray.length) return;
+
+  const supported = fileArray.filter((f) => {
+    const ext = f.name.split(".").pop().toLowerCase();
+    return _ALL_EXT.has(ext);
+  });
+  const skipped = fileArray.length - supported.length;
+  if (skipped > 0) toast(`${skipped} archivo(s) ignorados (tipo no compatible)`, "warn");
+  if (!supported.length) return;
+
+  const existing = new Set(files.map((f) => f.name));
+  const toUpload = supported.filter((f) => !existing.has(f.name));
+  const dups = supported.length - toUpload.length;
+  if (dups > 0) toast(`${dups} ya cargados, omitidos`, "warn");
+  if (!toUpload.length) return;
+
+  // 1. Add uploading placeholders immediately so the list updates right away
+  const placeholders = toUpload.map((file) => ({
+    id:       `_up_${Math.random().toString(36).slice(2)}`,
+    name:     file.name,
+    size:     file.size,
+    pages:    0,
+    error:    null,
+    uploading: true,
+    _ref:     file,           // keep reference to the original File object
+  }));
+  files.push(...placeholders);
+  files = naturalSort(files);
+  renderList();               // shows spinners in the list immediately
+
+  // 2. Upload in chunks of 4
+  let ok = 0;
+  const chunks = chunkArray(placeholders, 4);
+
+  for (const chunk of chunks) {
+    const results = await Promise.allSettled(chunk.map((p) => uploadFile(p._ref)));
+
+    results.forEach((r, ci) => {
+      const ph  = chunk[ci];
+      const idx = files.findIndex((f) => f.id === ph.id);
+      if (idx === -1) return;
+
+      if (r.status === "fulfilled") {
+        files[idx] = r.value;   // replace placeholder with real server data
+        ok++;
+      } else {
+        files.splice(idx, 1);   // remove failed placeholder
+        toast(`Error subiendo "${ph.name}": ${r.reason.message}`, "error", 5000);
+      }
+    });
+
+    // Re-render after each chunk so page counts appear progressively
+    files = naturalSort(files);
+    renderList();
+  }
+
+  if (ok > 0) toast(`${ok} archivo(s) cargado(s) correctamente`, "success");
+}
+
+function chunkArray(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Event listeners – upload
+   ═════════════════════════════════════════════════════════════════════════ */
+
+// Drag-and-drop onto the drop zone
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("drag-over");
+});
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("drag-over");
+  handleFileObjects([...e.dataTransfer.files]);
+});
+dropZone.addEventListener("click", () => fileInput.click());
+
+// File picker
+document.getElementById("btn-files").addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => {
+  handleFileObjects([...fileInput.files]);
+  fileInput.value = "";
+});
+
+// Folder picker (browser)
+document.getElementById("btn-folder-browser").addEventListener("click", () =>
+  folderInput.click()
+);
+folderInput.addEventListener("change", () => {
+  handleFileObjects([...folderInput.files]);
+  folderInput.value = "";
+});
+
+// Folder via text path (backend reads from disk)
+document.getElementById("btn-load-folder").addEventListener("click", loadFolderByPath);
+folderPath.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") loadFolderByPath();
+});
+
+async function loadFolderByPath() {
+  const p = folderPath.value.trim();
+  if (!p) { toast("Escribe la ruta de la carpeta primero", "warn"); return; }
+
+  try {
+    const res = await fetch(`${API}/api/load-folder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: p }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      toast(err.detail || "Error cargando carpeta", "error");
+      return;
+    }
+    // El backend devuelve {session_id, files}
+    const { session_id: folderSession, files: loaded } = await res.json();
+
+    // Adoptar la sesión creada por la carga de carpeta
+    if (folderSession) currentSession = folderSession;
+
+    // Deduplicar
+    const existing = new Set(files.map((f) => f.name));
+    let added = 0;
+    loaded.forEach((f) => {
+      if (!existing.has(f.name)) { files.push(f); added++; }
+    });
+    if (added === 0) {
+      toast("No se agregaron archivos nuevos (ya estaban cargados)", "warn");
+    } else {
+      files = naturalSort(files);
+      renderList();
+      toast(`${added} archivo(s) cargados desde la carpeta`, "success");
+    }
+  } catch (e) {
+    toast("Error de red al cargar carpeta", "error");
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sort & Clear
+   ═════════════════════════════════════════════════════════════════════════ */
+document.getElementById("btn-sort").addEventListener("click", () => {
+  files = naturalSort(files);
+  renderList();
+  toast("Archivos ordenados por nombre natural", "success");
+});
+
+document.getElementById("btn-clear").addEventListener("click", () => {
+  if (!files.length) return;
+  if (!confirm("¿Eliminar todos los archivos cargados?")) return;
+  fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
+  files = [];
+  resetSession();
+  renderList();
+  resetResult();
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Generate
+   ═════════════════════════════════════════════════════════════════════════ */
+btnGenerate.addEventListener("click", generate);
+
+async function generate() {
+  if (!files.length) return;
+
+  // Validar nombre obligatorio
+  const outputName  = document.getElementById("cfg-output-name").value.trim();
+  const nombreError = document.getElementById("nombre-error");
+  if (!outputName) {
+    if (nombreError) nombreError.style.display = "block";
+    document.getElementById("cfg-output-name").focus();
+    document.getElementById("cfg-output-name").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (nombreError) nombreError.style.display = "none";
+
+  const foliar = document.getElementById("cfg-foliar").checked;
+  const config = {
+    font_size:    parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
+    margin_top:   parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
+    margin_right: parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
+    position:     document.getElementById("cfg-position").value,
+    foliar,
+    folio_start:  Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1),
   };
-  await fetch(`${API}/api/expedientes/${encodeURIComponent(selectedExp)}/config`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(cfg),
-  }).catch(() => {});
+
+  const body = {
+    file_ids:          files.map((f) => f.id),
+    config,
+    output_name:       outputName,
+    nombre_expediente: outputName,
+  };
+
+  setProcessing(true);
+  resetResult();
+  showProgress(true);
+  setProgress(0, "Iniciando…");
+
+  try {
+    const res = await fetch(`${API}/api/process`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || "Error al iniciar proceso");
+    }
+    const { task_id } = await res.json();
+    activeTaskId = task_id;
+    startPolling(task_id);
+  } catch (e) {
+    setProcessing(false);
+    showProgress(false);
+    toast(`Error: ${e.message}`, "error", 6000);
+  }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Polling
+   ═════════════════════════════════════════════════════════════════════════ */
+function startPolling(taskId) {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => pollTask(taskId), POLL_MS);
+}
+
+async function pollTask(taskId) {
+  try {
+    const res = await fetch(`${API}/api/task/${taskId}`);
+    if (!res.ok) return;
+    const task = await res.json();
+
+    setProgress(task.progress, task.message);
+
+    if (task.status === "done") {
+      stopPolling();
+      setProcessing(false);
+      showProgress(false);
+      resetSession();     // el backend ya limpió temp/; descartamos la referencia
+      showResult(task);
+    } else if (task.status === "error") {
+      stopPolling();
+      setProcessing(false);
+      showProgress(false);
+      resetSession();     // el backend también limpia en caso de error
+      toast(`Error: ${task.error || task.message}`, "error", 8000);
+    }
+  } catch (_) { /* network hiccup – keep polling */ }
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  activeTaskId = null;
+}
+
+async function cancelGeneration() {
+  const tid = activeTaskId;
+  if (!tid) return;
+  btnCancelGen.disabled = true;
+  try {
+    await fetch(`${API}/api/task/${tid}`, { method: "DELETE" });
+  } catch (_) { /* ignore network errors — still reset UI */ }
+  stopPolling();
+  setProcessing(false);
+  showProgress(false);
+  resetSession();
+  toast("Generación cancelada", "warn", 4000);
+}
+
+btnCancelGen.addEventListener("click", cancelGeneration);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Progress UI
+   ═════════════════════════════════════════════════════════════════════════ */
+function showProgress(on) {
+  progressSec.classList.toggle("visible", on);
+  btnCancelGen.disabled = !on;
+}
+
+function setProgress(pct, msg) {
+  progressFill.style.width = `${pct}%`;
+  progressPct.textContent  = `${Math.round(pct)}%`;
+  progressMsg.textContent  = msg || "";
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Result UI
+   ═════════════════════════════════════════════════════════════════════════ */
+function showResult(task) {
+  const fname = task.result_file;
+  resultName.textContent = fname;
+  const secs = task.elapsed_seconds != null ? ` • generado en ${task.elapsed_seconds}s` : "";
+  resultMeta.textContent =
+    `${task.total_pages} páginas foliadas • listo en expedientes_generados/${secs}`;
+
+  btnDownload.href = `${API}/api/download/${encodeURIComponent(fname)}`;
+  btnDownload.download = fname;
+
+  if (task.failed_files && task.failed_files.length) {
+    failedWarn.style.display = "";
+    failedList.innerHTML = task.failed_files
+      .map((f) => `<li>${esc(f)}</li>`)
+      .join("");
+  } else {
+    failedWarn.style.display = "none";
+  }
+
+  resultSec.classList.add("visible");
+
+  if (task.sin_registro) {
+    toast(
+      "Este expediente se generó sin registrar en el sistema por superar el límite diario del mismo nombre.",
+      "warn",
+      8000,
+    );
+  } else {
+    const secsLabel = task.elapsed_seconds != null ? ` en ${task.elapsed_seconds}s` : "";
+    toast(`¡Expediente listo! ${task.total_pages} páginas${secsLabel}`, "success", 5000);
+  }
+
+  resultSec.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  if (task.total_mes !== undefined && task.total_mes !== null) {
+    window.dispatchEvent(new CustomEvent("expediente-registrado", { detail: { total_mes: task.total_mes } }));
+  }
+}
+
+function resetResult() {
+  resultSec.classList.remove("visible");
+  failedWarn.style.display = "none";
+  failedList.innerHTML = "";
+  btnDownload.href = "#";
+}
+
+/* ── Limpiar error de nombre al escribir ─────────────────────────────────── */
+document.getElementById("cfg-output-name").addEventListener("input", () => {
+  const err = document.getElementById("nombre-error");
+  if (err) err.style.display = "none";
+});
+
+/* ── New expedition ───────────────────────────────────────────────────────── */
+document.getElementById("btn-new").addEventListener("click", () => {
+  fetch(`${API}/api/cleanup`, { method: "POST" }).catch(() => {});
+  files = [];
+  resetSession();
+  renderList();
+  resetResult();
+  showProgress(false);
+  document.getElementById("cfg-output-name").value = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   /api/count-pages  — server-side verification
+   ═════════════════════════════════════════════════════════════════════════ */
+async function callCountPages() {
+  const readyIds = files.filter((f) => !f.uploading && f.id && !f.id.startsWith("_")).map((f) => f.id);
+  if (!readyIds.length) {
+    toast("No hay archivos listos para verificar", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("btn-recount");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-sm"></span> Verificando…`;
+
+  try {
+    const res = await fetch(`${API}/api/count-pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_ids: readyIds }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || res.statusText);
+    }
+    const data = await res.json();
+
+    // Sync any server-corrected page counts back into local state
+    let corrected = 0;
+    data.files.forEach((sf) => {
+      const local = files.find((f) => f.id === sf.id);
+      if (local && sf.pages > 0 && sf.pages !== local.pages) {
+        local.pages = sf.pages;
+        corrected++;
+      }
+    });
+
+    if (corrected > 0) {
+      renderList();
+      toast(`Conteo actualizado: ${corrected} archivo(s) corregido(s)`, "info");
+    }
+    toast(
+      `Verificado: ${data.total_pages.toLocaleString("es")} páginas en ${readyIds.length} archivo(s)`,
+      "success",
+      4500
+    );
+  } catch (e) {
+    toast(`Error al verificar: ${e.message}`, "error", 5000);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `${ICO_REFRESH} Verificar`;
+  }
+}
+
+document.getElementById("btn-recount").addEventListener("click", callCountPages);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Folio toggle + preview
+   ═════════════════════════════════════════════════════════════════════════ */
 function updateFolioPreview() {
   const foliar     = document.getElementById("cfg-foliar").checked;
   const options    = document.getElementById("foliar-options");
@@ -411,19 +839,22 @@ function updateFolioPreview() {
   const fontSize   = parseFloat(document.getElementById("cfg-fontsize").value)    || 11;
   const mTop       = parseFloat(document.getElementById("cfg-margin-top").value)  || 20;
   const mRight     = parseFloat(document.getElementById("cfg-margin-right").value)|| 30;
-  const folioStart = Math.max(1, parseInt(document.getElementById("cfg-folio-start").value) || 1);
+  const folioStart = Math.max(1, parseInt(document.getElementById("cfg-folio-start")?.value) || 1);
 
+  // Scale: preview page is ~85px wide vs real Oficio ~612pt
   const scale = 85 / 612;
   numEl.style.fontSize = `${Math.max(7, Math.round(fontSize * scale * 6))}px`;
-  numEl.style.top    = position.startsWith("top")    ? `${Math.round(mTop   * scale)}px` : "auto";
-  numEl.style.bottom = position.startsWith("bottom") ? `${Math.round(mTop   * scale)}px` : "auto";
-  numEl.style.right  = position.endsWith("right")    ? `${Math.round(mRight * scale)}px` : "auto";
-  numEl.style.left   = position.endsWith("left")     ? `${Math.round(mRight * scale)}px` : "auto";
-  numEl.textContent  = String(folioStart).padStart(3, "0");
+  numEl.style.top      = position.startsWith("top")    ? `${Math.round(mTop   * scale)}px` : "auto";
+  numEl.style.bottom   = position.startsWith("bottom") ? `${Math.round(mTop   * scale)}px` : "auto";
+  numEl.style.right    = position.endsWith("right")    ? `${Math.round(mRight * scale)}px` : "auto";
+  numEl.style.left     = position.endsWith("left")     ? `${Math.round(mRight * scale)}px` : "auto";
+  numEl.textContent    = String(folioStart).padStart(3, "0");
 
   const posLabel = {
-    "top-right": "Arriba derecha", "top-left": "Arriba izquierda",
-    "bottom-right": "Abajo derecha", "bottom-left": "Abajo izquierda",
+    "top-right":    "Arriba derecha",
+    "top-left":     "Arriba izquierda",
+    "bottom-right": "Abajo derecha",
+    "bottom-left":  "Abajo izquierda",
   }[position] || position;
 
   infoEl.innerHTML = `
@@ -434,219 +865,14 @@ function updateFolioPreview() {
   `;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Generar expediente
-   ═════════════════════════════════════════════════════════════════════════ */
-async function generate() {
-  if (!selectedExp || expFiles.length === 0) return;
-
-  const outputName  = document.getElementById("cfg-output-name").value.trim();
-  const nombreError = document.getElementById("nombre-error");
-  if (!outputName) {
-    nombreError.style.display = "block";
-    document.getElementById("cfg-output-name").focus();
-    document.getElementById("cfg-output-name").scrollIntoView({ behavior: "smooth", block: "center" });
-    return;
-  }
-  nombreError.style.display = "none";
-
-  const config_folio = {
-    activo:          document.getElementById("cfg-foliar").checked,
-    posicion:        document.getElementById("cfg-position").value,
-    tamano:          parseFloat(document.getElementById("cfg-fontsize").value)    || 11,
-    margen_superior: parseFloat(document.getElementById("cfg-margin-top").value)  || 20,
-    margen_lateral:  parseFloat(document.getElementById("cfg-margin-right").value)|| 30,
-    iniciar_desde:   Math.max(1, parseInt(document.getElementById("cfg-folio-start").value) || 1),
-  };
-
-  _setProcessing(true);
-  resetResult();
-  showProgress(true);
-  setProgress(0, "Iniciando…");
-
-  try {
-    const r = await fetch(
-      `${API}/api/expedientes/${encodeURIComponent(selectedExp)}/generar`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ output_name: outputName, config_folio }),
-      }
-    );
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({ detail: r.statusText }));
-      throw new Error(err.detail || "Error al generar");
-    }
-    const { task_id } = await r.json();
-    activeTaskId = task_id;
-    startPolling(task_id);
-  } catch (e) {
-    _setProcessing(false);
-    showProgress(false);
-    toast(`Error: ${e.message}`, "error", 6000);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Polling de progreso
-   ═════════════════════════════════════════════════════════════════════════ */
-function startPolling(taskId) {
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(() => _pollTask(taskId), POLL_MS);
-}
-
-async function _pollTask(taskId) {
-  try {
-    const r = await fetch(`${API}/api/task/${taskId}`);
-    if (!r.ok) return;
-    const task = await r.json();
-    setProgress(task.progress, task.message);
-    if (task.status === "done") {
-      stopPolling();
-      _setProcessing(false);
-      showProgress(false);
-      showResult(task);
-    } else if (task.status === "error") {
-      stopPolling();
-      _setProcessing(false);
-      showProgress(false);
-      toast(`Error: ${task.error || task.message}`, "error", 8000);
-    }
-  } catch { /* network hiccup — keep polling */ }
-}
-
-function stopPolling() {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  activeTaskId = null;
-}
-
-async function cancelGeneration() {
-  const tid = activeTaskId;
-  if (!tid) return;
-  document.getElementById("btn-cancel-gen").disabled = true;
-  try { await fetch(`${API}/api/task/${tid}`, { method: "DELETE" }); } catch {}
-  stopPolling();
-  _setProcessing(false);
-  showProgress(false);
-  toast("Generación cancelada", "warn", 4000);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   UI: progreso, resultado
-   ═════════════════════════════════════════════════════════════════════════ */
-function showProgress(on) {
-  document.getElementById("progress-section").classList.toggle("visible", on);
-  document.getElementById("btn-cancel-gen").disabled = !on;
-}
-
-function setProgress(pct, msg) {
-  document.getElementById("progress-fill").style.width = `${pct}%`;
-  document.getElementById("progress-pct").textContent  = `${Math.round(pct)}%`;
-  document.getElementById("progress-msg").textContent  = msg || "";
-}
-
-function _setProcessing(on) {
-  const btn = document.getElementById("btn-generate");
-  btn.disabled = on || expFiles.length === 0;
-  if (on) {
-    btn.innerHTML = `<span class="spinner"></span> Procesando…`;
-  } else {
-    updateExpHeader();
-  }
-}
-
-function showResult(task) {
-  const fname = task.result_file;
-  document.getElementById("result-name").textContent = fname;
-  const secs = task.elapsed_seconds != null ? ` · generado en ${task.elapsed_seconds}s` : "";
-  document.getElementById("result-meta").textContent =
-    `${task.total_pages} páginas foliadas${secs}`;
-
-  const dlBtn   = document.getElementById("btn-download");
-  dlBtn.href    = `${API}/api/download/${encodeURIComponent(fname)}`;
-  dlBtn.download = fname;
-
-  if (task.failed_files && task.failed_files.length) {
-    document.getElementById("failed-warn").style.display = "";
-    document.getElementById("failed-list").innerHTML = task.failed_files
-      .map(f => `<li>${esc(f)}</li>`).join("");
-  } else {
-    document.getElementById("failed-warn").style.display = "none";
-  }
-
-  document.getElementById("result-section").classList.add("visible");
-
-  if (task.sin_registro) {
-    toast("Este expediente se generó sin registrar por superar el límite diario del mismo nombre.", "warn", 8000);
-  } else {
-    const secsLabel = task.elapsed_seconds != null ? ` en ${task.elapsed_seconds}s` : "";
-    toast(`¡Expediente listo! ${task.total_pages} páginas${secsLabel}`, "success", 5000);
-  }
-
-  document.getElementById("result-section").scrollIntoView({ behavior: "smooth", block: "center" });
-
-  if (task.total_mes !== undefined && task.total_mes !== null) {
-    window.dispatchEvent(new CustomEvent("expediente-registrado", { detail: { total_mes: task.total_mes } }));
-  }
-}
-
-function resetResult() {
-  document.getElementById("result-section").classList.remove("visible");
-  document.getElementById("failed-warn").style.display = "none";
-  document.getElementById("failed-list").innerHTML     = "";
-  document.getElementById("btn-download").href         = "#";
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Event listeners
-   ═════════════════════════════════════════════════════════════════════════ */
-
-// Sidebar
-document.getElementById("btn-new-exp").addEventListener("click", _showCreateForm);
-document.getElementById("btn-exp-create-cancel").addEventListener("click", _hideCreateForm);
-document.getElementById("btn-exp-create-ok").addEventListener("click", _doCreateExpediente);
-document.getElementById("exp-new-name").addEventListener("keydown", e => {
-  if (e.key === "Enter")  _doCreateExpediente();
-  if (e.key === "Escape") _hideCreateForm();
-});
-document.getElementById("exp-search").addEventListener("input", renderExpList);
-
-// Panel derecho
-document.getElementById("btn-close-exp").addEventListener("click", deselectExpediente);
-document.getElementById("btn-add-files").addEventListener("click", () => {
-  document.getElementById("exp-file-input").click();
-});
-document.getElementById("exp-file-input").addEventListener("change", async e => {
-  const files = [...e.target.files];
-  e.target.value = "";
-  await addFilesToExp(files);
-});
-
-// Folio config — preview inmediato + auto-guardar con debounce
-["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right","cfg-folio-start"].forEach(id => {
+["cfg-foliar","cfg-position","cfg-fontsize","cfg-margin-top","cfg-margin-right","cfg-folio-start"].forEach((id) => {
   const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener("change", () => { updateFolioPreview(); _scheduleSaveFolioCfg(); });
-  el.addEventListener("input",  () => { updateFolioPreview(); _scheduleSaveFolioCfg(); });
+  if (el) {
+    el.addEventListener("change", updateFolioPreview);
+    el.addEventListener("input",  updateFolioPreview);
+  }
 });
-
-// Nombre del PDF — limpiar error al escribir
-document.getElementById("cfg-output-name").addEventListener("input", () => {
-  document.getElementById("nombre-error").style.display = "none";
-});
-
-// Generar
-document.getElementById("btn-generate").addEventListener("click", generate);
-
-// Cancelar
-document.getElementById("btn-cancel-gen").addEventListener("click", cancelGeneration);
-
-// Generar de nuevo — oculta resultado, mantiene expediente abierto
-document.getElementById("btn-new").addEventListener("click", () => {
-  resetResult();
-  showProgress(false);
-  updateExpHeader();
-});
-
-// Init folio preview
 updateFolioPreview();
+
+/* ── Init ─────────────────────────────────────────────────────────────────── */
+renderList();
