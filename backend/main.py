@@ -119,7 +119,7 @@ def _check_and_register_nombre(nombre: str) -> tuple[int, bool]:
             return count, False
 
 
-def _registrar_expediente(output_path: str, nombre_expediente: str = "", paginas_procesadas: int = 0) -> tuple[bool, int]:
+def _registrar_expediente(output_path: str, nombre_expediente: str = "", paginas_procesadas: int = 0, tiempo_generacion: float = 0.0) -> tuple[bool, int]:
     """
     Registra el expediente en el servidor ANTES de entregarlo al usuario.
     Retorna (ok, total_mes). Si falla, retorna (False, 0).
@@ -137,6 +137,7 @@ def _registrar_expediente(output_path: str, nombre_expediente: str = "", paginas
                 "hash_expediente":    hash_exp,
                 "nombre_expediente":  nombre_expediente,
                 "paginas_procesadas": paginas_procesadas,
+                "tiempo_generacion":  tiempo_generacion,
             },
             timeout=10,
         )
@@ -598,9 +599,11 @@ def _run_task(
         # Verificar límite diario de nombre antes de registrar en el servidor
         count_antes, puede_registrar = _check_and_register_nombre(nombre_expediente)
 
+        elapsed = round(_time.time() - t0, 1)
+
         if puede_registrar:
             cb("Registrando expediente…", 98)
-            ok, total_mes = _registrar_expediente(output_path, nombre_expediente, result.get("total_pages", 0))
+            ok, total_mes = _registrar_expediente(output_path, nombre_expediente, result.get("total_pages", 0), elapsed)
             if not ok:
                 task.update(
                     status  = "error",
@@ -620,7 +623,6 @@ def _run_task(
                 task_id, nombre_expediente, count_antes,
             )
 
-        elapsed = round(_time.time() - t0, 1)
         task.update(
             status       = "done",
             progress     = 100,
