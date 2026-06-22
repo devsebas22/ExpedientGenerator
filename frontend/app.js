@@ -22,6 +22,7 @@ let allExpedientes = [];     // lista completa para búsqueda local
 let pollTimer      = null;
 let activeTaskId   = null;
 let _autoSaveTimer = null;   // debounce para auto-guardar config folio
+let _initDone      = false;  // guard para evitar doble llamada a initApp
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Helpers
@@ -66,7 +67,9 @@ function fileIcon(name) {
    Init — punto de entrada llamado desde el inline script de index.html
    ═════════════════════════════════════════════════════════════════════════ */
 async function initApp() {
-  // Conectar listeners del setup-screen aquí, garantizando que el DOM esté listo
+  if (_initDone) return;
+  _initDone = true;
+
   document.getElementById("btn-browse-folder").addEventListener("click", browseFolder);
   document.getElementById("btn-save-config").addEventListener("click", saveConfig);
   document.getElementById("setup-path-input").addEventListener("keydown", e => {
@@ -111,9 +114,8 @@ async function browseFolder() {
     const d = await r.json();
     if (d.path) {
       document.getElementById("setup-path-input").value = d.path;
-    } else {
-      toast("No se seleccionó ninguna carpeta", "warn", 2500);
     }
+    // si d.path vacío el usuario canceló el diálogo — sin toast
   } catch {
     toast("Error de conexión con el backend", "error");
   } finally {
@@ -129,6 +131,7 @@ async function saveConfig() {
   btn.disabled = true;
   btn.textContent = "Guardando…";
 
+  let saved = false;
   try {
     const r = await fetch(`${API}/api/config`, {
       method: "POST",
@@ -138,16 +141,20 @@ async function saveConfig() {
     if (!r.ok) {
       const e = await r.json().catch(() => ({}));
       toast(e.detail || "No se pudo guardar. Verifica que la carpeta existe.", "error");
-      return;
+    } else {
+      saved = true;
     }
-    _showMainLayout();
-    await loadExpediciones();
-    toast("Carpeta configurada correctamente", "success");
   } catch (err) {
     toast("Error de conexión: " + err.message, "error");
   } finally {
     btn.disabled = false;
     btn.textContent = "Continuar";
+  }
+
+  if (saved) {
+    _showMainLayout();
+    await loadExpediciones();
+    toast("Carpeta configurada correctamente", "success");
   }
 }
 
