@@ -1,49 +1,16 @@
-# 📁 Expediente Digital
+# Expediente Digital
 
-Expediente Digital es una aplicación local para generar expedientes a partir
-de múltiples PDFs. La aplicación permite subir y ordenar documentos, fusionarlos
-por lotes y añadir numeración de página (folio) sin rasterizar el contenido.
+Aplicación de escritorio para Windows que fusiona múltiples PDFs (y convierte imágenes y documentos Word) en un único expediente foliado. Distribuida como un `.exe` con actualización automática.
 
----
-
-## Características
-
-- Interfaz web ligera con carga por arrastrar y soltar.
-- Admite selección de archivos individuales o carpetas completas.
-- Reordenado manual de archivos por arrastre.
-- Configuración de posición de folio, tamaño de fuente y márgenes.
-- Proceso de generación con barra de progreso y descarga directa.
-- Registro de actividad en `logs/expediente.log`.
+El backend es un servidor FastAPI local que corre en la máquina del usuario; el frontend es HTML/JS/CSS puro servido por ese mismo servidor. El usuario accede a la app desde el navegador en `localhost`.
 
 ---
 
-## Estructura del proyecto
-
-```
-expediente/
-├── backend/
-│   ├── __init__.py
-│   ├── main.py           ← API FastAPI
-│   ├── models.py         ← esquemas Pydantic
-│   └── pdf_processor.py  ← lógica de fusión y foliado
-├── frontend/
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
-├── expedientes_generados/   ← PDFs generados
-├── temp/                    ← archivos temporales
-├── logs/                    ← registros de ejecución
-├── requirements.txt
-└── run.py                   ← lanzador local
-```
-
----
-
-## Instalación
+## Cómo levantar en desarrollo local
 
 ### Requisitos
 
-- Python 3.10 o superior
+- Python 3.10+
 - `pip`
 
 ### Pasos
@@ -51,75 +18,58 @@ expediente/
 ```bash
 cd expediente
 python3 -m venv .venv
-source .venv/bin/activate        # Linux/Mac/WSL
-# .venv\Scripts\activate      # Windows CMD
-# .venv\Scripts\Activate.ps1  # Windows PowerShell
+source .venv/bin/activate      # Linux/Mac/WSL
+# .venv\Scripts\activate       # Windows CMD
 pip install -r requirements.txt
-```
-
----
-
-## Ejecución
-
-```bash
 python3 run.py
 ```
 
-Esto levanta el servidor en `http://127.0.0.1:8000` y abre la aplicación en el
-navegador por defecto.
+La app queda disponible en `http://127.0.0.1:8000` y se abre en el navegador automáticamente.
 
-### Opciones del lanzador
+### Variables de entorno (opcionales en local)
 
-```bash
-python3 run.py --port 8080
-python3 run.py --no-browser
-python3 run.py --host 0.0.0.0
+```
+LICENSE_SERVER_URL=https://expediente-licencias-production.up.railway.app
 ```
 
-### Arranque manual sin `run.py`
+Si no están definidas, la verificación de licencia y el registro de expedientes se omiten silenciosamente — útil para desarrollo.
 
-```bash
-python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+---
+
+## Estructura
+
+```
+expediente/
+├── backend/
+│   ├── main.py           ← API FastAPI (endpoints, registro de licencia)
+│   ├── pdf_processor.py  ← fusión, foliación, conversión de imágenes y Word
+│   └── models.py         ← esquemas Pydantic
+├── frontend/
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
+├── launcher_main.py       ← launcher Windows (auto-update, instancia única)
+├── run.py                 ← lanzador local de desarrollo
+├── requirements.txt
+├── ExpedienteDigital.spec ← spec PyInstaller para la app
+├── Launcher.spec          ← spec PyInstaller para el launcher
+├── build_all.bat          ← compila app + launcher + instalador (Windows)
+├── version.txt            ← versión actual (leída por el launcher)
+└── docs/                  ← documentación técnica
 ```
 
 ---
 
-## Uso
+## Compilar y distribuir
 
-1. Arrastra PDFs al área de carga o selecciona archivos desde el explorador.
-2. Carga una carpeta completa escribiendo su ruta o usando el selector de
-   carpetas.
-3. Reordena los documentos arrastrando las filas en la lista.
-4. Ajusta la posición del folio, tamaño de fuente y márgenes.
-5. Presiona **Generar expediente** y sigue el progreso.
-6. Descarga el resultado o encuentra el PDF en `expedientes_generados/`.
+Ver [`docs/BUILD_Y_DEPLOY.md`](docs/BUILD_Y_DEPLOY.md) para el proceso completo de compilación con PyInstaller y publicación de versiones.
 
 ---
 
-## API endpoints
+## Documentación técnica
 
-| Método    | Ruta | Descripción |
-|-----------|------|-------------|
-| `GET`     | `/` | Sirve la interfaz web |
-| `POST`    | `/api/upload` | Sube un PDF (multipart) |
-| `POST`    | `/api/load-folder` | Carga PDFs desde una ruta local |
-| `POST`    | `/api/process` | Inicia la fusión y foliado |
-| `GET`     | `/api/task/{id}` | Consulta el estado del proceso |
-| `GET`     | `/api/download/{filename}` | Descarga el expediente generado |
-| `DELETE`  | `/api/files/{id}` | Elimina un archivo subido |
-| `POST`    | `/api/cleanup` | Limpia archivos temporales |
-| `GET`     | `/api/health` | Verifica que el servicio está activo |
-
----
-
-## Notas técnicas
-
-- PyMuPDF agrega numeración de página como texto vectorial, sin degradar
-  la calidad del PDF.
-- El procesamiento se realiza por página para manejar archivos grandes de
-  forma eficiente.
-- Si un archivo falla, se reporta en la interfaz y el resto del expediente
-  continúa generándose.
-- Para PDFs encriptados, el servicio prueba contraseña vacía y omite el
-  archivo si no puede leerlo.
-- Los registros se almacenan en `logs/expediente.log`.
+| Documento | Contenido |
+|---|---|
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Stack, componentes, flujo de datos, auto-update |
+| [`docs/FUNCIONES.md`](docs/FUNCIONES.md) | Referencia de funciones principales del backend |
+| [`docs/BUILD_Y_DEPLOY.md`](docs/BUILD_Y_DEPLOY.md) | Compilación, PyInstaller, publicación de versiones |
